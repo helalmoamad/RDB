@@ -1,0 +1,108 @@
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// dart format width=80
+
+// **************************************************************************
+// InjectableConfigGenerator
+// **************************************************************************
+
+// ignore_for_file: type=lint
+// coverage:ignore-file
+
+// ignore_for_file: no_leading_underscores_for_library_prefixes
+import 'package:dio/dio.dart' as _i361;
+import 'package:get_it/get_it.dart' as _i174;
+import 'package:injectable/injectable.dart' as _i526;
+import 'package:logger/logger.dart' as _i974;
+import 'package:shared_preferences/shared_preferences.dart' as _i460;
+
+import '../../features/authentication/data/data_sources/auth_remote_datasource.dart'
+    as _i539;
+import '../../features/authentication/data/repositories/auth_repository_impl.dart'
+    as _i317;
+import '../../features/authentication/domain/repositories/auth_repository.dart'
+    as _i742;
+import '../../features/authentication/domain/use_cases/create_wallet_usecase.dart'
+    as _i650;
+import '../../features/authentication/domain/use_cases/get_user_country_usecase.dart'
+    as _i644;
+import '../../features/authentication/domain/use_cases/login_to_wallet_usecase.dart'
+    as _i304;
+import '../../features/authentication/domain/use_cases/send_otp_usecase.dart'
+    as _i952;
+import '../../features/authentication/domain/use_cases/verify_otp_signin_usecase.dart'
+    as _i574;
+import '../../features/authentication/domain/use_cases/verify_otp_signup_usecase.dart'
+    as _i282;
+import '../../features/authentication/presentation/manager/auth_bloc.dart'
+    as _i561;
+import '../data/data_source/common_use_repo_data_source.dart' as _i672;
+import '../data/repository/common_use_repository_impl.dart' as _i77;
+import '../domin/repositories/common_use_repository.dart' as _i702;
+import '../domin/repositories/prefs_repository.dart' as _i658;
+import '../domin/usecases/upload_file_cloudinary_usecase.dart' as _i1043;
+import 'di_container.dart' as _i198;
+
+// initializes the registration of main-scope dependencies inside of GetIt
+Future<_i174.GetIt> $initGetIt(
+  _i174.GetIt getIt, {
+  String? environment,
+  _i526.EnvironmentFilter? environmentFilter,
+}) async {
+  final gh = _i526.GetItHelper(getIt, environment, environmentFilter);
+  final appModule = _$AppModule();
+  gh.factory<_i672.CommonUseRemoteDataSource>(
+    () => _i672.CommonUseRemoteDataSource(),
+  );
+  gh.factory<_i361.BaseOptions>(() => appModule.dioOption);
+  gh.factory<_i539.AuthRemoteDatasource>(() => _i539.AuthRemoteDatasource());
+  gh.singleton<_i974.Logger>(() => appModule.logger);
+  await gh.singletonAsync<_i460.SharedPreferences>(
+    () => appModule.sharedPreferences,
+    preResolve: true,
+  );
+  await gh.singletonAsync<_i658.PrefsRepository>(
+    () => appModule.prefsRepository,
+    preResolve: true,
+  );
+  gh.singleton<_i361.Dio>(
+    () => appModule.dio(gh<_i361.BaseOptions>(), gh<_i974.Logger>()),
+  );
+  gh.lazySingleton<_i702.CommonUseRepository>(
+    () => _i77.CommonUseRepositoryImpl(gh<_i672.CommonUseRemoteDataSource>()),
+  );
+  gh.lazySingleton<_i742.AuthRepository>(
+    () => _i317.AuthRepositoryImpl(gh<_i539.AuthRemoteDatasource>()),
+  );
+  gh.factory<_i1043.UploadFileCloudinaryUseCase>(
+    () => _i1043.UploadFileCloudinaryUseCase(gh<_i702.CommonUseRepository>()),
+  );
+  gh.factory<_i650.CreateWalletUseCase>(
+    () => _i650.CreateWalletUseCase(gh<_i742.AuthRepository>()),
+  );
+  gh.factory<_i644.GetUserCountryUseCase>(
+    () => _i644.GetUserCountryUseCase(gh<_i742.AuthRepository>()),
+  );
+  gh.factory<_i304.LoginToWalletUseCase>(
+    () => _i304.LoginToWalletUseCase(gh<_i742.AuthRepository>()),
+  );
+  gh.factory<_i952.SendOtpUseCase>(
+    () => _i952.SendOtpUseCase(gh<_i742.AuthRepository>()),
+  );
+  gh.factory<_i574.VerifyOtpSignInUseCase>(
+    () => _i574.VerifyOtpSignInUseCase(gh<_i742.AuthRepository>()),
+  );
+  gh.factory<_i282.VerifyOtpSignUpUseCase>(
+    () => _i282.VerifyOtpSignUpUseCase(gh<_i742.AuthRepository>()),
+  );
+  gh.lazySingleton<_i561.AuthBloc>(
+    () => _i561.AuthBloc(
+      gh<_i952.SendOtpUseCase>(),
+      gh<_i574.VerifyOtpSignInUseCase>(),
+      gh<_i644.GetUserCountryUseCase>(),
+      gh<_i282.VerifyOtpSignUpUseCase>(),
+    ),
+  );
+  return getIt;
+}
+
+class _$AppModule extends _i198.AppModule {}
