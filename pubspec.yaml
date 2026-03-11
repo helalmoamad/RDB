@@ -73,7 +73,11 @@ dev_dependencies:
   flutter_lints: ^5.0.0
   injectable_generator: ^2.9.1
   build_runner: ^2.4.8
-  
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/launcher_icon.png"
+  remove_alpha_ios: true
 
 flutter:
   uses-material-design: true
