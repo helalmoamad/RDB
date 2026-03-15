@@ -2,17 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rdb/base_page.dart';
-import 'package:rdb/common/test_utils/test_var.dart';
 import 'package:rdb/core/utils/extensions/build_context.dart';
 import 'package:rdb/features/authentication/presentation/widgets/create_account_section.dart';
-import '../../../../common/test_utils/widgets_keys.dart';
 import '../../../../common/helper/show_message.dart';
 import '../../../../core/domin/repositories/prefs_repository.dart';
-import '../../../../core/utils/responsive_padding.dart';
 import '../../../../routes/router.dart';
 import '../manager/auth_bloc.dart';
 import '../widgets/welcome_section.dart';
@@ -126,20 +122,22 @@ class _RegistrationPageState extends State<RegistrationPage>
         // ignore: sort_child_properties_last
         child: ValueListenableBuilder<bool>(
           // ignore: sort_child_properties_last
-          child: Container(margin: const EdgeInsets.only(top: 20), child: logo),
+          child: logo,
           valueListenable: animate,
           builder: (context, yes, child) {
-            return Directionality(
-              textDirection: TextDirection.ltr,
-              child: AnimatedPositioned(
-                left: yes ? 40 : null,
-                right: yes ? 40 : null,
-                top: yes ? 50 : null,
-                bottom: yes ? null : 465.h,
-                duration: animationDuration,
-                child: child!,
-              ),
-            );
+            return yes && pageContent.value > 1
+                ? SizedBox.shrink()
+                : Directionality(
+                    textDirection: TextDirection.ltr,
+                    child: AnimatedPositioned(
+                      left: yes ? 40 : null,
+                      right: yes ? 40 : null,
+                      top: yes && pageContent.value > 1 ? 50 : 1.sh / 5,
+                      bottom: yes ? null : 465.h,
+                      duration: animationDuration,
+                      child: child!,
+                    ),
+                  );
           },
         ),
         valueListenable: pageContent,
@@ -157,7 +155,7 @@ class _RegistrationPageState extends State<RegistrationPage>
               alignment: Alignment.bottomCenter,
               children: [
                 child!,
-                Positioned(
+                /*  Positioned(
                   top: 10,
                   right: 0,
                   child: ValueListenableBuilder<int>(
@@ -219,13 +217,18 @@ class _RegistrationPageState extends State<RegistrationPage>
                             );
                     },
                   ),
-                ),
+                ),*/
                 Column(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     SizedBox(height: 96.h),
                     SizedBox(
-                      height: 1.sh / 2.5,
+                      height:
+                          pageContent.value == 2 ||
+                              pageContent.value == 3 ||
+                              pageContent.value == 4
+                          ? 1.sh / 1.3
+                          : 1.sh / 2.0,
                       width: 1.sw,
                       // ignore: deprecated_member_use
                       child: WillPopScope(
@@ -262,11 +265,16 @@ class _RegistrationPageState extends State<RegistrationPage>
                             ),
                             CreateAccountSection(
                               moveToNextStep: () {
-                                pageContent.value = 2;
                                 pageController.animateToPage(
                                   2,
-                                  duration: const Duration(milliseconds: 500),
+                                  duration: const Duration(milliseconds: 50),
                                   curve: Curves.easeInOut,
+                                );
+                                Future.delayed(
+                                  const Duration(milliseconds: 50),
+                                  () {
+                                    pageContent.value = 2;
+                                  },
                                 );
                               },
                             ),
@@ -278,7 +286,9 @@ class _RegistrationPageState extends State<RegistrationPage>
                                   ' ',
                                   '',
                                 );
+
                                 pageContent.value = 3;
+
                                 pageController.animateToPage(
                                   3,
                                   duration: const Duration(milliseconds: 500),
@@ -311,21 +321,22 @@ class _RegistrationPageState extends State<RegistrationPage>
                                           isViaWhatsApp: 1));*/
                               },
                               goBackToPhone: () {
+                                pageContent.value = 2;
                                 pageController.animateToPage(
                                   2,
                                   duration: const Duration(milliseconds: 500),
                                   curve: Curves.easeInOut,
                                 );
-                                pageContent.value = 2;
                               },
                               onChooseSms: () {
                                 isVisWhatsApp = 0;
+                                pageContent.value = 5;
                                 pageController.animateToPage(
                                   4,
                                   duration: const Duration(milliseconds: 500),
                                   curve: Curves.easeInOut,
                                 );
-                                pageContent.value = 5;
+
                                 /*   authBloc.add(SendOtpEvent(
                                           phone: phoneNumber,
                                           isViaWhatsApp: 0));*/
@@ -398,6 +409,7 @@ class _RegistrationPageState extends State<RegistrationPage>
                                 duration: const Duration(milliseconds: 500),
                                 curve: Curves.easeInOut,
                               );
+                              pageContent.value = PopScopeValue - 2;
                               return false;
                             }
                             await pageController.animateToPage(
@@ -405,6 +417,14 @@ class _RegistrationPageState extends State<RegistrationPage>
                               duration: const Duration(milliseconds: 500),
                               curve: Curves.easeInOut,
                             );
+
+                            Future.delayed(
+                              const Duration(milliseconds: 50),
+                              () {
+                                pageContent.value = PopScopeValue;
+                              },
+                            );
+
                             return false;
                           }
 

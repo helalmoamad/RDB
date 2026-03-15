@@ -33,52 +33,62 @@ class _CreateAccountSectionState extends State<CreateAccountSection> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Text.rich(
-          TextSpan(
-            children: [
-              TextSpan(
-                text: LocaleKeys.to.tr(),
-                style: context.textTheme.titleLarge?.lq.copyWith(
-                  color: const Color(0xff5d5c5d),
-                  letterSpacing: 0.14,
-                  height: 1.43,
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 100.0),
+          child: Text.rich(
+            TextSpan(
+              children: [
+                TextSpan(
+                  text: LocaleKeys.to.tr(),
+                  style: context.textTheme.titleLarge?.lq.copyWith(
+                    color: const Color(0xff5d5c5d),
+                    letterSpacing: 0.14,
+                    height: 1.43,
+                  ),
                 ),
-              ),
-              TextSpan(
-                text: LocaleKeys.create_new_account.tr(),
-                style: context.textTheme.titleLarge?.lq.copyWith(
-                  color: const Color(0xff5d5c5d),
-                  letterSpacing: 0.14,
-                  height: 1.43,
+                TextSpan(
+                  text: LocaleKeys.create_new_account.tr(),
+                  style: context.textTheme.titleLarge?.lq.copyWith(
+                    color: const Color(0xff5d5c5d),
+                    letterSpacing: 0.14,
+                    height: 1.43,
+                  ),
                 ),
-              ),
-              TextSpan(
-                text:
-                    " ${LocaleKeys.tap.tr()} “${LocaleKeys.agree_continue.tr()}” ${LocaleKeys.to_accept_rdb.tr()}",
-                style: context.textTheme.titleLarge?.lq.copyWith(
-                  color: const Color(0xff5d5c5d),
-                  letterSpacing: 0.14,
-                  height: 1.43,
+                TextSpan(
+                  text: " ${LocaleKeys.tap.tr()} ",
+                  style: context.textTheme.titleLarge?.lq.copyWith(
+                    color: const Color(0xff5d5c5d),
+                    letterSpacing: 0.14,
+                    height: 1.43,
+                  ),
                 ),
-              ),
-              TextSpan(
-                text: "\n${LocaleKeys.rdb.tr()}",
-                style: context.textTheme.titleLarge?.lq.copyWith(
-                  color: const Color(0xff5d5c5d),
-                  letterSpacing: 0.14,
-                  height: 1.2,
+                TextSpan(
+                  text: " “${LocaleKeys.agree_continue.tr()}” ",
+                  style: context.textTheme.titleLarge?.bq.copyWith(
+                    color: const Color(0xff5d5c5d),
+                    letterSpacing: 0.14,
+                    height: 1.43,
+                  ),
                 ),
-              ),
-            ],
+                TextSpan(
+                  text: " ${LocaleKeys.to_accept_rdb.tr()}",
+                  style: context.textTheme.titleLarge?.lq.copyWith(
+                    color: const Color(0xff5d5c5d),
+                    letterSpacing: 0.14,
+                    height: 1.43,
+                  ),
+                ),
+              ],
+            ),
+            textHeightBehavior: const TextHeightBehavior(
+              applyHeightToFirstAscent: false,
+            ),
+            textAlign: TextAlign.center,
           ),
-          textHeightBehavior: const TextHeightBehavior(
-            applyHeightToFirstAscent: false,
-          ),
-          textAlign: TextAlign.center,
         ),
-        SizedBox(height: 20.h),
+        SizedBox(height: 40.h),
         SvgPicture.asset(AppAssets.termsSvg),
-        SizedBox(height: 10.h),
+        SizedBox(height: 20.h),
         MyTextWidget(
           LocaleKeys.trems_of_services.tr(),
           style: context.textTheme.titleLarge?.rq.copyWith(
@@ -87,7 +97,7 @@ class _CreateAccountSectionState extends State<CreateAccountSection> {
           ),
           textAlign: TextAlign.center,
         ),
-        SizedBox(height: 60.h),
+        Spacer(),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20.0),
           child: InkWell(
@@ -109,30 +119,39 @@ class _CreateAccountSectionState extends State<CreateAccountSection> {
               builder: (context, index, _) {
                 return DottedBorder(
                   padding: EdgeInsets.zero,
-                  borderType: BorderType.RRect,
                   strokeCap: StrokeCap.round,
                   strokeWidth: 0.5,
+                  borderType: BorderType.RRect,
                   dashPattern: const [3, 3],
                   radius: const Radius.circular(20.0),
-                  color: index == 0
-                      ? const Color(0xff388cff)
-                      : const Color(0xfffafafa),
+                  color: const Color(0xfffafafa),
                   child: Container(
                     width: 1.sw,
-                    height: 50.h,
+                    height: 60.h,
                     decoration: BoxDecoration(
-                      color: index == 0
-                          ? Colors.white
-                          : const Color(0xfffafafa),
+                      border: Border.all(
+                        color: const Color.fromARGB(255, 180, 178, 178),
+                      ),
+                      color: Colors.grey.shade50,
                       borderRadius: BorderRadius.circular(20.0),
                     ),
-                    child: Center(
-                      child: MyTextWidget(
-                        LocaleKeys.agree_continue.tr(),
-                        style: context.textTheme.displayMedium?.rq.copyWith(
-                          color: const Color(0xff3c3c3c),
-                          letterSpacing: 0.16,
-                          height: 1.25,
+                    child: Container(
+                      width: 1.sw,
+                      height: 50.h,
+                      decoration: BoxDecoration(
+                        color: index == 0
+                            ? Colors.white
+                            : const Color(0xfffafafa),
+                        borderRadius: BorderRadius.circular(20.0),
+                      ),
+                      child: Center(
+                        child: MyTextWidget(
+                          LocaleKeys.agree_continue.tr(),
+                          style: context.textTheme.displayMedium?.rq.copyWith(
+                            color: const Color(0xff3c3c3c),
+                            letterSpacing: 0.16,
+                            height: 1.25,
+                          ),
                         ),
                       ),
                     ),
@@ -143,7 +162,22 @@ class _CreateAccountSectionState extends State<CreateAccountSection> {
           ),
         ),
 
-        const SizedBox(height: 80),
+        SizedBox(height: 10.h),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 10.0),
+          child: MyTextWidget(
+            LocaleKeys.later_take_look.tr(),
+            textAlign: TextAlign.center,
+            style: context.textTheme.titleLarge?.rq.copyWith(
+              color: Colors.grey,
+              decoration: TextDecoration.underline,
+              decorationColor: Colors.grey,
+              letterSpacing: 0.14,
+              height: 1.43,
+            ),
+          ),
+        ),
+        SizedBox(height: 30.h),
       ],
     );
   }

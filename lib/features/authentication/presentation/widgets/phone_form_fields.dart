@@ -140,7 +140,7 @@ class PhoneFormField extends StatelessWidget {
         alignment: Alignment.bottomLeft,
         children: [
           SizedBox(
-            height: 65.h,
+            height: 70.h,
             width: 390.w,
             child: Directionality(
               textDirection: TextDirection.ltr,

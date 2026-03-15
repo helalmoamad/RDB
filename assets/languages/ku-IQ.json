@@ -67,10 +67,10 @@
   "tto": "بۆ",
   "tap": "کرتە بکە",
   "to_accept_rdb": "بۆ قبوڵکردنی",
-  "phone_number": "ژمارەی تەلەفون + کۆدی وڵات",
+  "phone_number": "ژمارەی تەلەفون",
   "county_code": "کۆدی وڵات",
   "enter_your_phonenumber_registered_with_us": "ژمارەی تەلەفونەکەت بنووسە بۆ تۆماربوون لەگەڵمان",
-  "your_Privacy": "تایبەتمەندییەکانت پارێزراون،\n زانیاریەکانت نالەشێنین بە هیچ کەسێک",
+  "your_Privacy": "تایبەتمەندییەکانت پارێزراون، زانیاریەکانت نالەشێنین بە هیچ کەسێک",
   "whatsApp": "Whatsapp",
   "sms": "SMS",
   "we_will_send_code": "کۆدێکی دڵنیاکردنەوە نەنێرین بۆ ئەم ژمارەیە",
@@ -800,5 +800,14 @@
   "document_type_authorization_letter": "نامەی دەسەڵات",
   "phone_cannot_be_same_as_registered": "ژمارەی تەلەفۆن ناتوانێت هەمان ژمارەی تۆمارکراو بێت",
   "field_must_not_exceed_10_characters": "خانەکە نابێت زیاتر لە 10 پیت بێت",
-  "update": "گۆڕینی داواکاری"
+  "update": "گۆڕینی داواکاری",
+  "safe": "پارێزراو",
+  "easy": "ئاسان",
+  "transaction": "مامەڵە",
+  "payment": "پارەدان",
+  "powered_by": "پێشکەشکراوە لەلایەن",
+  "get_started": "دەست پێبکە !",
+  "sign_in_exclamation": "چوونە ژوورەوە !",
+  "sign_up_exclamation": "خۆتۆمارکردن !",
+  "verify_your_account": "ھەژمارەکەت پشتڕاست بکەرەوە"
 }

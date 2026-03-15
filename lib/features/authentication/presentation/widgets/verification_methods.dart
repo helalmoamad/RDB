@@ -214,51 +214,63 @@ class _VerificationMethodsState extends State<VerificationMethods> {
         bloc: authBloc,
         builder: (context, state) {
           return Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
               Padding(
                 padding: HWEdgeInsets.symmetric(horizontal: 40.0),
                 child: Column(
                   children: [
+                    MyTextWidget(
+                      widget.isFromLogin
+                          ? LocaleKeys.sign_in_exclamation.tr()
+                          : LocaleKeys.sign_up_exclamation.tr(),
+                      textAlign: TextAlign.center,
+                      style: context.textTheme.titleMedium?.bq.copyWith(
+                        color: const Color(0xff1D1D1D),
+                        height: 1.25,
+                        fontSize: 20,
+                      ),
+                    ),
+                    35.verticalSpace,
+                    SvgPicture.asset(
+                      AppAssets.phoneCallOutlinedSvg,
+                      width: 25,
+                      colorFilter: ColorFilter.mode(
+                        Colors.grey,
+                        BlendMode.srcIn,
+                      ),
+                    ),
+                    35.verticalSpace,
                     Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        SvgPicture.asset(
-                          AppAssets.phoneOtpSvg,
-                          width: 15,
-                          height: 15,
-                        ),
-                        10.horizontalSpace,
                         Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            MyTextWidget(
-                              LocaleKeys.we_will_send_code.tr(),
-                              style: context.textTheme.titleMedium?.rq.copyWith(
-                                color: const Color(0xff5D5C5D),
-                                height: 1.42,
-                              ),
-                            ),
                             Row(
                               children: [
-                                Padding(
-                                  padding: HWEdgeInsets.only(top: 3.0),
-                                  child: SvgPicture.asset(
-                                    AppAssets.phoneCallSvg,
-                                    width: 10,
-                                    height: 10,
+                                IgnorePointer(
+                                  child: Icon(
+                                    Icons.info_outline,
+                                    color: Color.fromARGB(255, 179, 179, 179),
+                                    size: 15,
                                   ),
                                 ),
-                                5.horizontalSpace,
+                                10.horizontalSpace,
                                 MyTextWidget(
-                                  widget.phoneNumber,
-                                  textAlign: TextAlign.start,
+                                  LocaleKeys.we_will_send_code.tr(),
                                   style: context.textTheme.titleMedium?.rq
                                       .copyWith(
-                                        color: const Color(0xffC4C2C2),
-                                        height: 1.25,
+                                        color: const Color(0xff5D5C5D),
+                                        height: 1.42,
                                       ),
                                 ),
+                              ],
+                            ),
+                            20.verticalSpace,
+                            Row(
+                              children: [
                                 InkWell(
                                   onTap: widget.goBackToPhone,
                                   child: Row(
@@ -266,35 +278,26 @@ class _VerificationMethodsState extends State<VerificationMethods> {
                                       const SizedBox(width: 4),
                                       SvgPicture.asset(
                                         AppAssets.editPenSvg,
-                                        width: 10,
-                                        height: 10,
+
+                                        height: 15,
                                       ),
                                       const SizedBox(width: 10),
                                     ],
                                   ),
                                 ),
-                              ],
-                            ),
-                            const SizedBox(height: 5),
-                            Row(
-                              children: [
-                                SvgPicture.asset(
-                                  AppAssets.registerInfoSvg,
-                                  width: 10,
-                                  height: 10,
-                                ),
                                 5.horizontalSpace,
                                 MyTextWidget(
-                                  LocaleKeys.choose_verification.tr(),
-                                  style: context.textTheme.titleMedium?.rq
+                                  widget.phoneNumber,
+                                  textAlign: TextAlign.center,
+                                  style: context.textTheme.titleMedium?.bq
                                       .copyWith(
-                                        color: const Color(0xffC4C2C2),
+                                        color: const Color(0xff1D1D1D),
                                         height: 1.25,
+                                        fontSize: 13,
                                       ),
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 3),
                           ],
                         ),
                       ],
@@ -302,7 +305,7 @@ class _VerificationMethodsState extends State<VerificationMethods> {
                   ],
                 ),
               ),
-              const SizedBox(height: 30),
+              const SizedBox(height: 100),
               buildLoadingOrTimer(state.sendOtpStatus),
               const SizedBox(height: 15),
               Padding(
@@ -345,14 +348,13 @@ class _VerificationMethodsState extends State<VerificationMethods> {
                                 padding: EdgeInsets.zero,
                                 borderType: BorderType.RRect,
                                 strokeCap: StrokeCap.round,
+
                                 strokeWidth: 0.5,
                                 dashPattern: const [3, 3],
                                 radius: const Radius.circular(20.0),
-                                color: index == 0
-                                    ? const Color(0xff388cff)
-                                    : const Color(0xffF5F5F5),
+                                color: const Color.fromARGB(255, 126, 126, 126),
                                 child: Container(
-                                  height: 60,
+                                  height: 50,
                                   decoration: BoxDecoration(
                                     color: index == 0
                                         ? const Color(0xffffffff)
@@ -385,7 +387,7 @@ class _VerificationMethodsState extends State<VerificationMethods> {
                         ),
                       ),
                     ),
-                    4.horizontalSpace,
+                    10.horizontalSpace,
                     Expanded(
                       child: InkWell(
                         highlightColor: Colors.transparent,
@@ -422,11 +424,9 @@ class _VerificationMethodsState extends State<VerificationMethods> {
                                 strokeWidth: 0.5,
                                 dashPattern: const [3, 3],
                                 radius: const Radius.circular(20.0),
-                                color: index == 1
-                                    ? const Color(0xff388cff)
-                                    : const Color(0xffF5F5F5),
+                                color: const Color.fromARGB(255, 126, 126, 126),
                                 child: Container(
-                                  height: 60,
+                                  height: 50,
                                   decoration: BoxDecoration(
                                     color: index == 1
                                         ? const Color(0xffffffff)
@@ -436,10 +436,12 @@ class _VerificationMethodsState extends State<VerificationMethods> {
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      SvgPicture.asset(
-                                        AppAssets.smsSvg,
-                                        width: 20,
-                                        height: 20,
+                                      IgnorePointer(
+                                        child: Icon(
+                                          Icons.messenger_outline,
+
+                                          size: 20,
+                                        ),
                                       ),
                                       10.horizontalSpace,
                                       MyTextWidget(

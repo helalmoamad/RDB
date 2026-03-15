@@ -139,7 +139,7 @@ class _PinItemState extends State<PinItem> with TickerProviderStateMixin {
                 animation: fadingController,
                 builder: (context, child) {
                   return SizedBox(
-                    height: 70.h,
+                    height: 50.w,
                     width: 50.w,
                     child: DottedBorder(
                       padding: EdgeInsets.zero,
@@ -155,86 +155,106 @@ class _PinItemState extends State<PinItem> with TickerProviderStateMixin {
                         borderRadius: const BorderRadius.all(
                           Radius.circular(15),
                         ),
-                        child: TextFormField(
-                          controller: widget.controller,
-                          enabled:
-                              (state.verifyOtpSignInStatus !=
-                                  VerifyOtpSignInStatus.loading &&
-                              state.verifyOtpSignUpStatus !=
-                                  VerifyOtpSignUpStatus.loading &&
-                              state.verifyOtpFromGuestStatus !=
-                                  VerifyOtpFromGuestStatus.loading),
-                          focusNode: focusNodes[widget.index],
-                          onTap: () {
-                            if (widget.index != currentToType) {
-                              focusNodes[currentToType].requestFocus();
-                            }
-                          },
-                          onChanged: (String? text) {
-                            debugPrint(widget.index.toString());
-                            debugPrint(text);
-                            debugPrint(widget.index.toString());
-                            debugPrint(text?.length.toString());
-                            widget.onChange.call();
-                            if (widget.index == 0 && (text?.length ?? 0) == 6) {
-                              widget.pasteOtpCode!.call(text!);
-                            }
-                            if ((text?.length ?? 0) > 1) {
-                              widget.controller.text = text![0];
-                              text = text[0];
-                            }
-                            setState(() {
-                              if ((text?.length ?? 0) == 1) {
-                                widget.onChange.call();
-                                focusNodes[min(5, widget.index + 1)]
-                                    .requestFocus();
-                                currentToType = min(5, widget.index + 1);
-                                withBorder = widget.index == 5;
-                                if (widget.index == 5) {
-                                  checkingOtp = true;
-                                  widget.checkOtp!.call();
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            TextFormField(
+                              controller: widget.controller,
+                              enabled:
+                                  (state.verifyOtpSignInStatus !=
+                                      VerifyOtpSignInStatus.loading &&
+                                  state.verifyOtpSignUpStatus !=
+                                      VerifyOtpSignUpStatus.loading &&
+                                  state.verifyOtpFromGuestStatus !=
+                                      VerifyOtpFromGuestStatus.loading),
+                              focusNode: focusNodes[widget.index],
+                              onTap: () {
+                                if (widget.index != currentToType) {
+                                  focusNodes[currentToType].requestFocus();
                                 }
-                              } else if (text?.isEmpty ?? true) {
+                              },
+                              onChanged: (String? text) {
+                                debugPrint(widget.index.toString());
+                                debugPrint(text);
+                                debugPrint(widget.index.toString());
+                                debugPrint(text?.length.toString());
                                 widget.onChange.call();
-                                checkingOtp = false;
-                                widget.controller.value = zwspEditingValue;
-                                focusNodes[max(0, widget.index - 1)]
-                                    .requestFocus();
-                                currentToType = max(0, widget.index - 1);
-                                withBorder = true;
-                              }
-                            });
-                          },
-                          textAlign: TextAlign.center,
-                          keyboardType: TextInputType.number,
-                          textDirection: TextDirection.ltr,
-                          autocorrect: false,
-                          cursorColor: const Color(0xff5D5C5D),
-                          cursorHeight: 0,
-                          enableInteractiveSelection: widget.index == 0,
-                          cursorWidth: 0,
-                          textAlignVertical: TextAlignVertical.center,
-                          inputFormatters: [
-                            FilteringTextInputFormatter.digitsOnly,
-                          ],
-                          style: context.textTheme.headlineSmall?.rq.copyWith(
-                            color: const Color(0xff707070),
-                            height: 0.6,
-                            decoration: TextDecoration.none,
-                          ),
-                          maxLines: 2,
-                          decoration: InputDecoration(
-                            border: InputBorder.none,
-                            contentPadding: HWEdgeInsets.only(
-                              top: 30,
-                              bottom: 15,
+                                if (widget.index == 0 &&
+                                    (text?.length ?? 0) == 6) {
+                                  widget.pasteOtpCode!.call(text!);
+                                }
+                                if ((text?.length ?? 0) > 1) {
+                                  widget.controller.text = text![0];
+                                  text = text[0];
+                                }
+                                setState(() {
+                                  if ((text?.length ?? 0) == 1) {
+                                    widget.onChange.call();
+                                    focusNodes[min(5, widget.index + 1)]
+                                        .requestFocus();
+                                    currentToType = min(5, widget.index + 1);
+                                    withBorder = widget.index == 5;
+                                    if (widget.index == 5) {
+                                      checkingOtp = true;
+                                      widget.checkOtp!.call();
+                                    }
+                                  } else if (text?.isEmpty ?? true) {
+                                    widget.onChange.call();
+                                    checkingOtp = false;
+                                    widget.controller.value = zwspEditingValue;
+                                    focusNodes[max(0, widget.index - 1)]
+                                        .requestFocus();
+                                    currentToType = max(0, widget.index - 1);
+                                    withBorder = true;
+                                  }
+                                });
+                              },
+                              textAlign: TextAlign.center,
+                              keyboardType: TextInputType.number,
+                              textDirection: TextDirection.ltr,
+                              autocorrect: false,
+                              cursorColor: const Color(0xff5D5C5D),
+                              cursorHeight: 0,
+                              enableInteractiveSelection: widget.index == 0,
+                              cursorWidth: 0,
+                              textAlignVertical: TextAlignVertical.center,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly,
+                              ],
+                              style: context.textTheme.headlineSmall?.rq
+                                  .copyWith(
+                                    color:
+                                        (!withBorder &&
+                                            widget.controller.text != '\u200b')
+                                        ? Colors.transparent
+                                        : const Color(0xff707070),
+                                    height: 0.6,
+                                    decoration: TextDecoration.none,
+                                  ),
+                              maxLines: 2,
+                              decoration: InputDecoration(
+                                border: InputBorder.none,
+                                contentPadding: HWEdgeInsets.only(
+                                  top: 15,
+                                  bottom: 5,
+                                ),
+                                focusedBorder: InputBorder.none,
+                                filled: true,
+                                fillColor: !withBorder
+                                    ? const Color(0xffF5F5F5)
+                                    : const Color(0xffFAFAFA),
+                              ),
                             ),
-                            focusedBorder: InputBorder.none,
-                            filled: true,
-                            fillColor: !withBorder
-                                ? const Color(0xffF5F5F5)
-                                : const Color(0xffFAFAFA),
-                          ),
+                            if (!withBorder &&
+                                widget.controller.text != '\u200b')
+                              const IgnorePointer(
+                                child: Icon(
+                                  Icons.lock_outline_rounded,
+                                  color: Color(0xffC4C2C2),
+                                  size: 20,
+                                ),
+                              ),
+                          ],
                         ),
                       ),
                     ),

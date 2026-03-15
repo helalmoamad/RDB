@@ -7,6 +7,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:rdb/common/test_utils/test_var.dart';
 import 'package:rdb/core/utils/extensions/build_context.dart';
 import 'package:rdb/core/utils/form_utils.dart';
+import 'package:rdb/features/app/rdb_loading.dart';
 import 'package:rdb/features/authentication/presentation/widgets/phone_form_fields.dart';
 import 'package:rdb/generated/locale_keys.g.dart';
 import 'package:rdb/core/utils/last_pages_tracker.dart';
@@ -45,6 +46,7 @@ class _InsertPhoneTabState extends State<InsertPhoneTab> with FormStateMinxin {
     ),
   );
   final ValueNotifier<bool> displaySubmit = ValueNotifier(false);
+  final ValueNotifier<bool> showLoadingSubmit = ValueNotifier(false);
   final ValueNotifier<bool> changeTextInputFieldContent = ValueNotifier(false);
   int maxLength = 25;
 
@@ -70,285 +72,280 @@ class _InsertPhoneTabState extends State<InsertPhoneTab> with FormStateMinxin {
       LastPagesTracker.sendErrorToBlocAndLog(error);
       FlutterError.dumpErrorToConsole(error);
     };
-    return Scaffold(
-      resizeToAvoidBottomInset: true,
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Padding(
-            padding: HWEdgeInsets.symmetric(horizontal: 20.0),
-            child: Column(
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SvgPicture.asset(
-                      widget.fromLogin
-                          ? AppAssets.enterSvg
-                          : AppAssets.phoneCallOutlinedSvg,
-                      width: 15,
-                      height: 15,
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Padding(
+          padding: HWEdgeInsets.symmetric(horizontal: 10.0),
+          child: Column(
+            children: [
+              MyTextWidget(
+                widget.fromLogin
+                    ? LocaleKeys.sign_in_exclamation.tr()
+                    : LocaleKeys.sign_up_exclamation.tr(),
+                textAlign: TextAlign.center,
+                style: context.textTheme.titleMedium?.bq.copyWith(
+                  color: const Color(0xff1D1D1D),
+                  height: 1.25,
+                  fontSize: 20,
+                ),
+              ),
+              30.verticalSpace,
+              SvgPicture.asset(
+                AppAssets.phoneCallOutlinedSvg,
+                width: 25,
+                colorFilter: ColorFilter.mode(Colors.grey, BlendMode.srcIn),
+              ),
+              30.verticalSpace,
+
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  MyTextWidget(
+                    "${LocaleKeys.enter_your_number.tr()} ${widget.fromLogin ? LocaleKeys.to_login.tr() : LocaleKeys.registered_with_us.tr()}",
+                    style: context.textTheme.titleMedium?.rq.copyWith(
+                      color: const Color(0xff5D5C5D),
+                      height: 1.42,
+                      fontSize: 13,
                     ),
-                    10.horizontalSpace,
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        MyTextWidget(
-                          "${LocaleKeys.enter_your_number.tr()} ${widget.fromLogin ? LocaleKeys.to_login.tr() : LocaleKeys.registered_with_us.tr()}",
+                  ),
+                  10.verticalSpace,
+
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SvgPicture.asset(
+                        AppAssets.phoneOtpSvg,
+                        width: 10,
+                        height: 10,
+                      ),
+                      10.horizontalSpace,
+                      SizedBox(
+                        child: MyTextWidget(
+                          LocaleKeys.we_will_send_code.tr(),
                           style: context.textTheme.titleMedium?.rq.copyWith(
                             color: const Color(0xff5D5C5D),
                             height: 1.42,
+                            fontSize: 13,
                           ),
                         ),
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Padding(
-                              padding: HWEdgeInsets.only(top: 3.0),
-                              child: SvgPicture.asset(
-                                AppAssets.registerInfoSvg,
-                                width: 10,
-                                height: 10,
-                              ),
-                            ),
-                            5.horizontalSpace,
-                            MyTextWidget(
-                              LocaleKeys
-                                  .enter_your_phonenumber_registered_with_us
-                                  .tr(),
-                              textAlign: TextAlign.start,
-                              style: context.textTheme.titleMedium?.rq.copyWith(
-                                color: const Color(0xffC4C2C2),
-                                height: 1.25,
-                              ),
-                            ),
-                          ],
-                        ),
-                        if (widget.fromLogin) ...{
-                          const SizedBox(height: 3),
-                          Row(
-                            children: [
-                              SvgPicture.asset(
-                                AppAssets.phoneOtpSvg,
-                                width: 10,
-                                height: 10,
-                              ),
-                              5.horizontalSpace,
-                              SizedBox(
-                                width: 1.sw - 120,
-                                child: MyTextWidget(
-                                  LocaleKeys.we_will_send_code.tr(),
-                                  style: context.textTheme.titleMedium?.rq
-                                      .copyWith(
-                                        color: const Color(0xffC4C2C2),
-                                        height: 1.25,
-                                      ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        } else ...{
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Padding(
-                                padding: HWEdgeInsets.only(top: 3.0),
-                                child: SvgPicture.asset(
-                                  AppAssets.privacySvg,
-                                  width: 10,
-                                  height: 10,
-                                ),
-                              ),
-                              5.horizontalSpace,
-                              SizedBox(
-                                width: 1.sw - 120,
-                                child: MyTextWidget(
-                                  LocaleKeys.your_Privacy.tr(),
-                                  textAlign: TextAlign.start,
-                                  maxLines: 2,
-                                  style: context.textTheme.titleMedium?.rq
-                                      .copyWith(
-                                        color: const Color(0xffC4C2C2),
-                                        height: 1.25.h,
-                                      ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 3.h),
-                        },
-                      ],
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          SizedBox(height: 29.h),
-          Padding(
-            padding: HWEdgeInsets.symmetric(horizontal: 20.0),
-            child: ValueListenableBuilder<bool>(
-              valueListenable: displaySubmit,
-              builder: (context, display, _) {
-                return PhoneFormField(
-                  onFieldSubmitted: (val) {
-                    if (display) {
-                      Future.delayed(const Duration(milliseconds: 300), () {
-                        if (mounted) {
-                          // ignore: use_build_context_synchronously
-                          FocusScope.of(context).unfocus();
-                        }
-                      });
-                      widget.moveToNextStep.call(form.controllers[0].text);
-                      //////////////////////////
-                    }
-                  },
-                  key: TestVariables.kTestMode
-                      ? const Key(WidgetsKeys.loginPhoneFormFieldKey)
-                      : null,
-                  autoFocus: true,
-                  onChange: (String? text) {
-                    if ((text?.length ?? 0) > 3 &&
-                        countryChanged.value.code == "") {
-                      if (text!.startsWith("00")) {
-                        form.controllers[0].text = text.replaceAll("00", '');
-                      } else {
-                        form.controllers[0].text = text.replaceFirst(
-                          RegExp(r'0'),
-                          '',
-                        );
-                      }
-                    }
-                    Country newCountry = countries.firstWhere(
-                      (element) => '+${form.controllers[0].text.toLowerCase()}'
-                          .startsWith(element.dialCode.toLowerCase()),
-                      orElse: () => const Country(
-                        name: '',
-                        flag: '',
-                        code: '',
-                        dialCode: '',
-                        minLength: 0,
-                        maxLength: 0,
                       ),
-                    );
-                    if ((form.controllers[0].text.isNotEmpty) &&
-                        newCountry.code != "") {
-                      displaySubmit.value =
-                          (form.controllers[0].text
-                                  .replaceAll(' ', '')
-                                  .length) >=
-                              (newCountry.minLength +
-                                  newCountry.dialCode.length -
-                                  3) &&
-                          (form.controllers[0].text
-                                  .replaceAll(' ', '')
-                                  .length) <=
-                              (newCountry.maxLength +
-                                  newCountry.dialCode.length +
-                                  3);
-                    } else {
-                      displaySubmit.value = false;
-                    }
-                    countryChanged.value = newCountry;
-                    debugPrint(
-                      'form.controllers[0].text${form.controllers[0].text}',
-                    );
-                    return form.controllers[0].text.isNotEmpty
-                        ? form
-                                  .controllers[0]
-                                  .text[form.controllers[0].text.length - 1] ==
-                              ' '
-                        : false;
-                  },
-                  maxLength: maxLength - 1,
-                  prefixIcon: Padding(
-                    padding: HWEdgeInsets.only(left: 20.0, top: 25),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    ],
+                  ),
+                  10.verticalSpace,
+                  SizedBox(
+                    width: 1.sw,
+                    height: 20,
+                    child: ListView(
+                      scrollDirection: Axis.horizontal,
+
                       children: [
-                        SvgPicture.asset(AppAssets.phoneCallSvg),
-                        10.horizontalSpace,
-                        ValueListenableBuilder<Country>(
-                          valueListenable: countryChanged,
-                          builder: (context, country, _) {
-                            if (country.code == '') {
-                              return SizedBox(width: 22.w, height: 15.h);
-                            } else {
-                              return country.code.toUpperCase() == "SY"
-                                  ? SvgPicture.asset(
-                                      AppAssets.syriaFlagSvg,
-                                      width: 22.w,
-                                    )
-                                  : CountryFlag.fromCountryCode(
-                                      country.code,
-                                      height: 15.h,
-                                      width: 22.w,
-                                      borderRadius: 4.r,
-                                    );
-                            }
-                          },
-                        ),
-                        10.horizontalSpace,
-                        SizedBox(
-                          height: 15.h,
-                          child: MyTextWidget(
-                            '+',
-                            style: context.textTheme.bodyMedium?.rq.copyWith(
-                              height: 0.9,
-                              color: const Color(0xff8E8E8E),
-                            ),
+                        Padding(
+                          padding: HWEdgeInsets.only(top: 3.0),
+                          child: SvgPicture.asset(
+                            AppAssets.privacySvg,
+                            width: 10,
+                            height: 10,
                           ),
                         ),
-
-                        2.horizontalSpace,
+                        5.horizontalSpace,
+                        MyTextWidget(
+                          LocaleKeys.your_Privacy.tr(),
+                          textAlign: TextAlign.start,
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 2,
+                          style: context.textTheme.titleMedium?.rq.copyWith(
+                            color: const Color(0xff5D5C5D),
+                            height: 1.42,
+                            fontSize: 13,
+                          ),
+                        ),
                       ],
                     ),
                   ),
-                  ready: display,
-                  suffixIcon: Padding(
-                    padding: HWEdgeInsets.only(right: 20.0, top: 22),
-                    child: !display
-                        ? SizedBox(width: 22.w, height: 15.h)
-                        : InkWell(
-                            key: TestVariables.kTestMode
-                                ? const Key(
-                                    WidgetsKeys.loginConfirmPhoneButtonKey,
-                                  )
-                                : null,
-                            onTap: () {
-                              Future.delayed(const Duration(seconds: 1), () {
-                                if (mounted) {
-                                  // ignore: use_build_context_synchronously
-                                  FocusScope.of(context).unfocus();
-                                }
-                              });
-                              widget.moveToNextStep.call(
-                                form.controllers[0].text,
-                              );
-                              //////////////////////////
-                            },
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                SvgPicture.asset(
-                                  AppAssets.submitArrowSvg,
-                                  width: 10.w,
-                                  height: 20.h,
-                                ),
-                              ],
-                            ),
-                          ),
-                  ),
-                  hintText: LocaleKeys.phone_number.tr(),
-                  controller: form.controllers[0],
-                );
-              },
-            ),
+                  SizedBox(height: 3.h),
+                ],
+              ),
+            ],
           ),
-          const SizedBox(height: 20),
-        ],
-      ),
+        ),
+        SizedBox(height: 75.h),
+        Padding(
+          padding: HWEdgeInsets.symmetric(horizontal: 40.w),
+          child: ValueListenableBuilder<bool>(
+            valueListenable: displaySubmit,
+            builder: (context, display, _) {
+              return PhoneFormField(
+                onFieldSubmitted: (val) {
+                  if (display) {
+                    Future.delayed(const Duration(milliseconds: 300), () {
+                      if (mounted) {
+                        // ignore: use_build_context_synchronously
+                        FocusScope.of(context).unfocus();
+                      }
+                    });
+                    showLoadingSubmit.value = true;
+                    //////////////////////////
+                  }
+                },
+                key: TestVariables.kTestMode
+                    ? const Key(WidgetsKeys.loginPhoneFormFieldKey)
+                    : null,
+                autoFocus: true,
+                onChange: (String? text) {
+                  if ((text?.length ?? 0) > 3 &&
+                      countryChanged.value.code == "") {
+                    if (text!.startsWith("00")) {
+                      form.controllers[0].text = text.replaceAll("00", '');
+                    } else {
+                      form.controllers[0].text = text.replaceFirst(
+                        RegExp(r'0'),
+                        '',
+                      );
+                    }
+                  }
+                  Country newCountry = countries.firstWhere(
+                    (element) => '+${form.controllers[0].text.toLowerCase()}'
+                        .startsWith(element.dialCode.toLowerCase()),
+                    orElse: () => const Country(
+                      name: '',
+                      flag: '',
+                      code: '',
+                      dialCode: '',
+                      minLength: 0,
+                      maxLength: 0,
+                    ),
+                  );
+                  if ((form.controllers[0].text.isNotEmpty) &&
+                      newCountry.code != "") {
+                    displaySubmit.value =
+                        (form.controllers[0].text.replaceAll(' ', '').length) >=
+                            (newCountry.minLength +
+                                newCountry.dialCode.length -
+                                3) &&
+                        (form.controllers[0].text.replaceAll(' ', '').length) <=
+                            (newCountry.maxLength +
+                                newCountry.dialCode.length +
+                                3);
+                  } else {
+                    displaySubmit.value = false;
+                  }
+                  countryChanged.value = newCountry;
+                  debugPrint(
+                    'form.controllers[0].text${form.controllers[0].text}',
+                  );
+                  return form.controllers[0].text.isNotEmpty
+                      ? form
+                                .controllers[0]
+                                .text[form.controllers[0].text.length - 1] ==
+                            ' '
+                      : false;
+                },
+                maxLength: maxLength - 1,
+                prefixIcon: Padding(
+                  padding: HWEdgeInsets.only(left: 20.0, top: 30),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SvgPicture.asset(AppAssets.phoneCallSvg),
+                      10.horizontalSpace,
+                      ValueListenableBuilder<Country>(
+                        valueListenable: countryChanged,
+                        builder: (context, country, _) {
+                          if (country.code == '') {
+                            return SizedBox(width: 22.w, height: 15.h);
+                          } else {
+                            return country.code.toUpperCase() == "SY"
+                                ? SvgPicture.asset(
+                                    AppAssets.syriaFlagSvg,
+                                    width: 22.w,
+                                  )
+                                : CountryFlag.fromCountryCode(
+                                    country.code,
+                                    height: 15.h,
+                                    width: 22.w,
+                                    borderRadius: 4.r,
+                                  );
+                          }
+                        },
+                      ),
+                      10.horizontalSpace,
+                      SizedBox(
+                        height: 15.h,
+                        child: MyTextWidget(
+                          '+',
+                          style: context.textTheme.bodyMedium?.rq.copyWith(
+                            height: 0.9,
+                            color: const Color(0xff8E8E8E),
+                          ),
+                        ),
+                      ),
+
+                      2.horizontalSpace,
+                    ],
+                  ),
+                ),
+                ready: display,
+                suffixIcon: Padding(
+                  padding: HWEdgeInsets.only(right: 20.0, top: 20),
+                  child: !display
+                      ? SizedBox(width: 22.w, height: 15.h)
+                      : InkWell(
+                          key: TestVariables.kTestMode
+                              ? const Key(
+                                  WidgetsKeys.loginConfirmPhoneButtonKey,
+                                )
+                              : null,
+                          onTap: () {
+                            Future.delayed(const Duration(seconds: 1), () {
+                              if (mounted) {
+                                // ignore: use_build_context_synchronously
+                                FocusScope.of(context).unfocus();
+                              }
+                            });
+                            showLoadingSubmit.value = true;
+                            //////////////////////////
+                          },
+                          child: ValueListenableBuilder<bool>(
+                            valueListenable: showLoadingSubmit,
+                            builder: (context, showLoading, _) {
+                              if (showLoading) {
+                                Future.delayed(Duration(seconds: 2), () {
+                                  showLoadingSubmit.value = false;
+                                  widget.moveToNextStep.call(
+                                    form.controllers[0].text,
+                                  );
+                                });
+                              }
+                              return Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  showLoading
+                                      ? RDBLoader(
+                                          size: 20,
+                                          color: Color(0xff1D1D1D),
+                                        )
+                                      : SvgPicture.asset(
+                                          AppAssets.submitArrowSvg,
+                                          width: 10.w,
+                                          height: 20.h,
+                                        ),
+                                ],
+                              );
+                            },
+                          ),
+                        ),
+                ),
+                hintText: LocaleKeys.phone_number.tr(),
+                controller: form.controllers[0],
+              );
+            },
+          ),
+        ),
+        SizedBox(height: 150),
+      ],
     );
   }
 

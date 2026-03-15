@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
-import 'package:rdb/base_page.dart';
 import 'package:rdb/core/utils/extensions/build_context.dart';
 import 'package:rdb/routes/router.dart';
+import 'package:rdb/splash_widget.dart';
 import 'core/domin/repositories/prefs_repository.dart';
 
 class SplashPage extends StatefulWidget {
@@ -18,10 +18,14 @@ class _SplashPageState extends State<SplashPage> {
 
   @override
   void initState() {
-    Future.delayed(Duration(seconds: 3), () {
+    Future.delayed(const Duration(milliseconds: 6300), () {
       // ignore: use_build_context_synchronously
       context.go(
-        prefsRepository.walletToken == null
+        prefsRepository.walletToken == null ||
+                ((GetIt.I<PrefsRepository>().isVerifiedPhone ?? false) &&
+                    !(GetIt.I<PrefsRepository>()
+                            .isVerifiedPhonePeforeExpiredToken ??
+                        false))
             ? GRouter.config.applicationRoutes.kRegistrationPage
             : GRouter.config.applicationRoutes.kBasePage,
       );
@@ -53,7 +57,7 @@ class _SplashPageState extends State<SplashPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: context.colorScheme.surface,
-      body: Center(child: logo),
+      body: Center(child: SplashWidget()),
     );
   }
 }

@@ -68,10 +68,10 @@
   "tto": "الى",
   "tap": "إضغط على",
   "to_accept_rdb": "للقبول في",
-  "phone_number": "رقم الهاتف  +  كود البلد",
+  "phone_number": "رقم الهاتف",
   "county_code": "كود البلد",
   "enter_your_phonenumber_registered_with_us": "أدخل رقم هاتفك للتسجل معنا",
-  "your_Privacy": "خصوصيتك آمنة تمامًا،\n ولا نشارك معلوماتك مع أي شخص",
+  "your_Privacy": "خصوصيتك آمنة تمامًا، ولا نشارك معلوماتك مع أي شخص",
   "whatsApp": "واتساب",
   "sms": "رسالة",
   "we_will_send_code": "سوف نرسل رمز التحقق الى هذا الرقم",
@@ -790,5 +790,14 @@
   "document_type_authorization_letter": "تفويض رسمي",
   "phone_cannot_be_same_as_registered": "رقم الهاتف لا يمكن أن يكون نفس الرقم المسجل به",
   "field_must_not_exceed_10_characters": "يجب ألا يتجاوز الحقل 10 محارف",
-  "update": "تعديل الطلب"
+  "update": "تعديل الطلب",
+  "safe": "آمن",
+  "easy": "سهل",
+  "transaction": "التحويلات",
+  "payment": "الدفع",
+  "powered_by": "مشغل بواسطة",
+  "get_started": "البدء !",
+  "sign_in_exclamation": "تسجيل الدخول !",
+  "sign_up_exclamation": "إنشاء حساب !",
+  "verify_your_account": "تحقق من حسابك"
 }

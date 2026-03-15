@@ -226,6 +226,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           // ignore: unrelated_type_equality_checks
           _prefsRepository.setVerifiedPhone(r.user?.isPhoneVerified == 1);
           _prefsRepository.setPhoneNumber((r.user?.phoneNumber).toString());
+          _prefsRepository.setVerifiedPhonePeforeExpiredToken(false);
 
           ////////////////////////
         } catch (error) {

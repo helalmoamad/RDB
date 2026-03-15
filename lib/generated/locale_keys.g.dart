@@ -904,4 +904,13 @@ abstract class LocaleKeys {
   static const field_must_not_exceed_10_characters =
       'field_must_not_exceed_10_characters';
   static const update = 'update';
+  static const safe = 'safe';
+  static const easy = 'easy';
+  static const transaction = 'transaction';
+  static const payment = 'payment';
+  static const powered_by = 'powered_by';
+  static const get_started = 'get_started';
+  static const sign_in_exclamation = 'sign_in_exclamation';
+  static const sign_up_exclamation = 'sign_up_exclamation';
+  static const verify_your_account = 'verify_your_account';
 }

@@ -45,4 +45,12 @@ abstract class AppAssets {
   static String get verifiedNumberSvg => 'verified_number'.svg;
   static String get termsSvg => 'terms'.svg;
   static String get trydosTextSvg => 'trydos_text'.svg;
+  static String get changeUserSvg => 'change_user'.svg;
+  static String get enterUserSvg => 'enterUser'.svg;
+  static String get clearLoginSvg => 'clear_login'.svg;
+  static String get forgetPasswordSvg => 'forget_password'.svg;
+  static String get lockSvg => 'lock'.svg;
+  static String get userSvg => 'user'.svg;
+  static String get bracket => 'bracket'.svg;
+  static String get rLetter => 'r_letter'.svg;
 }

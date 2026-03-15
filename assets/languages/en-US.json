@@ -72,10 +72,10 @@
   "tto": "To",
   "tap": "Tap",
   "to_accept_rdb": "To Accept RDB",
-  "phone_number": " county code  +  Phone Number",
+  "phone_number": "Phone Number",
   "country_code": "county code ",
   "enter_your_phonenumber_registered_with_us": "Enter Your Phone  Number Registered With Us",
-  "your_Privacy": "Your Privacy Is Completely Safe'\\n We Not Share Your Information With Anyone",
+  "your_Privacy": "Your Privacy Is Completely Safe' We Not Share Your Information With Anyone",
   "whatsApp": "WhatsApp",
   "sms": "SMS",
   "we_will_send_code": "We Will Send A Verification Code To The Number",
@@ -791,5 +791,14 @@
   "document_type_authorization_letter": "Authorization Letter",
   "phone_cannot_be_same_as_registered": "Phone number cannot be the same as your registered phone number",
   "field_must_not_exceed_10_characters": "Field must not exceed 10 characters",
-  "update": "Update Request"
+  "update": "Update Request",
+  "safe": "Safe",
+  "easy": "Easy",
+  "transaction": "Transaction",
+  "payment": "Payment",
+  "powered_by": "Powered By",
+  "get_started": "Get Started !",
+  "sign_in_exclamation": "Sign in !",
+  "sign_up_exclamation": "Sign up !",
+  "verify_your_account": "Verify Your Account"
 }

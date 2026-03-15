@@ -69,10 +69,10 @@
   "tto": "Kime",
   "tap": "Dokun",
   "to_accept_rdb": "Kabul Etmek İçin",
-  "phone_number": "Ülke Kodu + Telefon Numarası",
+  "phone_number": "Telefon Numarası",
   "country_code": "Ülke Kodu",
   "enter_your_phonenumber_registered_with_us": "Bizde Kayıtlı Olan Telefon Numaranızı Girin",
-  "your_Privacy": "Gizliliğiniz Tamamen Güvendedir\\n Bilgilerinizi Kimseyle Paylaşmayız",
+  "your_Privacy": "Gizliliğiniz Tamamen Güvendedir Bilgilerinizi Kimseyle Paylaşmayız",
   "whatsApp": "WhatsApp",
   "sms": "SMS",
   "we_will_send_code": "Numaraya Bir Doğrulama Kodu Göndereceğiz",
@@ -773,5 +773,14 @@
   "document_type_authorization_letter": "Yetki Mektubu",
   "phone_cannot_be_same_as_registered": "Telefon numarası kayıtlı telefon numaranızla aynı olamaz",
   "field_must_not_exceed_10_characters": "Alan 10 karakteri geçmemelidir",
-  "update": "İsteği Güncelle"
+  "update": "İsteği Güncelle",
+  "safe": "Güvenli",
+  "easy": "Kolay",
+  "transaction": "İşlem",
+  "payment": "Ödeme",
+  "powered_by": "Tarafından Desteklenmektedir",
+  "get_started": "Başla !",
+  "sign_in_exclamation": "Giriş Yap !",
+  "sign_up_exclamation": "Kayıt Ol !",
+  "verify_your_account": "Hesabınızı Doğrulayın"
 }
