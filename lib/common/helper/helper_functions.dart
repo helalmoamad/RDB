@@ -103,10 +103,8 @@ class HelperFunctions {
   }
 
   static Locale getInitLocale() {
-    // ignore: deprecated_member_use
-    final devicelang = WidgetsBinding.instance.window.locale.languageCode;
     return _prefsRepository.language == null
-        ? mpaLanguageCodeToLocale[devicelang] ?? defaultLocal
+        ? defaultLocal
         : mpaLanguageCodeToLocale[_prefsRepository.language] ?? defaultLocal;
   }
 

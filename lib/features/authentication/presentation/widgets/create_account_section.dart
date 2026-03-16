@@ -99,7 +99,7 @@ class _CreateAccountSectionState extends State<CreateAccountSection> {
         ),
         Spacer(),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+          padding: const EdgeInsets.symmetric(horizontal: 50.0),
           child: InkWell(
             key: TestVariables.kTestMode
                 ? const Key(WidgetsKeys.agreeContinueButtonKey)
@@ -127,7 +127,7 @@ class _CreateAccountSectionState extends State<CreateAccountSection> {
                   color: const Color(0xfffafafa),
                   child: Container(
                     width: 1.sw,
-                    height: 60.h,
+                    height: 40.h,
                     decoration: BoxDecoration(
                       border: Border.all(
                         color: const Color.fromARGB(255, 180, 178, 178),
@@ -137,7 +137,7 @@ class _CreateAccountSectionState extends State<CreateAccountSection> {
                     ),
                     child: Container(
                       width: 1.sw,
-                      height: 50.h,
+                      height: 40.h,
                       decoration: BoxDecoration(
                         color: index == 0
                             ? Colors.white

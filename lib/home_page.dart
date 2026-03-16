@@ -12,6 +12,7 @@ import 'package:rdb/features/authentication/presentation/widgets/insert_phone_ta
 import 'package:rdb/features/authentication/presentation/widgets/verification_methods.dart';
 import 'package:rdb/features/authentication/presentation/widgets/verify_otp.dart';
 import 'package:rdb/generated/locale_keys.g.dart';
+import 'package:rdb/routes/router.dart';
 import 'package:rdb/service/language_service.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get_it/get_it.dart';
@@ -52,6 +53,11 @@ class _HomePageState extends State<HomePage> {
         token: GetIt.I<PrefsRepository>().walletToken, // استخدم القيمة الفعلية
         languageCode: "en",
         skipSplash: true,
+        onLogout: () {
+          GetIt.I<PrefsRepository>().setVerifiedPhone(false);
+          GetIt.I<PrefsRepository>().setVerifiedPhonePeforeExpiredToken(false);
+          GRouter.config.applicationRoutes.kRegistrationPage;
+        },
 
         //LanguageService.languageCode,
         // استخدم اللغة الحالية

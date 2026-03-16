@@ -99,7 +99,7 @@ class _WelcomeSectionState extends State<WelcomeSection> {
             valueListenable: clickButton,
             builder: (context, index, _) {
               return Padding(
-                padding: const EdgeInsets.fromLTRB(24.0, 0.0, 24.0, 0.0),
+                padding: const EdgeInsets.fromLTRB(50.0, 0.0, 50.0, 0.0),
                 child: DottedBorder(
                   padding: EdgeInsets.zero,
                   strokeCap: StrokeCap.round,
@@ -110,7 +110,7 @@ class _WelcomeSectionState extends State<WelcomeSection> {
                   color: const Color(0xfffafafa),
                   child: Container(
                     width: 1.sw,
-                    height: 50.h,
+                    height: 40.h,
                     decoration: BoxDecoration(
                       border: Border.all(
                         color: const Color.fromARGB(255, 180, 178, 178),
@@ -149,7 +149,7 @@ class _WelcomeSectionState extends State<WelcomeSection> {
             });
           },
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(24.0, 0.0, 24.0, 0.0),
+            padding: const EdgeInsets.fromLTRB(50.0, 0.0, 50.0, 0.0),
             child: DottedBorder(
               padding: EdgeInsets.zero,
               strokeCap: StrokeCap.round,
@@ -160,7 +160,7 @@ class _WelcomeSectionState extends State<WelcomeSection> {
               color: const Color(0xfffafafa),
               child: Container(
                 width: 1.sw,
-                height: 50.h,
+                height: 40.h,
                 decoration: BoxDecoration(
                   border: Border.all(
                     color: const Color.fromARGB(255, 180, 178, 178),
