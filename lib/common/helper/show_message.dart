@@ -1,16 +1,13 @@
 import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:easy_localization/easy_localization.dart' as tran;
-import 'package:rdb/features/app/my_text_widget.dart';
-import 'package:rdb/generated/locale_keys.g.dart';
-import '../../main.dart'; // لاستخدام navigatorKey
 
-FToast fToast = FToast();
+import '../../main.dart';
 
-// دالة مساعدة للتحقق من الاتجاه
+OverlayEntry? _activeNotificationEntry;
+
 bool _isRTL(BuildContext context) {
   return Directionality.of(context) == TextDirection.rtl;
 }
@@ -34,21 +31,17 @@ showMessage(
         } else {
           showSuccessMessage(currentContext, message);
         }
-      } catch (e) {
-        try {
-          _showCustomToast(currentContext, message, isSuccess: !hasError);
-        } catch (e2) {
-          Fluttertoast.cancel().then(
-            (value) => Fluttertoast.showToast(
-              msg: message,
-              backgroundColor: hasError ? Colors.red : Colors.green,
-              textColor: Colors.white,
-              fontSize: 16,
-              toastLength: timeShowing,
-              gravity: ToastGravity.TOP,
-            ),
-          );
-        }
+      } catch (_) {
+        Fluttertoast.cancel().then(
+          (value) => Fluttertoast.showToast(
+            msg: message,
+            backgroundColor: hasError ? Colors.red : Colors.green,
+            textColor: Colors.white,
+            fontSize: 16,
+            toastLength: timeShowing,
+            gravity: ToastGravity.TOP,
+          ),
+        );
       }
     } else {
       Fluttertoast.cancel().then(
@@ -71,124 +64,7 @@ showSuccessMessage(
   String? actionText,
   VoidCallback? onActionPressed,
 }) {
-  // استخدام Overlay بدلاً من Dialog لتجنب إغلاق الصفحة
-  OverlayState? overlayState =
-      Overlay.maybeOf(context) ?? navigatorKey.currentState?.overlay;
-  if (overlayState == null) return;
-
-  late OverlayEntry overlayEntry;
-
-  overlayEntry = OverlayEntry(
-    builder: (context) => _buildSuccessWidget(context, message, () {
-      overlayEntry.remove();
-    }),
-  );
-
-  overlayState.insert(overlayEntry);
-
-  // إغلاق تلقائي بعد 3 ثوانٍ
-  Timer(const Duration(seconds: 3), () {
-    try {
-      overlayEntry.remove();
-    } catch (e) {
-      // تجاهل الأخطاء إذا كان الـ overlay محذوف بالفعل
-    }
-  });
-}
-
-Widget _buildSuccessWidget(
-  BuildContext context,
-  String message,
-  VoidCallback onClose,
-) {
-  return Align(
-    alignment: Alignment.topCenter,
-    child: Padding(
-      padding: EdgeInsets.only(
-        top:
-            MediaQuery.of(context).padding.top +
-            10, // إضافة padding للـ status bar
-        left: 16,
-        right: 16,
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: Stack(
-          children: [
-            Container(
-              width: double.infinity,
-              margin: EdgeInsets.only(top: 8.h), // تقليل margin
-              padding: EdgeInsets.all(16.w),
-              decoration: BoxDecoration(
-                color: const Color(0xFFE2FFF1),
-                borderRadius: BorderRadius.circular(12.r),
-                border: Border.all(color: const Color(0xFF2CDD92)),
-                boxShadow: [
-                  BoxShadow(
-                    // ignore: deprecated_member_use
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  MyTextWidget(
-                    LocaleKeys.info_message.tr(),
-                    style: TextStyle(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.w600,
-                      color: const Color(0xFF1A1A1A),
-                    ),
-                  ),
-                  SizedBox(height: 4.h),
-                  MyTextWidget(
-                    message,
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w400,
-                      color: const Color(0xFF666666),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Positioned(
-              top: 0,
-              right: _isRTL(context) ? null : 0,
-              left: _isRTL(context) ? 0 : null,
-              child: GestureDetector(
-                onTap: onClose,
-                child: Container(
-                  padding: EdgeInsets.all(6.w),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        // ignore: deprecated_member_use
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 4,
-                        offset: const Offset(0, 1),
-                      ),
-                    ],
-                  ),
-                  child: Icon(
-                    Icons.close,
-                    color: const Color(0xFF666666),
-                    size: 18.sp,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    ),
-  );
+  _showTopNotification(context, message);
 }
 
 showErrorMessage(
@@ -197,124 +73,7 @@ showErrorMessage(
   String? actionText,
   VoidCallback? onActionPressed,
 }) {
-  // استخدام Overlay بدلاً من Dialog لتجنب إغلاق الصفحة
-  OverlayState? overlayState =
-      Overlay.maybeOf(context) ?? navigatorKey.currentState?.overlay;
-  if (overlayState == null) return;
-
-  late OverlayEntry overlayEntry;
-
-  overlayEntry = OverlayEntry(
-    builder: (context) => _buildErrorWidget(context, message, () {
-      overlayEntry.remove();
-    }),
-  );
-
-  overlayState.insert(overlayEntry);
-
-  // إغلاق تلقائي بعد 3 ثوانٍ
-  Timer(const Duration(seconds: 3), () {
-    try {
-      overlayEntry.remove();
-    } catch (e) {
-      // تجاهل الأخطاء إذا كان الـ overlay محذوف بالفعل
-    }
-  });
-}
-
-Widget _buildErrorWidget(
-  BuildContext context,
-  String message,
-  VoidCallback onClose,
-) {
-  return Align(
-    alignment: Alignment.topCenter,
-    child: Padding(
-      padding: EdgeInsets.only(
-        top:
-            MediaQuery.of(context).padding.top +
-            10, // إضافة padding للـ status bar
-        left: 16,
-        right: 16,
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: Stack(
-          children: [
-            Container(
-              width: double.infinity,
-              margin: EdgeInsets.only(top: 8.h), // تقليل margin
-              padding: EdgeInsets.all(16.w),
-              decoration: BoxDecoration(
-                color: const Color(0xFFFFEDE2),
-                borderRadius: BorderRadius.circular(12.r),
-                border: Border.all(color: const Color(0xFF402CDD)),
-                boxShadow: [
-                  BoxShadow(
-                    // ignore: deprecated_member_use
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  MyTextWidget(
-                    LocaleKeys.info_message.tr(),
-                    style: TextStyle(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.w600,
-                      color: const Color(0xFF1A1A1A),
-                    ),
-                  ),
-                  SizedBox(height: 4.h),
-                  MyTextWidget(
-                    message,
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w400,
-                      color: const Color(0xFF666666),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Positioned(
-              top: 0,
-              right: _isRTL(context) ? null : 0,
-              left: _isRTL(context) ? 0 : null,
-              child: GestureDetector(
-                onTap: onClose,
-                child: Container(
-                  padding: EdgeInsets.all(6.w),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        // ignore: deprecated_member_use
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 4,
-                        offset: const Offset(0, 1),
-                      ),
-                    ],
-                  ),
-                  child: Icon(
-                    Icons.close,
-                    color: const Color(0xFF666666),
-                    size: 18.sp,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    ),
-  );
+  _showTopNotification(context, message);
 }
 
 showWarningMessage(
@@ -323,375 +82,208 @@ showWarningMessage(
   String? actionText,
   VoidCallback? onActionPressed,
 }) {
-  // استخدام Overlay بدلاً من Dialog لتجنب إغلاق الصفحة
-  OverlayState? overlayState =
-      Overlay.maybeOf(context) ?? navigatorKey.currentState?.overlay;
-  if (overlayState == null) return;
-
-  late OverlayEntry overlayEntry;
-
-  overlayEntry = OverlayEntry(
-    builder: (context) => _buildWarningWidget(context, message, () {
-      overlayEntry.remove();
-    }),
-  );
-
-  overlayState.insert(overlayEntry);
-
-  // إغلاق تلقائي بعد 3 ثوانٍ
-  Timer(const Duration(seconds: 3), () {
-    try {
-      overlayEntry.remove();
-    } catch (e) {
-      // تجاهل الأخطاء إذا كان الـ overlay محذوف بالفعل
-    }
-  });
+  _showTopNotification(context, message);
 }
 
-Widget _buildWarningWidget(
-  BuildContext context,
-  String message,
-  VoidCallback onClose,
-) {
-  return Align(
-    alignment: Alignment.topCenter,
-    child: Padding(
-      padding: EdgeInsets.only(
-        top:
-            MediaQuery.of(context).padding.top +
-            10, // إضافة padding للـ status bar
-        left: 16,
-        right: 16,
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: Stack(
-          children: [
-            Container(
-              width: double.infinity,
-              margin: EdgeInsets.only(top: 8.h), // تقليل margin
-              padding: EdgeInsets.all(16.w),
-              decoration: BoxDecoration(
-                color: const Color(0xFFFFEDE2),
-                borderRadius: BorderRadius.circular(12.r),
-                border: Border.all(color: const Color(0xFF402CDD)),
-                boxShadow: [
-                  BoxShadow(
-                    // ignore: deprecated_member_use
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  MyTextWidget(
-                    LocaleKeys.info_message.tr(),
-                    style: TextStyle(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.w600,
-                      color: const Color(0xFF1A1A1A),
-                    ),
-                  ),
-                  SizedBox(height: 4.h),
-                  MyTextWidget(
-                    message,
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w400,
-                      color: const Color(0xFF666666),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Positioned(
-              top: 0,
-              right: _isRTL(context) ? null : 0,
-              left: _isRTL(context) ? 0 : null,
-              child: GestureDetector(
-                onTap: onClose,
-                child: Container(
-                  padding: EdgeInsets.all(6.w),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        // ignore: deprecated_member_use
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 4,
-                        offset: const Offset(0, 1),
-                      ),
-                    ],
-                  ),
-                  child: Icon(
-                    Icons.close,
-                    color: const Color(0xFF666666),
-                    size: 18.sp,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    ),
-  );
-}
-
-void _showCustomToast(
+void _showTopNotification(
   BuildContext context,
   String message, {
-  bool isSuccess = true,
+  Duration duration = const Duration(seconds: 3),
 }) {
-  OverlayState? overlayState;
-  BuildContext? workingContext = context;
-
-  // المحاولة الأولى: الحصول على Overlay من الـ context الحالي
-  overlayState =
-      Overlay.maybeOf(context) ?? Overlay.maybeOf(context, rootOverlay: true);
-
-  // المحاولة الثانية: استخدام navigatorKey إذا فشلت الأولى
-  if (overlayState == null && navigatorKey.currentState != null) {
-    workingContext = navigatorKey.currentState!.context;
-    overlayState =
-        Overlay.maybeOf(workingContext) ?? navigatorKey.currentState!.overlay;
-  }
+  final overlayState =
+      Overlay.maybeOf(context, rootOverlay: true) ??
+      navigatorKey.currentState?.overlay;
 
   if (overlayState == null) {
-    _showDialogToast(workingContext, message, isSuccess);
+    Fluttertoast.cancel().then(
+      (value) => Fluttertoast.showToast(
+        msg: message,
+        backgroundColor: const Color(0xff444146),
+        textColor: Colors.white,
+        fontSize: 16,
+        toastLength: duration.inSeconds > 2
+            ? Toast.LENGTH_LONG
+            : Toast.LENGTH_SHORT,
+        gravity: ToastGravity.TOP,
+      ),
+    );
     return;
   }
 
-  late OverlayEntry overlayEntry;
+  _removeActiveNotification();
 
+  late final OverlayEntry overlayEntry;
   overlayEntry = OverlayEntry(
-    builder: (context) => Align(
-      alignment: Alignment.topCenter,
-      child: Padding(
-        padding: EdgeInsets.only(
-          top:
-              MediaQuery.of(context).padding.top +
-              10, // إضافة padding للـ status bar
-          left: 16,
-          right: 16,
-        ),
-        child: Material(
-          color: Colors.transparent,
-          child: Stack(
-            children: [
-              Container(
-                width: double.infinity,
-                margin: EdgeInsets.only(top: 8.h), // تقليل margin
-                padding: EdgeInsets.all(16.w),
-                decoration: BoxDecoration(
-                  color: isSuccess
-                      ? const Color(0xFFE2FFF1)
-                      : const Color(0xFFFFEDE2),
-                  borderRadius: BorderRadius.circular(12.r),
-                  border: Border.all(
-                    color: isSuccess
-                        ? const Color(0xFF2CDD92)
-                        : const Color(0xFF402CDD),
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      // ignore: deprecated_member_use
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    MyTextWidget(
-                      LocaleKeys.info_message.tr(),
-                      style: TextStyle(
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.w600,
-                        color: const Color(0xFF1A1A1A),
-                      ),
-                    ),
-                    SizedBox(height: 4.h),
-                    MyTextWidget(
-                      message,
-                      style: TextStyle(
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w400,
-                        color: const Color(0xFF666666),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Positioned(
-                top: 0,
-                right: _isRTL(context) ? null : 0,
-                left: _isRTL(context) ? 0 : null,
-                child: GestureDetector(
-                  onTap: () => overlayEntry.remove(),
-                  child: Container(
-                    padding: EdgeInsets.all(6.w),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          // ignore: deprecated_member_use
-                          color: Colors.black.withOpacity(0.1),
-                          blurRadius: 4,
-                          offset: const Offset(0, 1),
-                        ),
-                      ],
-                    ),
-                    child: Icon(
-                      Icons.close,
-                      color: const Color(0xFF666666),
-                      size: 18.sp,
-                    ),
-                  ),
-                ),
-              ),
-            ],
+    builder: (overlayContext) => Material(
+      color: Colors.transparent,
+      child: Stack(
+        children: [
+          _TopNotificationWidget(
+            message: message,
+            duration: duration,
+            onDismissed: () {
+              if (_activeNotificationEntry == overlayEntry) {
+                _removeActiveNotification();
+              }
+            },
           ),
-        ),
+        ],
       ),
     ),
   );
 
+  _activeNotificationEntry = overlayEntry;
   overlayState.insert(overlayEntry);
-
-  Timer(const Duration(seconds: 3), () {
-    try {
-      overlayEntry.remove();
-    } catch (e) {
-      // تجاهل الخطأ إذا تم حذف الـ overlay بالفعل
-    }
-  });
 }
 
-void _showDialogToast(BuildContext context, String message, bool isSuccess) {
-  // تحقق من mounted قبل أي استخدام لـ context
-  if (!context.mounted) return;
-  showDialog(
-    context: context,
-    barrierColor: Colors.transparent,
-    builder: (BuildContext dialogContext) {
-      Timer(const Duration(seconds: 3), () {
-        if (dialogContext.mounted && Navigator.of(dialogContext).canPop()) {
-          Navigator.of(dialogContext).pop();
-        }
-      });
+void _removeActiveNotification() {
+  final entry = _activeNotificationEntry;
+  if (entry == null) return;
 
-      return Align(
-        alignment: Alignment.topCenter,
-        child: Padding(
-          padding: EdgeInsets.only(
-            top:
-                MediaQuery.of(context).padding.top +
-                10, // إضافة padding للـ status bar
-            left: 16,
-            right: 16,
-          ),
-          child: Material(
-            color: Colors.transparent,
-            child: Stack(
+  _activeNotificationEntry = null;
+  try {
+    entry.remove();
+  } catch (_) {
+    // Ignore removal if the overlay was already removed.
+  }
+}
+
+class _TopNotificationWidget extends StatefulWidget {
+  const _TopNotificationWidget({
+    required this.message,
+    required this.duration,
+    required this.onDismissed,
+  });
+
+  final String message;
+  final Duration duration;
+  final VoidCallback onDismissed;
+
+  @override
+  State<_TopNotificationWidget> createState() => _TopNotificationWidgetState();
+}
+
+class _TopNotificationWidgetState extends State<_TopNotificationWidget>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<Offset> _offsetAnimation;
+  bool _isDismissing = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    );
+
+    _offsetAnimation = Tween<Offset>(
+      begin: const Offset(0, -1),
+      end: const Offset(0, 0),
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutBack));
+
+    _controller.forward();
+
+    Future.delayed(widget.duration, () async {
+      if (mounted) {
+        await _dismiss();
+      }
+    });
+  }
+
+  Future<void> _dismiss() async {
+    if (_isDismissing) return;
+    _isDismissing = true;
+
+    if (_controller.status != AnimationStatus.dismissed) {
+      await _controller.reverse();
+    }
+
+    if (mounted) {
+      widget.onDismissed();
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final topPadding = MediaQuery.of(context).padding.top + 16;
+
+    return Positioned(
+      top: topPadding,
+      left: 16,
+      right: 16,
+      child: SlideTransition(
+        position: _offsetAnimation,
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            decoration: BoxDecoration(
+              color: const Color(0xff444146),
+              borderRadius: BorderRadius.circular(14),
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0x3D000000),
+                  blurRadius: 14,
+                  offset: Offset(0, 5),
+                ),
+              ],
+            ),
+            child: Row(
               children: [
                 Container(
-                  width: double.infinity,
-                  margin: EdgeInsets.only(top: 8.h), // تقليل margin
-                  padding: EdgeInsets.all(16.w),
-                  decoration: BoxDecoration(
-                    color: isSuccess
-                        ? const Color(0xFFE2FFF1)
-                        : const Color(0xFFFFEDE2),
-                    borderRadius: BorderRadius.circular(12.r),
-                    border: Border.all(
-                      color: isSuccess
-                          ? const Color(0xFF2CDD92)
-                          : const Color(0xFF402CDD),
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        // ignore: deprecated_member_use
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
+                  width: 24,
+                  height: 24,
+                  decoration: const BoxDecoration(
+                    color: Color(0xffFF4D4F),
+                    shape: BoxShape.circle,
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      MyTextWidget(
-                        LocaleKeys.info_message.tr(),
-                        style: TextStyle(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w600,
-                          color: const Color(0xFF1A1A1A),
-                        ),
-                      ),
-                      SizedBox(height: 4.h),
-                      MyTextWidget(
-                        message,
-                        style: TextStyle(
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.w400,
-                          color: const Color(0xFF666666),
-                        ),
-                      ),
-                    ],
+                  child: const Center(
+                    child: Icon(
+                      Icons.priority_high_rounded,
+                      color: Colors.white,
+                      size: 15,
+                    ),
                   ),
                 ),
-                Positioned(
-                  top: 0,
-                  right: _isRTL(context) ? null : 0,
-                  left: _isRTL(context) ? 0 : null,
-                  child: GestureDetector(
-                    onTap: () {
-                      try {
-                        if (Navigator.of(dialogContext).canPop()) {
-                          Navigator.of(dialogContext).pop();
-                        }
-                      } catch (e) {
-                        // تجاهل الأخطاء
-                      }
-                    },
-                    child: Container(
-                      padding: EdgeInsets.all(6.w),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            // ignore: deprecated_member_use
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 4,
-                            offset: const Offset(0, 1),
-                          ),
-                        ],
-                      ),
-                      child: Icon(
-                        Icons.close,
-                        color: const Color(0xFF666666),
-                        size: 18.sp,
-                      ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Text(
+                    widget.message,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                      fontFamily: 'Quicksand',
+                      height: 1.1,
                     ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    textDirection: _isRTL(context)
+                        ? TextDirection.rtl
+                        : TextDirection.ltr,
                   ),
+                ),
+                IconButton(
+                  visualDensity: VisualDensity.compact,
+                  icon: const Icon(
+                    Icons.close,
+                    color: Color(0xff9A999D),
+                    size: 22,
+                  ),
+                  onPressed: _dismiss,
                 ),
               ],
             ),
           ),
         ),
-      );
-    },
-  );
+      ),
+    );
+  }
 }

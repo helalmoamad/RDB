@@ -53,18 +53,37 @@ class _HomePageState extends State<HomePage> {
         token: GetIt.I<PrefsRepository>().walletToken, // استخدم القيمة الفعلية
         languageCode: "en",
         skipSplash: true,
-        onLogout: () {
-          GetIt.I<PrefsRepository>().setVerifiedPhone(false);
-          GetIt.I<PrefsRepository>().setVerifiedPhonePeforeExpiredToken(false);
-          GRouter.config.applicationRoutes.kRegistrationPage;
-        },
+        onLogout: () {},
 
         //LanguageService.languageCode,
         // استخدم اللغة الحالية
         allowBadCertificate: true, // true للتطوير فقط عند خطأ SSL
       ),
     );
+    errorEvents.listen((event) {
+      debugPrint('❌ API Error: ${event.message} (${event.statusCode})');
+    });
+    errorEvents.listen((event) {
+      debugPrint('❌ API Error: ${event.message} (${event.statusCode})');
+    });
+
+    // الاستماع لأحداث تسجيل الخروج
+    logoutEvents.listen((event) {
+      if (kDebugMode) {
+        print('User logged out from wallet. Clearing verification status.');
+      }
+      GetIt.I<PrefsRepository>().setVerifiedPhone(false);
+      GetIt.I<PrefsRepository>().setVerifiedPhonePeforeExpiredToken(false);
+      GRouter.config.applicationRoutes.kRegistrationPage;
+    });
+
+    // الاستماع لأحداث تغيير اللغة
+    languageChangeEvents.listen((event) {});
+
     walletEvents = authEvents.listen((evt) async {
+      if (kDebugMode) {
+        print('User logged out from wallet. Clearing verification status.');
+      }
       if (evt.toString() == 'AuthEvent.unauthenticated') {
         GetIt.I<PrefsRepository>().setVerifiedPhone(false);
         GetIt.I<PrefsRepository>().setVerifiedPhonePeforeExpiredToken(true);

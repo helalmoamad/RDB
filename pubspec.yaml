@@ -55,7 +55,7 @@ dependencies:
   form_field_validator: ^1.1.0
   trydos_wallet:
     git:
-        url: https://github.com/trydos-app/trydos_wallet.git
+        url: https://github.com/helalmoamad/trydos_wallet.git
         ref: main
   dio_http2_adapter: ^2.5.3
   #flutter_svg_image: ^1.1.0+1
