@@ -108,11 +108,8 @@ class _PinItemState extends State<PinItem> with TickerProviderStateMixin {
     if (widget.wrongCode) {
       animationController.forward();
     }
-    if (widget.controller.text.length == 1 && checkingOtp) {
-      withBorder = true;
-    } else {
-      withBorder = widget.controller.text == '\u200b';
-    }
+    withBorder = widget.controller.text == '\u200b';
+    final hasValue = widget.controller.text != '\u200b';
     return BlocConsumer<AuthBloc, AuthState>(
       buildWhen: (p, c) =>
           p.verifyOtpSignInStatus != c.verifyOtpSignInStatus ||
@@ -129,6 +126,11 @@ class _PinItemState extends State<PinItem> with TickerProviderStateMixin {
         }
       },
       builder: (context, state) {
+        final isVerifying =
+            state.verifyOtpSignInStatus == VerifyOtpSignInStatus.loading ||
+            state.verifyOtpFromGuestStatus ==
+                VerifyOtpFromGuestStatus.loading ||
+            state.verifyOtpSignUpStatus == VerifyOtpSignUpStatus.loading;
         return AnimatedBuilder(
           animation: animationController,
           builder: (context, child) {
@@ -148,7 +150,9 @@ class _PinItemState extends State<PinItem> with TickerProviderStateMixin {
                       strokeWidth: 1 - fadingController.value,
                       dashPattern: const [3, 3],
                       radius: const Radius.circular(15.0),
-                      color: withBorder
+                      color: hasValue && isVerifying
+                          ? widget.borderColor
+                          : withBorder
                           ? widget.borderColor
                           : const Color(0xffF5F5F5),
                       child: ClipRRect(
@@ -223,9 +227,7 @@ class _PinItemState extends State<PinItem> with TickerProviderStateMixin {
                               ],
                               style: context.textTheme.headlineSmall?.rq
                                   .copyWith(
-                                    color:
-                                        (!withBorder &&
-                                            widget.controller.text != '\u200b')
+                                    color: (!withBorder && hasValue)
                                         ? Colors.transparent
                                         : const Color(0xff707070),
                                     height: 0.6,
@@ -245,8 +247,7 @@ class _PinItemState extends State<PinItem> with TickerProviderStateMixin {
                                     : const Color(0xffFAFAFA),
                               ),
                             ),
-                            if (!withBorder &&
-                                widget.controller.text != '\u200b')
+                            if (!withBorder && hasValue)
                               const IgnorePointer(
                                 child: Icon(
                                   Icons.lock_outline_rounded,

@@ -19,6 +19,7 @@ bool isHydratedStorageInitialized = false;
 bool isLoadDotenvFile = false;
 bool isDependencyInitialized = false;
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+////////////////////////////
 bool notificationClicked = false;
 //todo this list will store on it the api's that we try to load it and returned a failure for the first time so we check if it's not  in this list we try to reload it
 List<String> isFailedTheFirstTime = [];

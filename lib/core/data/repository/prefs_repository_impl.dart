@@ -17,6 +17,16 @@ class PrefsRepositoryImpl extends PrefsRepository {
       _preferences.getString(PrefsKey.currentCountry);
 
   @override
+  Future<bool> setEmail(String? email) =>
+      _preferences.setString(PrefsKey.email, email!);
+  @override
+  Future<bool> setPhoto(String? photo) =>
+      _preferences.setString(PrefsKey.photo, photo!);
+  @override
+  Future<bool> setMemberSince(String? memberSince) =>
+      _preferences.setString(PrefsKey.memberSince, memberSince!);
+
+  @override
   Future<bool> setWalletToken(String token) =>
       _preferences.setString(PrefsKey.walletToken, token);
 
@@ -47,6 +57,12 @@ class PrefsRepositoryImpl extends PrefsRepository {
 
   @override
   String? get myPhoneNumber => _preferences.getString(PrefsKey.phoneNumber);
+  @override
+  String? get email => _preferences.getString(PrefsKey.email);
+  @override
+  String? get photo => _preferences.getString(PrefsKey.photo);
+  @override
+  String? get memberSince => _preferences.getString(PrefsKey.memberSince);
 
   @override
   Future<bool> setPhoneNumber(String phoneNumber) =>

@@ -22,7 +22,7 @@ class _SplashPageState extends State<SplashPage> {
       // ignore: use_build_context_synchronously
       context.go(
         prefsRepository.walletToken == null ||
-                ((GetIt.I<PrefsRepository>().isVerifiedPhone ?? false) &&
+                (!(GetIt.I<PrefsRepository>().isVerifiedPhone ?? false) &&
                     !(GetIt.I<PrefsRepository>()
                             .isVerifiedPhonePeforeExpiredToken ??
                         false))

@@ -6,6 +6,9 @@ abstract class PrefsRepository {
   String? get countryIso;
   String? get userChoosedCountryIso;
   String? get fcmTokenId;
+  String? get email;
+  String? get photo;
+  String? get memberSince;
   String? get fcmMarketTokenId;
 
   //String? get alaaWebForCall;
@@ -45,6 +48,9 @@ abstract class PrefsRepository {
   Future<bool> setCountryIso(String? countryIso);
   bool? get isTimerForOtpRunning;
   Future<bool> setUserChoosedCountryIso(String? countryIso);
+  Future<bool> setEmail(String? email);
+  Future<bool> setPhoto(String? photo);
+  Future<bool> setMemberSince(String? memberSince);
 
   Future<bool> setsessionInfo(String verificationId);
 

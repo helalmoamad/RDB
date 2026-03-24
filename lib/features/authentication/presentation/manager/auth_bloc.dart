@@ -218,13 +218,15 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           if ((r.user!.firstName?.replaceAll(' ', '') ?? '') != '') {
             _prefsRepository.setUserName(r.user!.firstName!);
           }
-
+          _prefsRepository.setEmail(r.user?.email ?? "");
+          _prefsRepository.setPhoto(r.user?.profilePictureUrl ?? "");
+          _prefsRepository.setMemberSince((r.user?.createdAt ?? '').toString());
           _prefsRepository.setWalletToken(r.accessToken!.token!);
           _prefsRepository.setTokenExpired(false);
           _prefsRepository.setUserId(r.user!.id.toString());
 
           // ignore: unrelated_type_equality_checks
-          _prefsRepository.setVerifiedPhone(r.user?.isPhoneVerified == 1);
+          _prefsRepository.setVerifiedPhone(r.user?.isPhoneVerified ?? false);
           _prefsRepository.setPhoneNumber((r.user?.phoneNumber).toString());
           _prefsRepository.setVerifiedPhonePeforeExpiredToken(false);
 
@@ -291,7 +293,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         //    "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd${r.data!.user?.isPhoneVerified}");
 
         // ignore: unrelated_type_equality_checks
-        _prefsRepository.setVerifiedPhone(r.user?.isPhoneVerified == 1);
+        _prefsRepository.setVerifiedPhone(r.user?.isPhoneVerified ?? false);
         _prefsRepository.setPhoneNumber((r.user?.phoneNumber).toString());
 
         emit(

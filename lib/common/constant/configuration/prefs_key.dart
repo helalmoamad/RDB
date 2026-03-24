@@ -7,6 +7,9 @@ abstract class PrefsKey {
   static const onMessageRun = r'__$__onMessageRun__$__';
   static const walletToken = r'__$__walletToken__$__';
   static const fcmMarketTokenId = r'__$fcmMarketTokenId$__';
+  static const email = r'__$__email__$__';
+  static const photo = r'__$__photo__$__';
+  static const memberSince = r'__$__memberSince__$__';
   static const requestNotificationPermission =
       r'__$__requestNotificationPermission__$__';
   static const tokenExpired = r'__$__tokenexpired__$__';

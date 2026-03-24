@@ -29,6 +29,8 @@ class HomePage extends StatefulWidget {
 }
 
 late StreamSubscription walletEvents;
+late StreamSubscription languageChangeEvent;
+late StreamSubscription logoutEvent;
 
 class _HomePageState extends State<HomePage> {
   // 🛡️ حماية حالة الصفحة الرئيسية
@@ -46,39 +48,63 @@ class _HomePageState extends State<HomePage> {
       print("walletToken: ${GetIt.I<PrefsRepository>().walletToken}###");
     }
     authBloc = BlocProvider.of<AuthBloc>(context);
+    final memberSince = DateTime.tryParse(
+      GetIt.I<PrefsRepository>().memberSince ?? '',
+    );
+
     // تهيئة المحفظة
     TrydosWallet.init(
       TrydosWalletConfig(
         baseUrl: dotenv.env['WALLET_URL'] ?? '', // رابط الـ API
         token: GetIt.I<PrefsRepository>().walletToken, // استخدم القيمة الفعلية
-        languageCode: "en",
+        languageCode: LanguageService.languageCode,
+        email: GetIt.I<PrefsRepository>().email ?? '',
+        firstName: (GetIt.I<PrefsRepository>().userName ?? '').split(" ").first,
+        lastName:
+            (GetIt.I<PrefsRepository>().userName ?? '').split(" ").length > 1
+            ? (GetIt.I<PrefsRepository>().userName ?? '').split(" ").last
+            : "",
+        userSubtitle: (GetIt.I<PrefsRepository>().isVerifiedPhone ?? false)
+            ? "Registered"
+            : "Guest",
+        profileImageUrl: GetIt.I<PrefsRepository>().photo ?? "",
+        isAccountActive: !(authBloc.state.walletUser?.isBlocked ?? false),
+        isPhoneVerified: GetIt.I<PrefsRepository>().isVerifiedPhone ?? false,
+        memberSince: memberSince,
+        phoneNumber: GetIt.I<PrefsRepository>().myPhoneNumber,
+        isKurdish: LanguageService.languageCode == "ku",
+        isTwoFactorEnabled:
+            authBloc.state.walletUser?.isTwoFactorEnabled ?? false,
+        applicationVersion: "1.0.0",
         skipSplash: true,
-        onLogout: () {},
 
-        //LanguageService.languageCode,
         // استخدم اللغة الحالية
         allowBadCertificate: true, // true للتطوير فقط عند خطأ SSL
       ),
     );
-    errorEvents.listen((event) {
-      debugPrint('❌ API Error: ${event.message} (${event.statusCode})');
-    });
-    errorEvents.listen((event) {
-      debugPrint('❌ API Error: ${event.message} (${event.statusCode})');
-    });
 
     // الاستماع لأحداث تسجيل الخروج
-    logoutEvents.listen((event) {
+    logoutEvent = logoutEvents.listen((event) {
       if (kDebugMode) {
         print('User logged out from wallet. Clearing verification status.');
       }
       GetIt.I<PrefsRepository>().setVerifiedPhone(false);
       GetIt.I<PrefsRepository>().setVerifiedPhonePeforeExpiredToken(false);
-      GRouter.config.applicationRoutes.kRegistrationPage;
+      GRouter.router.go(GRouter.config.kRootRoute);
     });
 
     // الاستماع لأحداث تغيير اللغة
-    languageChangeEvents.listen((event) {});
+    languageChangeEvent = languageChangeEvents.listen((event) async {
+      final languageCode = event.languageCode.trim().toLowerCase();
+      final locale = mpaLanguageCodeToLocale[languageCode];
+      if (locale == null || !mounted) {
+        return;
+      }
+
+      await context.setLocale(locale);
+      await GetIt.I<PrefsRepository>().setLanguage(languageCode);
+      GRouter.router.go(GRouter.config.kRootRoute);
+    });
 
     walletEvents = authEvents.listen((evt) async {
       if (kDebugMode) {
@@ -110,6 +136,8 @@ class _HomePageState extends State<HomePage> {
   @override
   void dispose() {
     walletEvents.cancel();
+    languageChangeEvent.cancel();
+    logoutEvent.cancel();
 
     // تنظيف موارد الم
 

@@ -323,9 +323,13 @@ class _InsertPhoneTabState extends State<InsertPhoneTab> with FormStateMinxin {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   showLoading
-                                      ? RDBLoader(
-                                          size: 20,
-                                          color: Color(0xff1D1D1D),
+                                      ? SizedBox(
+                                          width: 16.w,
+                                          height: 25.h,
+                                          child: RDBLoader(
+                                            size: 24,
+                                            color: Color(0xff1D1D1D),
+                                          ),
                                         )
                                       : SvgPicture.asset(
                                           AppAssets.submitArrowSvg,

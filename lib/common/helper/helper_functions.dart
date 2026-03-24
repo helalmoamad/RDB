@@ -103,9 +103,24 @@ class HelperFunctions {
   }
 
   static Locale getInitLocale() {
-    return _prefsRepository.language == null
-        ? defaultLocal
-        : mpaLanguageCodeToLocale[_prefsRepository.language] ?? defaultLocal;
+    final savedLanguage = _prefsRepository.language;
+    if (savedLanguage != null && savedLanguage.trim().isNotEmpty) {
+      return mpaLanguageCodeToLocale[savedLanguage] ?? defaultLocal;
+    }
+
+    final deviceLocale = WidgetsBinding.instance.platformDispatcher.locale;
+    var deviceLanguageCode = deviceLocale.languageCode.toLowerCase();
+    if (deviceLanguageCode == 'ckb') {
+      deviceLanguageCode = 'ku';
+    }
+
+    for (final locale in supportedLocal) {
+      if (locale.languageCode == deviceLanguageCode) {
+        return locale;
+      }
+    }
+
+    return defaultLocal;
   }
 
   static Country getDefaultCountry() {
