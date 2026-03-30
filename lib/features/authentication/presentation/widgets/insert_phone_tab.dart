@@ -11,6 +11,7 @@ import 'package:rdb/features/app/rdb_loading.dart';
 import 'package:rdb/features/authentication/presentation/widgets/phone_form_fields.dart';
 import 'package:rdb/generated/locale_keys.g.dart';
 import 'package:rdb/core/utils/last_pages_tracker.dart';
+import 'package:rdb/service/language_service.dart';
 import 'package:rdb/theme/typography.dart';
 import '../../../../common/constant/countries.dart';
 import '../../../../common/constant/design/assets_provider.dart';
@@ -106,7 +107,7 @@ class _InsertPhoneTabState extends State<InsertPhoneTab> with FormStateMinxin {
                     style: context.textTheme.titleMedium?.rq.copyWith(
                       color: const Color(0xff5D5C5D),
                       height: 1.42,
-                      fontSize: 13,
+                      fontSize: 13.sp,
                     ),
                   ),
                   10.verticalSpace,
@@ -127,43 +128,79 @@ class _InsertPhoneTabState extends State<InsertPhoneTab> with FormStateMinxin {
                           style: context.textTheme.titleMedium?.rq.copyWith(
                             color: const Color(0xff5D5C5D),
                             height: 1.42,
-                            fontSize: 13,
+                            fontSize: 13.sp,
                           ),
                         ),
                       ),
                     ],
                   ),
                   10.verticalSpace,
-                  SizedBox(
-                    width: 1.sw,
-                    height: 20,
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-
-                      children: [
-                        Padding(
-                          padding: HWEdgeInsets.only(top: 3.0),
-                          child: SvgPicture.asset(
-                            AppAssets.privacySvg,
-                            width: 10,
-                            height: 10,
+                  LanguageService.rtl
+                      ? SizedBox(
+                          width: 1.sw - 20,
+                          height: 20,
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Padding(
+                                padding: HWEdgeInsets.only(top: 3.0),
+                                child: SvgPicture.asset(
+                                  AppAssets.privacySvg,
+                                  width: 10,
+                                  height: 10,
+                                ),
+                              ),
+                              5.horizontalSpace,
+                              MyTextWidget(
+                                LocaleKeys.your_Privacy.tr(),
+                                textAlign: TextAlign.start,
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 2,
+                                style: context.textTheme.titleMedium?.rq
+                                    .copyWith(
+                                      color: const Color(0xff5D5C5D),
+                                      height: 1.42,
+                                      fontSize: 13.sp,
+                                    ),
+                              ),
+                            ],
+                          ),
+                        )
+                      : SizedBox(
+                          width: 1.sw - 20,
+                          height: 20,
+                          child: SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Padding(
+                                  padding: HWEdgeInsets.only(top: 3.0),
+                                  child: SvgPicture.asset(
+                                    AppAssets.privacySvg,
+                                    width: 10,
+                                    height: 10,
+                                  ),
+                                ),
+                                5.horizontalSpace,
+                                MyTextWidget(
+                                  LocaleKeys.your_Privacy.tr(),
+                                  textAlign: TextAlign.start,
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 2,
+                                  style: context.textTheme.titleMedium?.rq
+                                      .copyWith(
+                                        color: const Color(0xff5D5C5D),
+                                        height: 1.42,
+                                        fontSize: 13.sp,
+                                      ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                        5.horizontalSpace,
-                        MyTextWidget(
-                          LocaleKeys.your_Privacy.tr(),
-                          textAlign: TextAlign.start,
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 2,
-                          style: context.textTheme.titleMedium?.rq.copyWith(
-                            color: const Color(0xff5D5C5D),
-                            height: 1.42,
-                            fontSize: 13,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
                   SizedBox(height: 3.h),
                 ],
               ),
