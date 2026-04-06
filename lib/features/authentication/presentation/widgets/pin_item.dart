@@ -149,16 +149,14 @@ class _PinItemState extends State<PinItem> with TickerProviderStateMixin {
                       strokeCap: StrokeCap.round,
                       strokeWidth: 1 - fadingController.value,
                       dashPattern: const [3, 3],
-                      radius: const Radius.circular(15.0),
+                      radius: Radius.circular(12.r),
                       color: hasValue && isVerifying
                           ? widget.borderColor
                           : withBorder
                           ? widget.borderColor
                           : const Color(0xffF5F5F5),
                       child: ClipRRect(
-                        borderRadius: const BorderRadius.all(
-                          Radius.circular(15),
-                        ),
+                        borderRadius: BorderRadius.all(Radius.circular(12.r)),
                         child: Stack(
                           alignment: Alignment.center,
                           children: [
@@ -237,8 +235,8 @@ class _PinItemState extends State<PinItem> with TickerProviderStateMixin {
                               decoration: InputDecoration(
                                 border: InputBorder.none,
                                 contentPadding: HWEdgeInsets.only(
-                                  top: 15,
-                                  bottom: 5,
+                                  top: 15.h,
+                                  bottom: 5.h,
                                 ),
                                 focusedBorder: InputBorder.none,
                                 filled: true,
@@ -248,11 +246,11 @@ class _PinItemState extends State<PinItem> with TickerProviderStateMixin {
                               ),
                             ),
                             if (!withBorder && hasValue)
-                              const IgnorePointer(
+                              IgnorePointer(
                                 child: Icon(
                                   Icons.lock_outline_rounded,
                                   color: Color(0xffC4C2C2),
-                                  size: 20,
+                                  size: 24.h,
                                 ),
                               ),
                           ],

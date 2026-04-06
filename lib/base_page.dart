@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get_it/get_it.dart';
 import 'package:rdb/common/constant/constant.dart';
@@ -18,15 +19,15 @@ import 'package:rdb/home_page.dart';
 
 Widget get logo {
   return SizedBox(
-    width: 300,
-    height: 200,
+    width: 300.w,
+    height: 200.h,
     child: Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        SvgPicture.asset(AppAssets.rdb),
-        const SizedBox(height: 12),
-        SvgPicture.asset(AppAssets.rammazDigitalBanking),
+        SvgPicture.asset(AppAssets.rdb, height: 75.h),
+        SizedBox(height: 12.h),
+        SvgPicture.asset(AppAssets.rammazDigitalBanking, height: 14.h),
       ],
     ),
   );

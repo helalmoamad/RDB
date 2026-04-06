@@ -134,14 +134,14 @@ class PhoneFormField extends StatelessWidget {
       strokeCap: StrokeCap.round,
       strokeWidth: 0.5,
       dashPattern: const [3, 3],
-      radius: const Radius.circular(20.0),
+      radius: Radius.circular(24.r),
       color: ready ? const Color(0xff388CFF) : const Color(0xff5D5C5D),
       child: Stack(
         alignment: Alignment.bottomLeft,
         children: [
           SizedBox(
             height: 70.h,
-            width: 390.w,
+            width: 370.w,
             child: Directionality(
               textDirection: TextDirection.ltr,
               child: TextFormField(
@@ -193,7 +193,6 @@ class PhoneFormField extends StatelessWidget {
                   decoration: TextDecoration.none,
                 ),
                 decoration: InputDecoration(
-                  contentPadding: HWEdgeInsets.only(top: 22.h),
                   border: InputBorder.none,
                   focusedBorder: InputBorder.none,
                   prefixIcon: prefixIcon,

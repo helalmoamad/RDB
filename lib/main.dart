@@ -24,12 +24,12 @@ bool notificationClicked = false;
 //todo this list will store on it the api's that we try to load it and returned a failure for the first time so we check if it's not  in this list we try to reload it
 List<String> isFailedTheFirstTime = [];
 List<String> apisMustNotToRequest = [];
-
-int applicationVersion = 3;
+////////////////////////////////////////
+int applicationVersion = 10;
 request() async {
   final Stopwatch stopWatch = Stopwatch();
   stopWatch.start();
-  //await http.get(Uri.parse('http://market_under_dev_backend.trydos.dev/api/new_v1/mobile/home/mainCategories'));
+  //await http.get(Uri.parse('http://market_under_dev_backend.trydos.dev/api/new_v1/mobile/home/mainCategories'));///
 
   await Dio().getUri(Uri.parse('http://ip-api.com/json')).onError((e, st) {
     //

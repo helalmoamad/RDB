@@ -57,7 +57,7 @@ class _WelcomeSectionState extends State<WelcomeSection> {
             color: const Color(0xff5D5C5D),
             letterSpacing: 0.14,
             height: 1.3,
-            fontSize: 20,
+            fontSize: 24.sp,
           ),
         ),
         SizedBox(height: 20.h),
@@ -70,7 +70,7 @@ class _WelcomeSectionState extends State<WelcomeSection> {
               color: const Color(0xff5D5C5D),
               letterSpacing: 0.14,
               height: 1.3,
-              fontSize: 13,
+              fontSize: 13.sp,
             ),
           ),
         ),
@@ -116,7 +116,7 @@ class _WelcomeSectionState extends State<WelcomeSection> {
                         color: const Color.fromARGB(255, 180, 178, 178),
                       ),
                       color: Colors.grey.shade50,
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(15.r),
                     ),
                     child: Center(
                       child: MyTextWidget(
@@ -125,6 +125,7 @@ class _WelcomeSectionState extends State<WelcomeSection> {
                           color: const Color(0xff5D5C5D),
                           letterSpacing: 0.16,
                           height: 1.25,
+                          fontSize: 16.sp,
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -166,7 +167,7 @@ class _WelcomeSectionState extends State<WelcomeSection> {
                     color: const Color.fromARGB(255, 180, 178, 178),
                   ),
                   color: Colors.grey.shade50,
-                  borderRadius: BorderRadius.circular(12.0),
+                  borderRadius: BorderRadius.circular(15.r),
                 ),
                 child: Center(
                   child: ValueListenableBuilder<int>(
@@ -177,6 +178,7 @@ class _WelcomeSectionState extends State<WelcomeSection> {
                         style: context.textTheme.displayMedium?.rq.copyWith(
                           color: const Color(0xff5D5C5D),
                           letterSpacing: 0.16,
+                          fontSize: 16.sp,
                           height: 1.25,
                         ),
                         textAlign: TextAlign.center,
@@ -200,6 +202,7 @@ class _WelcomeSectionState extends State<WelcomeSection> {
               decorationColor: Colors.grey,
               letterSpacing: 0.14,
               height: 1.43,
+              fontSize: 16.sp,
             ),
           ),
         ),

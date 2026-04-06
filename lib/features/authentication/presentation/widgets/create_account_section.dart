@@ -34,15 +34,16 @@ class _CreateAccountSectionState extends State<CreateAccountSection> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 100.0),
+          padding: EdgeInsets.symmetric(horizontal: 120.w),
           child: Text.rich(
             TextSpan(
               children: [
                 TextSpan(
-                  text: LocaleKeys.to.tr(),
+                  text: "${LocaleKeys.to.tr()} ",
                   style: context.textTheme.titleLarge?.lq.copyWith(
                     color: const Color(0xff5d5c5d),
                     letterSpacing: 0.14,
+                    fontSize: 13.sp,
                     height: 1.43,
                   ),
                 ),
@@ -52,6 +53,7 @@ class _CreateAccountSectionState extends State<CreateAccountSection> {
                     color: const Color(0xff5d5c5d),
                     letterSpacing: 0.14,
                     height: 1.43,
+                    fontSize: 13.sp,
                   ),
                 ),
                 TextSpan(
@@ -60,6 +62,7 @@ class _CreateAccountSectionState extends State<CreateAccountSection> {
                     color: const Color(0xff5d5c5d),
                     letterSpacing: 0.14,
                     height: 1.43,
+                    fontSize: 13.sp,
                   ),
                 ),
                 TextSpan(
@@ -68,6 +71,7 @@ class _CreateAccountSectionState extends State<CreateAccountSection> {
                     color: const Color(0xff5d5c5d),
                     letterSpacing: 0.14,
                     height: 1.43,
+                    fontSize: 13.sp,
                   ),
                 ),
                 TextSpan(
@@ -76,6 +80,7 @@ class _CreateAccountSectionState extends State<CreateAccountSection> {
                     color: const Color(0xff5d5c5d),
                     letterSpacing: 0.14,
                     height: 1.43,
+                    fontSize: 13.sp,
                   ),
                 ),
               ],
@@ -94,6 +99,7 @@ class _CreateAccountSectionState extends State<CreateAccountSection> {
           style: context.textTheme.titleLarge?.rq.copyWith(
             color: const Color(0xff388CFF),
             height: 1.42,
+            fontSize: 13.sp,
           ),
           textAlign: TextAlign.center,
         ),
@@ -133,16 +139,16 @@ class _CreateAccountSectionState extends State<CreateAccountSection> {
                         color: const Color.fromARGB(255, 180, 178, 178),
                       ),
                       color: Colors.grey.shade50,
-                      borderRadius: BorderRadius.circular(12.0),
+                      borderRadius: BorderRadius.circular(15.r),
                     ),
                     child: Container(
                       width: 1.sw,
-                      height: 40.h,
+                      height: 50.h,
                       decoration: BoxDecoration(
                         color: index == 0
                             ? Colors.white
                             : const Color(0xfffafafa),
-                        borderRadius: BorderRadius.circular(20.0),
+                        borderRadius: BorderRadius.circular(15.r),
                       ),
                       child: Center(
                         child: MyTextWidget(
@@ -151,6 +157,7 @@ class _CreateAccountSectionState extends State<CreateAccountSection> {
                             color: const Color(0xff3c3c3c),
                             letterSpacing: 0.16,
                             height: 1.25,
+                            fontSize: 16.sp,
                           ),
                         ),
                       ),
@@ -173,6 +180,7 @@ class _CreateAccountSectionState extends State<CreateAccountSection> {
               decoration: TextDecoration.underline,
               decorationColor: Colors.grey,
               letterSpacing: 0.14,
+              fontSize: 16.sp,
               height: 1.43,
             ),
           ),

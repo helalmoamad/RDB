@@ -14,6 +14,7 @@ import 'package:rdb/core/utils/extensions/build_context.dart';
 import 'package:flutter_countdown_timer/countdown_timer_controller.dart';
 import 'package:rdb/core/utils/form_utils.dart';
 import 'package:rdb/core/utils/last_pages_tracker.dart';
+import 'package:rdb/features/app/rdb_loading.dart';
 import 'package:rdb/features/authentication/presentation/widgets/pin_item.dart';
 import 'package:rdb/generated/locale_keys.g.dart';
 import 'package:rdb/theme/typography.dart';
@@ -201,13 +202,13 @@ class _VerifyOtpState extends State<VerifyOtp> with FormStateMinxin {
                       style: context.textTheme.titleMedium?.bq.copyWith(
                         color: const Color(0xff1D1D1D),
                         height: 1.25,
-                        fontSize: 20,
+                        fontSize: 24.sp,
                       ),
                     ),
                     30.verticalSpace,
                     SvgPicture.asset(
                       AppAssets.phoneCallOutlinedSvg,
-                      width: 25,
+                      width: 50.w,
                       colorFilter: ColorFilter.mode(
                         Colors.grey,
                         BlendMode.srcIn,
@@ -223,7 +224,7 @@ class _VerifyOtpState extends State<VerifyOtp> with FormStateMinxin {
                           child: Icon(
                             Icons.info_outline,
                             color: Color.fromARGB(255, 179, 179, 179),
-                            size: 15,
+                            size: 15.h,
                           ),
                         ),
                         6.horizontalSpace,
@@ -232,6 +233,7 @@ class _VerifyOtpState extends State<VerifyOtp> with FormStateMinxin {
                           style: context.textTheme.titleMedium?.rq.copyWith(
                             color: const Color(0xff8e8e8e),
                             height: 1.25,
+                            fontSize: 13.sp,
                           ),
                         ),
                         6.horizontalSpace,
@@ -243,7 +245,7 @@ class _VerifyOtpState extends State<VerifyOtp> with FormStateMinxin {
                             child: Icon(
                               Icons.swap_horiz_outlined,
                               color: Color(0xff4D84FF),
-                              size: 20,
+                              size: 15.h,
                             ),
                           ),
                         ),
@@ -255,7 +257,7 @@ class _VerifyOtpState extends State<VerifyOtp> with FormStateMinxin {
                       style: context.textTheme.titleMedium?.bq.copyWith(
                         color: const Color(0xff1D1D1D),
                         height: 1.25,
-                        fontSize: 13,
+                        fontSize: 13.sp,
                       ),
                     ),
                     15.verticalSpace,
@@ -300,7 +302,7 @@ class _VerifyOtpState extends State<VerifyOtp> with FormStateMinxin {
                     ),*/
                     25.verticalSpace,
                     Padding(
-                      padding: HWEdgeInsets.symmetric(horizontal: 20.0),
+                      padding: HWEdgeInsets.symmetric(horizontal: 20.0.w),
                       child: ValueListenableBuilder<bool>(
                         valueListenable: enabledResendNotifier,
                         builder: (context, isExpired, _) {
@@ -313,13 +315,11 @@ class _VerifyOtpState extends State<VerifyOtp> with FormStateMinxin {
                                 builder: (context, state) {
                                   if (state.sendOtpStatus ==
                                       SendOtpStatus.loading) {
-                                    return const Center(
+                                    return Center(
                                       child: SizedBox(
-                                        width: 16,
-                                        height: 16,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                        ),
+                                        width: 20.w,
+                                        height: 20.h,
+                                        child: RDBLoader(size: 16.h),
                                       ),
                                     );
                                   } else if (state.sendOtpStatus ==
@@ -578,6 +578,7 @@ class _VerifyOtpState extends State<VerifyOtp> with FormStateMinxin {
                                               187,
                                             ),
                                       height: 1.25,
+                                      fontSize: 13.sp,
                                     ),
                               ),
                               Directionality(
@@ -599,6 +600,7 @@ class _VerifyOtpState extends State<VerifyOtp> with FormStateMinxin {
                                           .copyWith(
                                             color: const Color(0xff4D84FF),
                                             height: 1.25,
+                                            fontSize: 13.sp,
                                           ),
                                     );
                                   },
@@ -618,6 +620,7 @@ class _VerifyOtpState extends State<VerifyOtp> with FormStateMinxin {
                             style: context.textTheme.titleMedium?.rq.copyWith(
                               color: const Color(0xff4D84FF),
                               height: 1.25,
+                              fontSize: 13.sp,
                             ),
                           ),
                         );
@@ -728,7 +731,7 @@ class _FailureWithTimerAndTryAgain extends StatelessWidget {
       child: MyTextWidget(
         LocaleKeys.otp_error_try_again_later.tr(),
         style: Theme.of(context).textTheme.bodySmall?.rq.copyWith(
-          fontSize: 12,
+          fontSize: 12.sp,
           color: const Color(0xFF1D1D1D),
         ),
         textAlign: TextAlign.center,

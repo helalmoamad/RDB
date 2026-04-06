@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:easy_localization/easy_localization.dart' as tran;
 import 'package:rdb/common/constant/design/assets_provider.dart';
@@ -81,7 +82,7 @@ class _SplashOverlay extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const Spacer(flex: 3),
+            const Spacer(flex: 5),
 
             // Logo section
             SizedBox(
@@ -90,9 +91,12 @@ class _SplashOverlay extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  SvgPicture.asset(AppAssets.rdb),
-                  const SizedBox(height: 12),
-                  SvgPicture.asset(AppAssets.rammazDigitalBanking),
+                  SvgPicture.asset(AppAssets.rdb, height: 72.h),
+                  SizedBox(height: 20.h),
+                  SvgPicture.asset(
+                    AppAssets.rammazDigitalBanking,
+                    height: 13.h,
+                  ),
                 ],
               ),
             ),
@@ -108,30 +112,30 @@ class _SplashOverlay extends StatelessWidget {
                 children: [
                   // Custom progress bar
                   Container(
-                    width: 180,
-                    height: 10,
+                    width: 146.w,
+                    height: 5.h,
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(15),
+                      borderRadius: BorderRadius.circular(15.r),
                       border: Border.all(
                         color: const Color(0xFF707070),
-                        width: 0.8,
+                        width: 0.8.h,
                       ),
                     ),
-                    padding: const EdgeInsets.all(1.5),
+                    padding: EdgeInsets.all(1.h),
                     child: Stack(
                       children: [
                         Container(
-                          width: 177 * progress,
+                          width: (177.w) * progress,
                           decoration: BoxDecoration(
                             color: const Color(0xFF3066CC),
-                            borderRadius: BorderRadius.circular(10),
+                            borderRadius: BorderRadius.circular(10.r),
                           ),
                         ),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  SizedBox(height: 12.h),
                   AnimatedSwitcher(
                     duration: const Duration(milliseconds: 300),
                     child: Text(
@@ -139,9 +143,8 @@ class _SplashOverlay extends StatelessWidget {
                       key: ValueKey<String>(_getWord(progress)),
                       textAlign: TextAlign.center,
                       style: context.textTheme.headlineMedium?.rq.copyWith(
-                        fontSize: 16,
+                        fontSize: 13.sp,
                         color: Colors.black,
-                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ),
@@ -155,7 +158,7 @@ class _SplashOverlay extends StatelessWidget {
             Directionality(
               textDirection: TextDirection.ltr,
               child: Padding(
-                padding: const EdgeInsets.only(bottom: 40),
+                padding: EdgeInsets.only(bottom: 40.h),
                 child: Center(
                   child: IntrinsicWidth(
                     child: Column(
@@ -165,24 +168,27 @@ class _SplashOverlay extends StatelessWidget {
                         Text(
                           "Powered By",
                           style: TextStyle(
-                            fontSize: 8,
+                            fontSize: 8.sp,
                             color: const Color(0xff404040),
                           ),
                         ),
-                        const SizedBox(height: 10),
+                        SizedBox(height: 10.h),
                         Stack(
                           clipBehavior: Clip.none,
                           children: [
-                            SvgPicture.asset(AppAssets.rammaz),
+                            SvgPicture.asset(AppAssets.rammaz, height: 10.h),
                             Positioned(
-                              top: -5,
-                              left: 44,
+                              top: -5.h,
+                              left: 44.w,
                               child: SvgPicture.asset(AppAssets.bracket),
                             ),
                             Positioned(
-                              top: -5,
-                              right: -5,
-                              child: SvgPicture.asset(AppAssets.rLetter),
+                              top: -5.h,
+                              right: -5.w,
+                              child: SvgPicture.asset(
+                                AppAssets.rLetter,
+                                height: 7.h,
+                              ),
                             ),
                           ],
                         ),

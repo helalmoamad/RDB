@@ -8,6 +8,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:get_it/get_it.dart';
 import 'package:rdb/common/test_utils/test_var.dart';
 import 'package:rdb/core/utils/extensions/build_context.dart';
+import 'package:rdb/features/app/rdb_loading.dart';
 import 'package:rdb/generated/locale_keys.g.dart';
 import 'package:rdb/theme/typography.dart';
 
@@ -123,29 +124,26 @@ class _VerificationMethodsState extends State<VerificationMethods> {
   Widget buildLoadingOrTimer(SendOtpStatus status) {
     if (status == SendOtpStatus.loading) {
       return SizedBox(
-        height: 40,
-        child: const Center(
-          child: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(Color(0xff388cff)),
-          ),
-        ),
+        height: 40.h,
+        child: Center(child: RDBLoader(size: 24.h)),
       );
     } else if (status == SendOtpStatus.failure) {
       if (remainingSeconds > 0) {
         return SizedBox(
-          height: 40,
+          height: 40.h,
           child: Center(
             child: MyTextWidget(
               '${LocaleKeys.you_must_wait_for_some_seconds_before_try_again.tr()} ${remainingSeconds}s',
               style: context.textTheme.titleMedium?.rq.copyWith(
                 color: const Color(0xff5D5C5D),
+                fontSize: 13.sp,
               ),
             ),
           ),
         );
       } else {
         return SizedBox(
-          height: 40,
+          height: 40.h,
           child: Center(
             child: InkWell(
               onTap: () {
@@ -154,18 +152,16 @@ class _VerificationMethodsState extends State<VerificationMethods> {
                 }
               },
               child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 8,
-                ),
+                padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 8.h),
                 decoration: BoxDecoration(
                   color: const Color(0xff388cff),
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(12.r),
                 ),
                 child: MyTextWidget(
                   LocaleKeys.resend_code.tr(),
                   style: context.textTheme.titleMedium?.rq.copyWith(
                     color: Colors.white,
+                    fontSize: 13.sp,
                   ),
                 ),
               ),
@@ -217,7 +213,7 @@ class _VerificationMethodsState extends State<VerificationMethods> {
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               Padding(
-                padding: HWEdgeInsets.symmetric(horizontal: 40.0),
+                padding: HWEdgeInsets.symmetric(horizontal: 40.0.w),
                 child: Column(
                   children: [
                     MyTextWidget(
@@ -228,13 +224,13 @@ class _VerificationMethodsState extends State<VerificationMethods> {
                       style: context.textTheme.titleMedium?.bq.copyWith(
                         color: const Color(0xff1D1D1D),
                         height: 1.25,
-                        fontSize: 20,
+                        fontSize: 24.sp,
                       ),
                     ),
                     35.verticalSpace,
                     SvgPicture.asset(
                       AppAssets.phoneCallOutlinedSvg,
-                      width: 25,
+                      width: 50.w,
                       colorFilter: ColorFilter.mode(
                         Colors.grey,
                         BlendMode.srcIn,
@@ -254,7 +250,7 @@ class _VerificationMethodsState extends State<VerificationMethods> {
                                   child: Icon(
                                     Icons.info_outline,
                                     color: Color.fromARGB(255, 179, 179, 179),
-                                    size: 15,
+                                    size: 15.h,
                                   ),
                                 ),
                                 10.horizontalSpace,
@@ -264,6 +260,7 @@ class _VerificationMethodsState extends State<VerificationMethods> {
                                       .copyWith(
                                         color: const Color(0xff5D5C5D),
                                         height: 1.42,
+                                        fontSize: 13.sp,
                                       ),
                                 ),
                               ],
@@ -279,7 +276,7 @@ class _VerificationMethodsState extends State<VerificationMethods> {
                                       SvgPicture.asset(
                                         AppAssets.editPenSvg,
 
-                                        height: 15,
+                                        height: 15.h,
                                       ),
                                       const SizedBox(width: 10),
                                     ],
@@ -293,7 +290,7 @@ class _VerificationMethodsState extends State<VerificationMethods> {
                                       .copyWith(
                                         color: const Color(0xff1D1D1D),
                                         height: 1.25,
-                                        fontSize: 13,
+                                        fontSize: 13.sp,
                                       ),
                                 ),
                               ],
@@ -305,9 +302,9 @@ class _VerificationMethodsState extends State<VerificationMethods> {
                   ],
                 ),
               ),
-              const SizedBox(height: 100),
+              SizedBox(height: 100.h),
               buildLoadingOrTimer(state.sendOtpStatus),
-              const SizedBox(height: 15),
+              SizedBox(height: 15.h),
               Padding(
                 padding: HWEdgeInsets.symmetric(horizontal: 20.0),
                 child: Row(
@@ -351,23 +348,23 @@ class _VerificationMethodsState extends State<VerificationMethods> {
 
                                 strokeWidth: 0.5,
                                 dashPattern: const [3, 3],
-                                radius: const Radius.circular(20.0),
+                                radius: Radius.circular(15.r),
                                 color: const Color.fromARGB(255, 126, 126, 126),
                                 child: Container(
-                                  height: 50,
+                                  height: 50.h,
                                   decoration: BoxDecoration(
                                     color: index == 0
                                         ? const Color(0xffffffff)
                                         : const Color(0xffF5F5F5),
-                                    borderRadius: BorderRadius.circular(20.0),
+                                    borderRadius: BorderRadius.circular(15.r),
                                   ),
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       SvgPicture.asset(
                                         AppAssets.whatsappSvg,
-                                        width: 20,
-                                        height: 20,
+                                        width: 20.w,
+                                        height: 20.h,
                                       ),
                                       10.horizontalSpace,
                                       MyTextWidget(
@@ -376,6 +373,7 @@ class _VerificationMethodsState extends State<VerificationMethods> {
                                             .copyWith(
                                               color: const Color(0xff5D5C5D),
                                               height: 1.42,
+                                              fontSize: 13.sp,
                                             ),
                                       ),
                                     ],
@@ -423,15 +421,16 @@ class _VerificationMethodsState extends State<VerificationMethods> {
                                 strokeCap: StrokeCap.round,
                                 strokeWidth: 0.5,
                                 dashPattern: const [3, 3],
-                                radius: const Radius.circular(20.0),
+                                radius: Radius.circular(15.r),
                                 color: const Color.fromARGB(255, 126, 126, 126),
                                 child: Container(
-                                  height: 50,
+                                  height: 50.h,
+
                                   decoration: BoxDecoration(
                                     color: index == 1
                                         ? const Color(0xffffffff)
                                         : const Color(0xffF5F5F5),
-                                    borderRadius: BorderRadius.circular(20.0),
+                                    borderRadius: BorderRadius.circular(15.r),
                                   ),
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
@@ -440,7 +439,7 @@ class _VerificationMethodsState extends State<VerificationMethods> {
                                         child: Icon(
                                           Icons.messenger_outline,
 
-                                          size: 20,
+                                          size: 20.h,
                                         ),
                                       ),
                                       10.horizontalSpace,
@@ -450,6 +449,7 @@ class _VerificationMethodsState extends State<VerificationMethods> {
                                             .copyWith(
                                               color: const Color(0xff5D5C5D),
                                               height: 1.42,
+                                              fontSize: 13.sp,
                                             ),
                                       ),
                                     ],

@@ -88,13 +88,13 @@ class _InsertPhoneTabState extends State<InsertPhoneTab> with FormStateMinxin {
                 style: context.textTheme.titleMedium?.bq.copyWith(
                   color: const Color(0xff1D1D1D),
                   height: 1.25,
-                  fontSize: 20,
+                  fontSize: 24.sp,
                 ),
               ),
               30.verticalSpace,
               SvgPicture.asset(
                 AppAssets.phoneCallOutlinedSvg,
-                width: 25,
+                width: 50.w,
                 colorFilter: ColorFilter.mode(Colors.grey, BlendMode.srcIn),
               ),
               30.verticalSpace,
@@ -138,7 +138,7 @@ class _InsertPhoneTabState extends State<InsertPhoneTab> with FormStateMinxin {
                   LanguageService.rtl
                       ? SizedBox(
                           width: 1.sw - 20,
-                          height: 20,
+                          height: 20.h,
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -169,7 +169,7 @@ class _InsertPhoneTabState extends State<InsertPhoneTab> with FormStateMinxin {
                         )
                       : SizedBox(
                           width: 1.sw - 20,
-                          height: 20,
+                          height: 20.h,
                           child: SingleChildScrollView(
                             scrollDirection: Axis.horizontal,
                             child: Row(
@@ -281,10 +281,10 @@ class _InsertPhoneTabState extends State<InsertPhoneTab> with FormStateMinxin {
                 },
                 maxLength: maxLength - 1,
                 prefixIcon: Padding(
-                  padding: HWEdgeInsets.only(left: 20.0, top: 30),
+                  padding: HWEdgeInsets.only(left: 20.0.w, top: 5.h),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       SvgPicture.asset(AppAssets.phoneCallSvg),
                       10.horizontalSpace,
@@ -326,7 +326,7 @@ class _InsertPhoneTabState extends State<InsertPhoneTab> with FormStateMinxin {
                 ),
                 ready: display,
                 suffixIcon: Padding(
-                  padding: HWEdgeInsets.only(right: 20.0, top: 20),
+                  padding: HWEdgeInsets.only(right: 20.0.w, top: 2.h),
                   child: !display
                       ? SizedBox(width: 22.w, height: 15.h)
                       : InkWell(
@@ -361,10 +361,10 @@ class _InsertPhoneTabState extends State<InsertPhoneTab> with FormStateMinxin {
                                 children: [
                                   showLoading
                                       ? SizedBox(
-                                          width: 16.w,
-                                          height: 25.h,
+                                          width: 30.w,
+                                          height: 30.h,
                                           child: RDBLoader(
-                                            size: 24,
+                                            size: 24.h,
                                             color: Color(0xff1D1D1D),
                                           ),
                                         )
@@ -385,7 +385,7 @@ class _InsertPhoneTabState extends State<InsertPhoneTab> with FormStateMinxin {
             },
           ),
         ),
-        SizedBox(height: 150),
+        SizedBox(height: 150.h),
       ],
     );
   }
