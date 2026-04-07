@@ -77,7 +77,7 @@ class _HomePageState extends State<HomePage> {
             authBloc.state.walletUser?.isTwoFactorEnabled ?? false,
         applicationVersion: "1.0.0",
         skipSplash: true,
-
+        disableWalletOverscrollIndicator: true,
         // استخدم اللغة الحالية
         allowBadCertificate: true, // true للتطوير فقط عند خطأ SSL
       ),
@@ -158,7 +158,12 @@ class _HomePageState extends State<HomePage> {
         padding: HWEdgeInsets.symmetric(horizontal: 0.w),
         child: Stack(
           children: [
-            TrydosWalletWelcomeScreen(),
+            ScrollConfiguration(
+              behavior: const MaterialScrollBehavior().copyWith(
+                overscroll: false,
+              ),
+              child: TrydosWalletWelcomeScreen(),
+            ),
             ValueListenableBuilder<bool>(
               valueListenable: isVerified,
               builder: (context, isverified, _) {
@@ -207,14 +212,27 @@ class _HomePageState extends State<HomePage> {
                   ? [
                       VerifyOtp(
                         fromProfile: false,
-                        navigateToProfile: () {},
+                        navigateToProfile: () {
+                          isVerified.value = true;
+                          Future.delayed(Duration(seconds: 1), () {
+                            GRouter.router.go(GRouter.config.kRootRoute);
+                          });
+                        },
                         fromExpired: true,
                         isVisWhatsApp: 1,
-                        navigateToAddName: () {},
+                        navigateToAddName: () {
+                          isVerified.value = true;
+                          Future.delayed(Duration(seconds: 1), () {
+                            GRouter.router.go(GRouter.config.kRootRoute);
+                          });
+                        },
                         navigateTocartOrProfile: () {
                           isVerified.value = true;
+                          Future.delayed(Duration(seconds: 1), () {
+                            GRouter.router.go(GRouter.config.kRootRoute);
+                          });
                         },
-                        fromLogin: false,
+                        fromLogin: true,
                         onLoginFailed: () {
                           //   pageController.animateToPage(3, duration: Duration(milliseconds: 500), curve: Curves.easeInOut);
                         },
@@ -281,12 +299,25 @@ class _HomePageState extends State<HomePage> {
                       ),
                       VerifyOtp(
                         fromProfile: false,
-                        navigateToProfile: () {},
+                        navigateToProfile: () {
+                          isVerified.value = true;
+                          Future.delayed(Duration(seconds: 1), () {
+                            GRouter.router.go(GRouter.config.kRootRoute);
+                          });
+                        },
                         fromExpired: true,
                         isVisWhatsApp: isVisWhatsApp,
-                        navigateToAddName: () {},
+                        navigateToAddName: () {
+                          isVerified.value = true;
+                          Future.delayed(Duration(seconds: 1), () {
+                            GRouter.router.go(GRouter.config.kRootRoute);
+                          });
+                        },
                         navigateTocartOrProfile: () {
                           isVerified.value = true;
+                          Future.delayed(Duration(seconds: 1), () {
+                            GRouter.router.go(GRouter.config.kRootRoute);
+                          });
                         },
                         fromLogin: false,
                         onLoginFailed: () {

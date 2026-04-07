@@ -77,7 +77,7 @@ class _InsertPhoneTabState extends State<InsertPhoneTab> with FormStateMinxin {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Padding(
-          padding: HWEdgeInsets.symmetric(horizontal: 10.0),
+          padding: HWEdgeInsets.symmetric(horizontal: 10.0.h),
           child: Column(
             children: [
               MyTextWidget(
@@ -281,7 +281,7 @@ class _InsertPhoneTabState extends State<InsertPhoneTab> with FormStateMinxin {
                 },
                 maxLength: maxLength - 1,
                 prefixIcon: Padding(
-                  padding: HWEdgeInsets.only(left: 20.0.w, top: 5.h),
+                  padding: HWEdgeInsets.only(left: 20.0.w, top: 0.h),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.center,
@@ -326,7 +326,7 @@ class _InsertPhoneTabState extends State<InsertPhoneTab> with FormStateMinxin {
                 ),
                 ready: display,
                 suffixIcon: Padding(
-                  padding: HWEdgeInsets.only(right: 20.0.w, top: 2.h),
+                  padding: HWEdgeInsets.only(right: 20.0.w, top: 0.h),
                   child: !display
                       ? SizedBox(width: 22.w, height: 15.h)
                       : InkWell(

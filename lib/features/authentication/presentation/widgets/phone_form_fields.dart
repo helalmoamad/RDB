@@ -189,13 +189,14 @@ class PhoneFormField extends StatelessWidget {
                 inputFormatters: [PhoneNumberFormatter()],
                 style: context.textTheme.headlineSmall?.rq.copyWith(
                   color: const Color(0xff5D5C5D),
-                  height: 0.6,
+                  height: 0.6.h,
                   decoration: TextDecoration.none,
                 ),
                 decoration: InputDecoration(
                   border: InputBorder.none,
                   focusedBorder: InputBorder.none,
                   prefixIcon: prefixIcon,
+                  contentPadding: EdgeInsets.all(20.h),
                   suffixIcon: suffixIcon,
                   counterText: '',
                   hintText: hintText?.tr(),
