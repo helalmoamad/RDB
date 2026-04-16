@@ -7,7 +7,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:rdb/core/utils/extensions/build_context.dart';
 import 'package:rdb/theme/typography.dart';
-import '../../../../core/utils/responsive_padding.dart';
 import '../manager/auth_bloc.dart';
 
 List<FocusNode> focusNodes = List.generate(6, (index) => FocusNode());
@@ -113,13 +112,11 @@ class _PinItemState extends State<PinItem> with TickerProviderStateMixin {
     return BlocConsumer<AuthBloc, AuthState>(
       buildWhen: (p, c) =>
           p.verifyOtpSignInStatus != c.verifyOtpSignInStatus ||
-          p.verifyOtpFromGuestStatus != c.verifyOtpFromGuestStatus ||
-          p.verifyOtpSignUpStatus != c.verifyOtpSignUpStatus,
+          p.verifyOtpFromGuestStatus != c.verifyOtpFromGuestStatus,
       listener: (context, state) {
         if (state.verifyOtpSignInStatus == VerifyOtpSignInStatus.loading ||
             state.verifyOtpFromGuestStatus ==
-                VerifyOtpFromGuestStatus.loading ||
-            state.verifyOtpSignUpStatus == VerifyOtpSignUpStatus.loading) {
+                VerifyOtpFromGuestStatus.loading) {
           fadingController.repeat(reverse: true);
         } else {
           fadingController.reset();
@@ -130,7 +127,10 @@ class _PinItemState extends State<PinItem> with TickerProviderStateMixin {
             state.verifyOtpSignInStatus == VerifyOtpSignInStatus.loading ||
             state.verifyOtpFromGuestStatus ==
                 VerifyOtpFromGuestStatus.loading ||
-            state.verifyOtpSignUpStatus == VerifyOtpSignUpStatus.loading;
+            state.verifyOtpSignInStatus == VerifyOtpSignInStatus.failure ||
+            state.verifyOtpFromGuestStatus ==
+                VerifyOtpFromGuestStatus.failure ||
+            widget.isExpired;
         return AnimatedBuilder(
           animation: animationController,
           builder: (context, child) {
@@ -141,22 +141,22 @@ class _PinItemState extends State<PinItem> with TickerProviderStateMixin {
                 animation: fadingController,
                 builder: (context, child) {
                   return SizedBox(
-                    height: 50.w,
-                    width: 50.w,
+                    height: 60.h,
+                    width: 60.w,
                     child: DottedBorder(
                       padding: EdgeInsets.zero,
                       borderType: BorderType.RRect,
                       strokeCap: StrokeCap.round,
                       strokeWidth: 1 - fadingController.value,
                       dashPattern: const [3, 3],
-                      radius: Radius.circular(12.r),
-                      color: hasValue && isVerifying
+                      radius: Radius.circular(15.r),
+                      color: hasValue || isVerifying
                           ? widget.borderColor
-                          : withBorder
+                          : !withBorder
                           ? widget.borderColor
-                          : const Color(0xffF5F5F5),
+                          : const Color(0xffC3C3C3),
                       child: ClipRRect(
-                        borderRadius: BorderRadius.all(Radius.circular(12.r)),
+                        borderRadius: BorderRadius.all(Radius.circular(18.r)),
                         child: Stack(
                           alignment: Alignment.center,
                           children: [
@@ -165,8 +165,6 @@ class _PinItemState extends State<PinItem> with TickerProviderStateMixin {
                               enabled:
                                   (state.verifyOtpSignInStatus !=
                                       VerifyOtpSignInStatus.loading &&
-                                  state.verifyOtpSignUpStatus !=
-                                      VerifyOtpSignUpStatus.loading &&
                                   state.verifyOtpFromGuestStatus !=
                                       VerifyOtpFromGuestStatus.loading),
                               focusNode: focusNodes[widget.index],
@@ -223,36 +221,39 @@ class _PinItemState extends State<PinItem> with TickerProviderStateMixin {
                               inputFormatters: [
                                 FilteringTextInputFormatter.digitsOnly,
                               ],
-                              style: context.textTheme.headlineSmall?.rq
+                              style: context.textTheme.headlineSmall?.mq
                                   .copyWith(
-                                    color: (!withBorder && hasValue)
-                                        ? Colors.transparent
-                                        : const Color(0xff707070),
+                                    color: const Color(0xffFFFFFF),
+
                                     height: 0.6,
+                                    fontSize: 0.sp,
                                     decoration: TextDecoration.none,
                                   ),
-                              maxLines: 2,
+                              maxLines: 1,
                               decoration: InputDecoration(
                                 border: InputBorder.none,
-                                contentPadding: HWEdgeInsets.only(
-                                  top: 15.h,
-                                  bottom: 5.h,
-                                ),
+
                                 focusedBorder: InputBorder.none,
                                 filled: true,
                                 fillColor: !withBorder
-                                    ? const Color(0xffF5F5F5)
-                                    : const Color(0xffFAFAFA),
+                                    ? const Color(0xffFFFFFF)
+                                    : const Color(0xffFCFCFC),
                               ),
                             ),
-                            if (!withBorder && hasValue)
-                              IgnorePointer(
-                                child: Icon(
-                                  Icons.lock_outline_rounded,
-                                  color: Color(0xffC4C2C2),
-                                  size: 24.h,
-                                ),
+                            Positioned(
+                              top: 30.h,
+                              child: Text(
+                                widget.controller.value.text,
+                                style: context.textTheme.headlineSmall?.mq
+                                    .copyWith(
+                                      color: const Color(0xff1D1D1D),
+
+                                      height: 0.6,
+                                      fontSize: 16.sp,
+                                      decoration: TextDecoration.none,
+                                    ),
                               ),
+                            ),
                           ],
                         ),
                       ),

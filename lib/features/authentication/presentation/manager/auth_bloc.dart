@@ -20,7 +20,6 @@ import '../../../../common/helper/show_message.dart';
 import '../../../../core/domin/repositories/prefs_repository.dart';
 import '../../data/models/verify_otp_sign_up_and_in_response_model.dart';
 
-import '../../domain/use_cases/verify_otp_signup_usecase.dart';
 part 'auth_event.dart';
 
 part 'auth_state.dart';
@@ -41,7 +40,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     this.sendOtpUseCase,
     this.verifyOtpSignInUseCase,
     this.getUserCountryUseCase,
-    this.verifyOtpSignUpUseCase,
+    // this.verifyOtpSignUpUseCase,
   ) : super(const AuthState()) {
     on<AuthEvent>((event, emit) {});
 
@@ -54,9 +53,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       _onSendOtpEvent,
       transformer: throttleDroppable(const Duration(seconds: 10)),
     );
+    on<SaveErrorSigneInVerify>(_onSaveErrorSigneInVerify);
+    on<ResetAllData>(_onResetAllData);
     on<VerifyOtpSignInEvent>(_onVerifyOtpSignInEvent);
 
-    on<VerifyOtpSignUpEvent>(_onVerifyOtpSignUpEvent);
+    // on<VerifyOtpSignUpEvent>(_onVerifyOtpSignUpEvent);
 
     on<GetUserCountryEvent>(
       _onGetUserCountryEvent,
@@ -67,7 +68,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   final SendOtpUseCase sendOtpUseCase;
   final VerifyOtpSignInUseCase verifyOtpSignInUseCase;
-  final VerifyOtpSignUpUseCase verifyOtpSignUpUseCase;
+  //final VerifyOtpSignUpUseCase verifyOtpSignUpUseCase;
   //final CreateWalletUseCase createWalletUseCase;
   // final LoginToWalletUseCase loginToWalletUseCase;
   final GetUserCountryUseCase getUserCountryUseCase;
@@ -110,7 +111,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       (r) {
         ErrorManager.resetRetry('SendOtpEvent');
         _prefsRepository.setsessionInfo(r.sessionInfo!);
-        emit(state.copyWith(sendOtpStatus: SendOtpStatus.success));
+        emit(
+          state.copyWith(
+            sendOtpStatus: SendOtpStatus.success,
+            verifyOtpFromGuestStatus: VerifyOtpFromGuestStatus.init,
+            verifyOtpSignInStatus: VerifyOtpSignInStatus.init,
+          ),
+        );
       },
     );
   }
@@ -189,6 +196,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       VerifyOtpSignInParams(
         sessionInfo: event.sessionInfo,
         otp: event.otp,
+        action: event.action,
         phone: event.phone,
       ),
     );
@@ -199,16 +207,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
             VerifyOtpSignInEvent(
               sessionInfo: event.sessionInfo,
               otp: event.otp,
+              action: event.action,
               phone: event.phone,
             ),
           );
           ErrorManager.incrementRetry('VerifyOtpSignInEvent');
         }
         emit(
-          state.copyWith(
-            verifyOtpSignInStatus: VerifyOtpSignInStatus.failure,
-            signInErrorMessage: l.message,
-          ),
+          state.copyWith(verifyOtpSignInStatus: VerifyOtpSignInStatus.failure),
         );
       },
       (r) {
@@ -239,13 +245,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           state.copyWith(
             verifyOtpSignInStatus: VerifyOtpSignInStatus.success,
             walletUser: r.user,
+            signInErrorMessage: r.status,
           ),
         );
       },
     );
   }
 
-  FutureOr<void> _onVerifyOtpSignUpEvent(
+  /* FutureOr<void> _onVerifyOtpSignUpEvent(
     VerifyOtpSignUpEvent event,
     Emitter<AuthState> emit,
   ) async {
@@ -304,7 +311,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         );
       },
     );
-  }
+  }*/
 
   FutureOr<void> _onGetUserCountryEvent(
     GetUserCountryEvent event,
@@ -338,5 +345,29 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         );
       },
     );
+  }
+
+  FutureOr<void> _onSaveErrorSigneInVerify(
+    SaveErrorSigneInVerify event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(state.copyWith(signInErrorMessage: event.error));
+  }
+
+  FutureOr<void> _onResetAllData(
+    ResetAllData event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(
+      state.copyWith(
+        signInErrorMessage: "",
+        sendOtpStatus: SendOtpStatus.init,
+        walletUser: User(),
+        verifyOtpFromGuestStatus: VerifyOtpFromGuestStatus.init,
+        verifyOtpSignInStatus: VerifyOtpSignInStatus.init,
+      ),
+    );
+    GetIt.I<PrefsRepository>().setVerifiedPhone(false);
+    GetIt.I<PrefsRepository>().setVerifiedPhonePeforeExpiredToken(false);
   }
 }

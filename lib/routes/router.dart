@@ -52,17 +52,7 @@ class GRouter {
           );
         },
       ),
-      GoRoute(
-        path: _config.applicationRoutes.kLoginSuccessfullyPage,
-        pageBuilder: (BuildContext context, GoRouterState state) {
-          return _builderPage(
-            child: LoginSuccessfully(
-              phoneNumber: state.uri.queryParameters['phoneNumber']!,
-            ),
-            state: state,
-          );
-        },
-      ),
+
       GoRoute(
         path: _config.applicationRoutes.kRegistrationPage,
         pageBuilder: (BuildContext context, GoRouterState state) {
@@ -101,6 +91,17 @@ class GRouter {
                 pageBuilder: (BuildContext context, GoRouterState state) {
                   return _builderPage(
                     child: AlreadyExistAccount(
+                      phoneNumber: state.uri.queryParameters['phoneNumber']!,
+                    ),
+                    state: state,
+                  );
+                },
+              ),
+              GoRoute(
+                path: _config.applicationRoutes.kLoginSuccessfullyPageName,
+                pageBuilder: (BuildContext context, GoRouterState state) {
+                  return _builderPage(
+                    child: LoginSuccessfully(
                       phoneNumber: state.uri.queryParameters['phoneNumber']!,
                     ),
                     state: state,

@@ -154,6 +154,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: Padding(
         padding: HWEdgeInsets.symmetric(horizontal: 0.w),
         child: Stack(
@@ -211,6 +212,7 @@ class _HomePageState extends State<HomePage> {
                       false)
                   ? [
                       VerifyOtp(
+                        goChangeNumber: () {},
                         fromProfile: false,
                         navigateToProfile: () {
                           isVerified.value = true;
@@ -298,6 +300,7 @@ class _HomePageState extends State<HomePage> {
                         },
                       ),
                       VerifyOtp(
+                        goChangeNumber: () {},
                         fromProfile: false,
                         navigateToProfile: () {
                           isVerified.value = true;

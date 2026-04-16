@@ -23,7 +23,9 @@ class _ApplicationRoutes {
   final String kRegistrationPagePath = '/BasePage/RegistrationPage';
   final String kMyContactsPageName = 'MyContacts';
   final String kMyContactsPagePath = '/BasePage/MyContacts';
-  final String kLoginSuccessfullyPage = '/LoginSuccessfullyPage';
+  final String kLoginSuccessfullyPageName = 'LoginSuccessfullyPage';
+  final String kLoginSuccessfullyPagePath =
+      '/BasePage/RegistrationPage/LoginSuccessfullyPage';
   final String kUserExistName = 'UserExist';
   final String kNumberNotRegisteredName = 'NumberNotRegistered';
   final String kNumberNotRegisteredPage =

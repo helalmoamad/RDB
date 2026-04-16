@@ -16,7 +16,7 @@ abstract class WalletEndPoints {
   static final sendOtpEP = "send-otp".authScope();
   static final reSendOtpEP = "resend-otp".authScope();
   static final verifyEP = "verify".authScope();
-  static final registerEP = "users/phone/register";
+  //static final registerEP = "users/phone/register";
   static String walletBalanceEP(String assetId) =>
       "wallets/my/balances/$assetId";
   static const checkoutEP = "merchant/checkout";

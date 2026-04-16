@@ -128,107 +128,118 @@ class PhoneFormField extends StatelessWidget {
     if (controller?.text.isEmpty ?? true) {
       offset = 0;
     }
-    return DottedBorder(
-      padding: EdgeInsets.zero,
-      borderType: BorderType.RRect,
-      strokeCap: StrokeCap.round,
-      strokeWidth: 0.5,
-      dashPattern: const [3, 3],
-      radius: Radius.circular(24.r),
-      color: ready ? const Color(0xff388CFF) : const Color(0xff5D5C5D),
-      child: Stack(
-        alignment: Alignment.bottomLeft,
-        children: [
-          SizedBox(
-            height: 70.h,
-            width: 370.w,
-            child: Directionality(
-              textDirection: TextDirection.ltr,
-              child: TextFormField(
-                controller: controller,
-                onTap: onTap,
-                onChanged: (String? text) {
-                  if (text != null) {
-                    onChange?.call(text) ?? false;
-                    offset = (controller!.text.length * 10).sp;
-                    rebuildCursor.value = !rebuildCursor.value;
-                  }
-                },
-                onFieldSubmitted: onFieldSubmitted,
-                onEditingComplete: onEditingComplete,
-                onSaved: onSaved,
-                validator: validator,
-                maxLines: maxLines,
-                minLines: minLines,
-                maxLength: maxLength,
-                enabled: enabled,
-                keyboardType: TextInputType.phone,
-                textInputAction: textInputAction,
-                textDirection: TextDirection.ltr,
-                scrollPadding: scrollPadding,
-                expands: expands,
-                maxLengthEnforcement: maxLengthEnforcement,
-                focusNode: focusNode,
-                obscureText: obscure,
-                obscuringCharacter: obscuringCharacter,
-                autovalidateMode: autoValidateMode,
-                readOnly: readOnly,
-                scrollPhysics: scrollPhysics,
-                scrollController: scrollController,
-                autocorrect: false,
-                autofocus: autoFocus ?? false,
-                cursorColor: const Color(0xff5D5C5D),
-                cursorHeight: 0,
-                cursorWidth: 0.w,
-                initialValue: initialValue,
-                keyboardAppearance: keyboardAppearance,
-                textAlignVertical: TextAlignVertical.center,
-                textCapitalization: textCapitalization,
-                // ignore: deprecated_member_use
-                toolbarOptions: toolbarOptions,
-                inputFormatters: [PhoneNumberFormatter()],
-                style: context.textTheme.headlineSmall?.rq.copyWith(
-                  color: const Color(0xff5D5C5D),
-                  height: 0.6.h,
-                  decoration: TextDecoration.none,
-                ),
-                decoration: InputDecoration(
-                  border: InputBorder.none,
-                  focusedBorder: InputBorder.none,
-                  prefixIcon: prefixIcon,
-                  contentPadding: EdgeInsets.all(20.h),
-                  suffixIcon: suffixIcon,
-                  counterText: '',
-                  hintText: hintText?.tr(),
-                  hintStyle: context.textTheme.displayMedium?.rq.copyWith(
-                    color: const Color(0xffC4C2C2),
+    return SizedBox(
+      height: 60.h,
+      width: 1.sw,
+      child: DottedBorder(
+        padding: EdgeInsets.zero,
+        borderType: BorderType.RRect,
+        strokeCap: StrokeCap.round,
+        strokeWidth: 0.5,
+        dashPattern: const [3, 3],
+        radius: Radius.circular(20.r),
+        color: ready ? const Color(0xff388CFF) : const Color(0xff8D8D8D),
+        child: SizedBox(
+          height: 60.h,
+          width: 1.sw,
+          child: Stack(
+            alignment: Alignment.bottomLeft,
+            children: [
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20.w),
+                child: Directionality(
+                  textDirection: TextDirection.ltr,
+                  child: TextFormField(
+                    controller: controller,
+                    onTap: onTap,
+                    onChanged: (String? text) {
+                      if (text != null) {
+                        onChange?.call(text) ?? false;
+                        offset = (controller!.text.length * 12.sp);
+                        rebuildCursor.value = !rebuildCursor.value;
+                      }
+                    },
+                    onFieldSubmitted: onFieldSubmitted,
+                    onEditingComplete: onEditingComplete,
+                    onSaved: onSaved,
+                    validator: validator,
+                    maxLines: maxLines,
+                    minLines: minLines,
+                    maxLength: maxLength,
+                    enabled: enabled,
+                    keyboardType: TextInputType.phone,
+                    textInputAction: textInputAction,
+                    textDirection: TextDirection.ltr,
+
+                    expands: expands,
+                    maxLengthEnforcement: maxLengthEnforcement,
+                    focusNode: focusNode,
+                    obscureText: obscure,
+                    obscuringCharacter: obscuringCharacter,
+                    autovalidateMode: autoValidateMode,
+                    readOnly: readOnly,
+                    scrollPhysics: scrollPhysics,
+                    scrollController: scrollController,
+                    autocorrect: false,
+                    autofocus: autoFocus ?? false,
+                    cursorColor: const Color(0xff5D5C5D),
+                    cursorHeight: 0,
+                    cursorWidth: 0.w,
+                    initialValue: initialValue,
+                    keyboardAppearance: keyboardAppearance,
+                    textAlignVertical: TextAlignVertical.top,
+
+                    textCapitalization: textCapitalization,
+                    // ignore: deprecated_member_use
+                    toolbarOptions: toolbarOptions,
+                    inputFormatters: [PhoneNumberFormatter()],
+                    style: context.textTheme.headlineSmall?.mq.copyWith(
+                      color: const Color(0xff1D1D1D),
+                      height: 0.6.h,
+                      decoration: TextDecoration.none,
+                      fontSize: 16.sp,
+                    ),
+                    decoration: InputDecoration(
+                      border: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+
+                      prefix: prefixIcon,
+
+                      suffixIcon: suffixIcon,
+                      counterText: '',
+                      hintText: hintText?.tr(),
+                      hintStyle: context.textTheme.displayMedium?.rq.copyWith(
+                        color: const Color(0xffC3C3C3),
+                        fontSize: 16.sp,
+                      ),
+                    ),
                   ),
                 ),
               ),
-            ),
+              ValueListenableBuilder<bool>(
+                valueListenable: showCursor,
+                builder: (context, show, _) {
+                  return show
+                      ? ValueListenableBuilder<bool>(
+                          valueListenable: rebuildCursor,
+                          builder: (context, rebuild, _) {
+                            return Container(
+                              margin: HWEdgeInsets.only(
+                                left: 120.w + offset,
+                                bottom: 25.h,
+                              ),
+                              width: 10.w,
+                              height: 1,
+                              color: const Color(0xff5D5C5D),
+                            );
+                          },
+                        )
+                      : const SizedBox.shrink();
+                },
+              ),
+            ],
           ),
-          ValueListenableBuilder<bool>(
-            valueListenable: showCursor,
-            builder: (context, show, _) {
-              return show
-                  ? ValueListenableBuilder<bool>(
-                      valueListenable: rebuildCursor,
-                      builder: (context, rebuild, _) {
-                        return Container(
-                          margin: HWEdgeInsets.only(
-                            left: 95 + offset,
-                            bottom: 20.h,
-                          ),
-                          width: 10.w,
-                          height: 1,
-                          color: const Color(0xff5D5C5D),
-                        );
-                      },
-                    )
-                  : const SizedBox.shrink();
-            },
-          ),
-        ],
+        ),
       ),
     );
   }

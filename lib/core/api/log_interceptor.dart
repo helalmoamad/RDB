@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get_it/get_it.dart';
 import 'package:rdb/common/helper/show_message.dart';
+import 'package:rdb/features/authentication/presentation/manager/auth_bloc.dart';
 import '../../enums/status_code_type.dart';
 import '../domin/repositories/prefs_repository.dart';
 import 'api.dart';
@@ -91,7 +92,19 @@ class LoggerInterceptor extends Interceptor with HandlingExceptionRequest {
       //       showInRelease: true,
       //       timeShowing: Toast.LENGTH_LONG);
       // }
-      if (err.response?.statusCode == 400 || err.response?.statusCode == 422) {
+      if ((err.response?.statusCode == 400) &&
+          (err.requestOptions.path.contains("phone/verify"))) {
+        GetIt.I<AuthBloc>().add(
+          SaveErrorSigneInVerify(
+            error:
+                jsonDecode(err.response.toString())["message"] ??
+                "ServerException",
+          ),
+        );
+      }
+      if ((err.response?.statusCode == 400 ||
+              err.response?.statusCode == 422) &&
+          (!(err.requestOptions.path.contains("phone/verify")))) {
         showMessage(
           jsonDecode(err.response.toString())["message"] is List
               ? jsonDecode(err.response.toString())["message"][0]
@@ -165,6 +178,7 @@ class LoggerInterceptor extends Interceptor with HandlingExceptionRequest {
     //  handler.next(err);
 
     // إضافة كود الخطأ للـdata
+
     Map<String, dynamic> errorData = {
       'error_code': err.response?.statusCode ?? 0,
       'error_message': err.message ?? "",

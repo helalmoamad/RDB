@@ -54,19 +54,19 @@ class _WelcomeSectionState extends State<WelcomeSection> {
           LocaleKeys.get_started.tr(),
           textAlign: TextAlign.center,
           style: context.textTheme.titleLarge?.bq.copyWith(
-            color: const Color(0xff5D5C5D),
+            color: const Color(0xff1D1D1D),
             letterSpacing: 0.14,
             height: 1.3,
-            fontSize: 24.sp,
+            fontSize: 30.sp,
           ),
         ),
         SizedBox(height: 20.h),
         Padding(
-          padding: HWEdgeInsets.symmetric(horizontal: 75.w),
+          padding: HWEdgeInsets.symmetric(horizontal: 20.w),
           child: MyTextWidget(
             LocaleKeys.welcome_page_description.tr(),
             textAlign: TextAlign.center,
-            style: context.textTheme.titleLarge?.lq.copyWith(
+            style: context.textTheme.titleLarge?.rq.copyWith(
               color: const Color(0xff5D5C5D),
               letterSpacing: 0.14,
               height: 1.3,
@@ -75,7 +75,7 @@ class _WelcomeSectionState extends State<WelcomeSection> {
           ),
         ),
 
-        Spacer(),
+        SizedBox(height: 40.h),
         InkWell(
           key: TestVariables.kTestMode
               ? const Key(WidgetsKeys.haveAccountButtonKey)
@@ -99,24 +99,23 @@ class _WelcomeSectionState extends State<WelcomeSection> {
             valueListenable: clickButton,
             builder: (context, index, _) {
               return Padding(
-                padding: const EdgeInsets.fromLTRB(50.0, 0.0, 50.0, 0.0),
+                padding: EdgeInsets.symmetric(horizontal: 20.w),
                 child: DottedBorder(
-                  padding: EdgeInsets.zero,
                   strokeCap: StrokeCap.round,
                   strokeWidth: 0.5,
                   borderType: BorderType.RRect,
                   dashPattern: const [3, 3],
-                  radius: const Radius.circular(20.0),
-                  color: const Color(0xfffafafa),
+                  padding: EdgeInsets.all(1.h),
+
+                  radius: Radius.circular(20.r),
+                  color: const Color(0xff5D5C5D),
                   child: Container(
                     width: 1.sw,
-                    height: 50.h,
+                    height: 58.h,
+
                     decoration: BoxDecoration(
-                      border: Border.all(
-                        color: const Color.fromARGB(255, 180, 178, 178),
-                      ),
-                      color: Colors.grey.shade50,
-                      borderRadius: BorderRadius.circular(15.r),
+                      color: const Color(0xffFCFCFC),
+                      borderRadius: BorderRadius.circular(20.r),
                     ),
                     child: Center(
                       child: MyTextWidget(
@@ -136,7 +135,7 @@ class _WelcomeSectionState extends State<WelcomeSection> {
             },
           ),
         ),
-        SizedBox(height: 10.h),
+        SizedBox(height: 8.h),
         InkWell(
           key: TestVariables.kTestMode
               ? const Key(WidgetsKeys.createNewAccountButtonKey)
@@ -150,31 +149,30 @@ class _WelcomeSectionState extends State<WelcomeSection> {
             });
           },
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(50.0, 0.0, 50.0, 0.0),
+            padding: EdgeInsets.symmetric(horizontal: 20.w),
             child: DottedBorder(
-              padding: EdgeInsets.zero,
               strokeCap: StrokeCap.round,
               strokeWidth: 0.5,
               borderType: BorderType.RRect,
               dashPattern: const [3, 3],
-              radius: const Radius.circular(20.0),
-              color: const Color(0xfffafafa),
+              padding: EdgeInsets.all(1.h),
+
+              radius: Radius.circular(20.r),
+              color: const Color(0xff5D5C5D),
               child: Container(
                 width: 1.sw,
-                height: 50.h,
+                height: 58.h,
                 decoration: BoxDecoration(
-                  border: Border.all(
-                    color: const Color.fromARGB(255, 180, 178, 178),
-                  ),
-                  color: Colors.grey.shade50,
-                  borderRadius: BorderRadius.circular(15.r),
+                  color: const Color(0xffFCFCFC),
+                  borderRadius: BorderRadius.circular(20.r),
                 ),
+
                 child: Center(
                   child: ValueListenableBuilder<int>(
                     valueListenable: clickButton,
                     builder: (context, index, _) {
                       return MyTextWidget(
-                        LocaleKeys.create_new_account.tr(),
+                        "New Customer",
                         style: context.textTheme.displayMedium?.rq.copyWith(
                           color: const Color(0xff5D5C5D),
                           letterSpacing: 0.16,
@@ -190,23 +188,18 @@ class _WelcomeSectionState extends State<WelcomeSection> {
             ),
           ),
         ),
-        SizedBox(height: 10.h),
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10.0),
-          child: MyTextWidget(
-            LocaleKeys.later_take_look.tr(),
-            textAlign: TextAlign.center,
-            style: context.textTheme.titleLarge?.rq.copyWith(
-              color: Colors.grey,
-              decoration: TextDecoration.underline,
-              decorationColor: Colors.grey,
-              letterSpacing: 0.14,
-              height: 1.43,
-              fontSize: 16.sp,
-            ),
+        SizedBox(height: 30.h),
+        MyTextWidget(
+          LocaleKeys.later_take_look.tr(),
+          textAlign: TextAlign.center,
+          style: context.textTheme.titleLarge?.rq.copyWith(
+            color: Color(0xff4D84FF),
+            letterSpacing: 0.14,
+            height: 1.43,
+            fontSize: 13.sp,
           ),
         ),
-        SizedBox(height: 30.h),
+        SizedBox(height: 55.h),
       ],
     );
   }

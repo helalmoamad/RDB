@@ -124,13 +124,13 @@ class _VerificationMethodsState extends State<VerificationMethods> {
   Widget buildLoadingOrTimer(SendOtpStatus status) {
     if (status == SendOtpStatus.loading) {
       return SizedBox(
-        height: 40.h,
-        child: Center(child: RDBLoader(size: 24.h)),
+        height: 30.h,
+        child: Center(child: RDBLoader(size: 16.h)),
       );
     } else if (status == SendOtpStatus.failure) {
       if (remainingSeconds > 0) {
         return SizedBox(
-          height: 40.h,
+          height: 30.h,
           child: Center(
             child: MyTextWidget(
               '${LocaleKeys.you_must_wait_for_some_seconds_before_try_again.tr()} ${remainingSeconds}s',
@@ -143,7 +143,7 @@ class _VerificationMethodsState extends State<VerificationMethods> {
         );
       } else {
         return SizedBox(
-          height: 40.h,
+          height: 30.h,
           child: Center(
             child: InkWell(
               onTap: () {
@@ -171,7 +171,7 @@ class _VerificationMethodsState extends State<VerificationMethods> {
       }
     }
     // For init, success, or any other status, show empty space
-    return const SizedBox.shrink();
+    return SizedBox(height: 30.h);
   }
 
   @override
@@ -208,13 +208,18 @@ class _VerificationMethodsState extends State<VerificationMethods> {
       },
       child: BlocBuilder<AuthBloc, AuthState>(
         bloc: authBloc,
+        buildWhen: (previous, current) =>
+            previous.sendOtpStatus != current.sendOtpStatus,
         builder: (context, state) {
           return Column(
             mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
                 padding: HWEdgeInsets.symmetric(horizontal: 40.0.w),
                 child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     MyTextWidget(
                       widget.isFromLogin
@@ -224,87 +229,112 @@ class _VerificationMethodsState extends State<VerificationMethods> {
                       style: context.textTheme.titleMedium?.bq.copyWith(
                         color: const Color(0xff1D1D1D),
                         height: 1.25,
-                        fontSize: 24.sp,
+                        fontSize: 30.sp,
                       ),
                     ),
-                    35.verticalSpace,
-                    SvgPicture.asset(
-                      AppAssets.phoneCallOutlinedSvg,
-                      width: 50.w,
-                      colorFilter: ColorFilter.mode(
-                        Colors.grey,
-                        BlendMode.srcIn,
+
+                    12.verticalSpace,
+                    MyTextWidget(
+                      "Choose Verification Method",
+                      style: context.textTheme.titleMedium?.mq.copyWith(
+                        color: const Color(0xff5D5C5D),
+                        height: 1.42,
+                        fontSize: 16.sp,
                       ),
                     ),
-                    35.verticalSpace,
+                    10.verticalSpace,
+
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        SizedBox(
+                          child: MyTextWidget(
+                            LocaleKeys.we_will_send_code.tr(),
+                            style: context.textTheme.titleMedium?.rq.copyWith(
+                              color: const Color(0xff1D1D1D),
+                              height: 1.42,
+                              fontSize: 12.sp,
+                            ),
+                          ),
+                        ),
+                        10.horizontalSpace,
+                        SvgPicture.asset(
+                          AppAssets.phoneOtpSvg,
+                          width: 15.h,
+                          height: 15.h,
+                          // ignore: deprecated_member_use
+                          color: const Color(0xff1D1D1D),
+                        ),
+                      ],
+                    ),
+                    10.verticalSpace,
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.start,
                       children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Row(
-                              children: [
-                                IgnorePointer(
-                                  child: Icon(
-                                    Icons.info_outline,
-                                    color: Color.fromARGB(255, 179, 179, 179),
-                                    size: 15.h,
-                                  ),
-                                ),
-                                10.horizontalSpace,
-                                MyTextWidget(
-                                  LocaleKeys.we_will_send_code.tr(),
-                                  style: context.textTheme.titleMedium?.rq
-                                      .copyWith(
-                                        color: const Color(0xff5D5C5D),
-                                        height: 1.42,
-                                        fontSize: 13.sp,
-                                      ),
-                                ),
-                              ],
-                            ),
-                            20.verticalSpace,
-                            Row(
-                              children: [
-                                InkWell(
-                                  onTap: widget.goBackToPhone,
-                                  child: Row(
-                                    children: [
-                                      const SizedBox(width: 4),
-                                      SvgPicture.asset(
-                                        AppAssets.editPenSvg,
+                        MyTextWidget(
+                          "+ ${widget.phoneNumber}",
+                          textAlign: TextAlign.start,
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 2,
+                          style: context.textTheme.titleMedium?.mq.copyWith(
+                            color: const Color(0xff1D1D1D),
+                            height: 1.42,
+                            fontSize: 12.sp,
+                          ),
+                        ),
+                        5.horizontalSpace,
+                        InkWell(
+                          onTap: widget.goBackToPhone,
+                          child: MyTextWidget(
+                            "Edit",
+                            textAlign: TextAlign.start,
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 2,
 
-                                        height: 15.h,
-                                      ),
-                                      const SizedBox(width: 10),
-                                    ],
-                                  ),
-                                ),
-                                5.horizontalSpace,
-                                MyTextWidget(
-                                  widget.phoneNumber,
-                                  textAlign: TextAlign.center,
-                                  style: context.textTheme.titleMedium?.bq
-                                      .copyWith(
-                                        color: const Color(0xff1D1D1D),
-                                        height: 1.25,
-                                        fontSize: 13.sp,
-                                      ),
-                                ),
-                              ],
+                            style: context.textTheme.titleMedium?.mq.copyWith(
+                              color: const Color(0xff388CFF),
+                              height: 1.42,
+                              decoration: TextDecoration.underline,
+                              decorationColor: const Color(0xff388CFF),
+
+                              fontSize: 12.sp,
                             ),
-                          ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    10.verticalSpace,
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        MyTextWidget(
+                          "Your Privacy Is Completely Safe",
+                          textAlign: TextAlign.start,
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 2,
+                          style: context.textTheme.titleMedium?.rq.copyWith(
+                            color: const Color(0xffC3C3C3),
+                            height: 1.42,
+                            fontSize: 11.sp,
+                          ),
+                        ),
+                        10.horizontalSpace,
+                        SvgPicture.asset(
+                          AppAssets.privacySvg,
+                          width: 15.h,
+                          height: 15.h,
                         ),
                       ],
                     ),
                   ],
                 ),
               ),
-              SizedBox(height: 100.h),
+
+              SizedBox(height: 28.h),
               buildLoadingOrTimer(state.sendOtpStatus),
-              SizedBox(height: 15.h),
+              SizedBox(height: 10.h),
               Padding(
                 padding: HWEdgeInsets.symmetric(horizontal: 20.0),
                 child: Row(
@@ -326,7 +356,6 @@ class _VerificationMethodsState extends State<VerificationMethods> {
                                 Future.delayed(
                                   const Duration(milliseconds: 100),
                                   () {
-                                    clickButton.value = -1;
                                     sendOtp('whatsapp');
                                   },
                                 );
@@ -339,46 +368,67 @@ class _VerificationMethodsState extends State<VerificationMethods> {
                                 state.sendOtpStatus == SendOtpStatus.loading ||
                                 (state.sendOtpStatus == SendOtpStatus.failure &&
                                     remainingSeconds > 0);
-                            return Opacity(
-                              opacity: isDisabled ? 0.5 : 1.0,
-                              child: DottedBorder(
-                                padding: EdgeInsets.zero,
-                                borderType: BorderType.RRect,
-                                strokeCap: StrokeCap.round,
+                            return SizedBox(
+                              height: 70.h,
+                              child: Stack(
+                                alignment: AlignmentGeometry.bottomCenter,
+                                children: [
+                                  Opacity(
+                                    opacity: isDisabled ? 0.5 : 1.0,
+                                    child: DottedBorder(
+                                      padding: EdgeInsets.all(0.5),
+                                      borderType: BorderType.RRect,
+                                      strokeCap: StrokeCap.round,
 
-                                strokeWidth: 0.5,
-                                dashPattern: const [3, 3],
-                                radius: Radius.circular(15.r),
-                                color: const Color.fromARGB(255, 126, 126, 126),
-                                child: Container(
-                                  height: 50.h,
-                                  decoration: BoxDecoration(
-                                    color: index == 0
-                                        ? const Color(0xffffffff)
-                                        : const Color(0xffF5F5F5),
-                                    borderRadius: BorderRadius.circular(15.r),
-                                  ),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      SvgPicture.asset(
-                                        AppAssets.whatsappSvg,
-                                        width: 20.w,
-                                        height: 20.h,
-                                      ),
-                                      10.horizontalSpace,
-                                      MyTextWidget(
-                                        LocaleKeys.whatsApp.tr(),
-                                        style: context.textTheme.titleLarge?.rq
-                                            .copyWith(
-                                              color: const Color(0xff5D5C5D),
-                                              height: 1.42,
-                                              fontSize: 13.sp,
+                                      strokeWidth: 0.5,
+                                      dashPattern: const [3, 3],
+                                      radius: Radius.circular(20.r),
+                                      color: index == 0
+                                          ? Color(0xff388CFF)
+                                          : Color(0xffC3C3C3),
+                                      child: Container(
+                                        height: 60.h,
+                                        decoration: BoxDecoration(
+                                          color: index == 0
+                                              ? const Color(0xffffffff)
+                                              : const Color(0xffFCFCFC),
+                                          borderRadius: BorderRadius.circular(
+                                            20.r,
+                                          ),
+                                        ),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            MyTextWidget(
+                                              LocaleKeys.whatsApp.tr(),
+                                              style: context
+                                                  .textTheme
+                                                  .titleLarge
+                                                  ?.rq
+                                                  .copyWith(
+                                                    color: const Color(
+                                                      0xff1D1D1D,
+                                                    ),
+                                                    height: 1.42,
+                                                    fontSize: 16.sp,
+                                                  ),
                                             ),
+                                          ],
+                                        ),
                                       ),
-                                    ],
+                                    ),
                                   ),
-                                ),
+                                  PositionedDirectional(
+                                    top: 0,
+                                    start: 10.w,
+                                    child: SvgPicture.asset(
+                                      AppAssets.whatsappSvg,
+                                      width: 20.w,
+                                      height: 20.h,
+                                    ),
+                                  ),
+                                ],
                               ),
                             );
                           },
@@ -400,7 +450,6 @@ class _VerificationMethodsState extends State<VerificationMethods> {
                                 Future.delayed(
                                   const Duration(milliseconds: 100),
                                   () {
-                                    clickButton.value = -1;
                                     sendOtp('sms');
                                   },
                                 );
@@ -413,48 +462,68 @@ class _VerificationMethodsState extends State<VerificationMethods> {
                                 state.sendOtpStatus == SendOtpStatus.loading ||
                                 (state.sendOtpStatus == SendOtpStatus.failure &&
                                     remainingSeconds > 0);
-                            return Opacity(
-                              opacity: isDisabled ? 0.5 : 1.0,
-                              child: DottedBorder(
-                                padding: EdgeInsets.zero,
-                                borderType: BorderType.RRect,
-                                strokeCap: StrokeCap.round,
-                                strokeWidth: 0.5,
-                                dashPattern: const [3, 3],
-                                radius: Radius.circular(15.r),
-                                color: const Color.fromARGB(255, 126, 126, 126),
-                                child: Container(
-                                  height: 50.h,
+                            return SizedBox(
+                              height: 70.h,
+                              child: Stack(
+                                alignment: AlignmentGeometry.bottomCenter,
 
-                                  decoration: BoxDecoration(
-                                    color: index == 1
-                                        ? const Color(0xffffffff)
-                                        : const Color(0xffF5F5F5),
-                                    borderRadius: BorderRadius.circular(15.r),
-                                  ),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      IgnorePointer(
-                                        child: Icon(
-                                          Icons.messenger_outline,
+                                children: [
+                                  Opacity(
+                                    opacity: isDisabled ? 0.5 : 1.0,
+                                    child: DottedBorder(
+                                      padding: EdgeInsets.all(0.5),
+                                      borderType: BorderType.RRect,
+                                      strokeCap: StrokeCap.round,
 
-                                          size: 20.h,
+                                      strokeWidth: 0.5,
+                                      dashPattern: const [3, 3],
+                                      radius: Radius.circular(20.r),
+                                      color: index == 1
+                                          ? Color(0xff388CFF)
+                                          : Color(0xffC3C3C3),
+                                      child: Container(
+                                        height: 60.h,
+                                        decoration: BoxDecoration(
+                                          color: index == 1
+                                              ? const Color(0xffffffff)
+                                              : const Color(0xffFCFCFC),
+                                          borderRadius: BorderRadius.circular(
+                                            20.r,
+                                          ),
+                                        ),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            MyTextWidget(
+                                              LocaleKeys.sms.tr(),
+                                              style: context
+                                                  .textTheme
+                                                  .titleLarge
+                                                  ?.rq
+                                                  .copyWith(
+                                                    color: const Color(
+                                                      0xff1D1D1D,
+                                                    ),
+                                                    height: 1.42,
+                                                    fontSize: 16.sp,
+                                                  ),
+                                            ),
+                                          ],
                                         ),
                                       ),
-                                      10.horizontalSpace,
-                                      MyTextWidget(
-                                        LocaleKeys.sms.tr(),
-                                        style: context.textTheme.titleLarge?.rq
-                                            .copyWith(
-                                              color: const Color(0xff5D5C5D),
-                                              height: 1.42,
-                                              fontSize: 13.sp,
-                                            ),
-                                      ),
-                                    ],
+                                    ),
                                   ),
-                                ),
+                                  PositionedDirectional(
+                                    top: 0,
+                                    start: 10.w,
+                                    child: SvgPicture.asset(
+                                      AppAssets.smsSvg,
+                                      width: 20.w,
+                                      height: 20.h,
+                                    ),
+                                  ),
+                                ],
                               ),
                             );
                           },

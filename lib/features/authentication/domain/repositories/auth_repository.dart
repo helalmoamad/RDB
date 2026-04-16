@@ -23,7 +23,7 @@ abstract class AuthRepository {
   Future<Either<Failure, VerifyOtpSignUpAndInResponseModel>> verifyOtpSignIn(
     Map<String, dynamic> params,
   );
-  Future<Either<Failure, VerifyOtpSignUpAndInResponseModel>> verifyOtpSignUp(
+  /*Future<Either<Failure, VerifyOtpSignUpAndInResponseModel>> verifyOtpSignUp(
     Map<String, dynamic> params,
-  );
+  );*/
 }

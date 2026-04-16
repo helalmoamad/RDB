@@ -8,10 +8,10 @@ import 'package:go_router/go_router.dart';
 import 'package:rdb/common/test_utils/test_var.dart';
 import 'package:rdb/core/domin/repositories/prefs_repository.dart';
 import 'package:rdb/core/utils/extensions/build_context.dart';
+import 'package:rdb/features/authentication/presentation/manager/auth_bloc.dart';
 import 'package:rdb/generated/locale_keys.g.dart';
 import 'package:rdb/routes/router.dart';
 import 'package:rdb/theme/typography.dart';
-import '../../../../base_page.dart';
 import '../../../../common/constant/design/assets_provider.dart';
 import '../../../../common/test_utils/widgets_keys.dart';
 import '../../../../core/utils/responsive_padding.dart';
@@ -56,167 +56,128 @@ class _NumberNotRegisteredState extends ThemeState<NumberNotRegistered> {
               // ignore: deprecated_member_use
               WillPopScope(
                 onWillPop: () async {
-                  if (pageController.page == 1) {
+                  /*  if (pageController.page == 1) {
                     prefsRepository.setUserName("");
                     context.go(
                       '${GRouter.config.applicationRoutes.kRegistrationCompletedPage}?userName=',
                     );
                     return false;
-                  }
-                  return true;
+                  }*/
+                  return false;
                 },
                 child: Stack(
                   alignment: Alignment.bottomCenter,
                   children: [
-                    Positioned(top: 50, left: 40, right: 40, child: logo),
-                    PageView(
-                      physics: const NeverScrollableScrollPhysics(),
-                      controller: pageController,
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Column(
-                          mainAxisSize: MainAxisSize.min,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Spacer(),
-                            Padding(
-                              padding: HWEdgeInsets.symmetric(horizontal: 40.0),
-                              child: Column(
+                        const Spacer(),
+                        Padding(
+                          padding: HWEdgeInsets.symmetric(horizontal: 40.0),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              MyTextWidget(
+                                "Not Registered !",
+                                style: context.textTheme.titleLarge?.bq
+                                    .copyWith(
+                                      color: const Color(0xff1D1D1D),
+                                      height: 1.42,
+                                      fontSize: 30.sp,
+                                    ),
+                              ),
+                              10.verticalSpace,
+                              MyTextWidget(
+                                LocaleKeys
+                                    .sorry_this_number_is_not_registered_with_us
+                                    .tr(),
+                                style: context.textTheme.titleLarge?.mq
+                                    .copyWith(
+                                      color: const Color(0xff1D1D1D),
+                                      height: 1.42,
+                                      fontSize: 16.sp,
+                                    ),
+                              ),
+                              10.verticalSpace,
+                              Row(
                                 children: [
-                                  Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      SvgPicture.asset(
-                                        AppAssets.registerInfoSvg,
-                                        width: 15,
-                                        height: 15,
-                                        // ignore: deprecated_member_use
-                                        color: const Color(0xffFCAC2D),
-                                      ),
-                                      10.horizontalSpace,
-                                      Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          MyTextWidget(
-                                            LocaleKeys
-                                                .sorry_this_number_is_not_registered_with_us
-                                                .tr(),
-                                            style: context
-                                                .textTheme
-                                                .titleLarge
-                                                ?.rq
-                                                .copyWith(
-                                                  color: const Color(
-                                                    0xff5D5C5D,
-                                                  ),
-                                                  height: 1.42,
-                                                ),
-                                          ),
-                                          Row(
-                                            children: [
-                                              Padding(
-                                                padding: HWEdgeInsets.only(
-                                                  top: 3.0,
-                                                ),
-                                                child: SvgPicture.asset(
-                                                  AppAssets.phoneCallSvg,
-                                                  width: 10,
-                                                  height: 10,
-                                                ),
-                                              ),
-                                              5.horizontalSpace,
-                                              MyTextWidget(
-                                                widget.phoneNumber,
-                                                textAlign: TextAlign.start,
-                                                style: context
-                                                    .textTheme
-                                                    .titleMedium
-                                                    ?.rq
-                                                    .copyWith(
-                                                      color: const Color(
-                                                        0xff8D8D8D,
-                                                      ),
-                                                      height: 1.25,
-                                                    ),
-                                              ),
-                                            ],
-                                          ),
-                                          10.verticalSpace,
-                                          Row(
-                                            children: [
-                                              15.horizontalSpace,
-                                              MyTextWidget(
-                                                LocaleKeys
-                                                    .register_create_new_account
-                                                    .tr(),
-                                                style: context
-                                                    .textTheme
-                                                    .titleMedium
-                                                    ?.rq
-                                                    .copyWith(
-                                                      color: const Color(
-                                                        0xffC4C2C2,
-                                                      ),
-                                                      height: 1.25,
-                                                    ),
-                                              ),
-                                            ],
-                                          ),
-                                        ],
-                                      ),
-                                    ],
+                                  MyTextWidget(
+                                    "+ ${widget.phoneNumber}",
+                                    textAlign: TextAlign.start,
+                                    style: context.textTheme.titleMedium?.rq
+                                        .copyWith(
+                                          color: const Color(0xff1D1D1D),
+                                          height: 1.25,
+                                          fontSize: 12.sp,
+                                        ),
+                                  ),
+                                  10.horizontalSpace,
+                                  SvgPicture.asset(
+                                    AppAssets.yallowQuestion,
+                                    width: 15.w,
+                                    height: 15.h,
                                   ),
                                 ],
                               ),
-                            ),
-                            const Spacer(),
-                            InkWell(
-                              key: TestVariables.kTestMode
-                                  ? const Key(
-                                      WidgetsKeys.createNewAccountContinueKey,
-                                    )
-                                  : null,
-                              onTap: () {
-                                pageContent.value = 1;
-                                pageController.animateToPage(
-                                  1,
-                                  duration: const Duration(milliseconds: 500),
-                                  curve: Curves.easeInOut,
-                                );
-                                ///////////////////
-                              },
-                              child: Container(
-                                width: 1.sw,
-                                height: 60,
-                                margin: HWEdgeInsets.symmetric(horizontal: 20),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xffFAFAFA),
-                                  borderRadius: BorderRadius.circular(20.0),
-                                ),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    MyTextWidget(
-                                      LocaleKeys.create_new_account_continue
-                                          .tr(),
-                                      style: textTheme.displayMedium?.rq
-                                          .copyWith(
-                                            color: const Color(0xff5D5C5D),
-                                            letterSpacing: 0.16,
-                                            height: 1.25,
-                                          ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            20.verticalSpace,
-
-                            const SizedBox(height: 44),
-                          ],
+                            ],
+                          ),
                         ),
-                        //const AddingName(fromLogin: true),
+                        const Spacer(),
+                        InkWell(
+                          key: TestVariables.kTestMode
+                              ? const Key(
+                                  WidgetsKeys.createNewAccountContinueKey,
+                                )
+                              : null,
+                          onTap: () {
+                            GetIt.I<AuthBloc>().add(ResetAllData());
+                            context.go(
+                              GRouter
+                                  .config
+                                  .applicationRoutes
+                                  .kRegistrationPage,
+                            );
+                          },
+                          child: Container(
+                            width: 1.sw,
+                            height: 60.h,
+                            margin: HWEdgeInsets.symmetric(horizontal: 20.w),
+                            decoration: BoxDecoration(
+                              color: const Color(0xffFAFAFA),
+                              borderRadius: BorderRadius.circular(20.r),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                MyTextWidget(
+                                  LocaleKeys.create_new_account_continue.tr(),
+                                  style: textTheme.displayMedium?.rq.copyWith(
+                                    color: const Color(0xff5D5C5D),
+                                    letterSpacing: 0.16,
+                                    height: 1.25,
+                                    fontSize: 16.sp,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        30.verticalSpace,
+                        Center(
+                          child: MyTextWidget(
+                            "Cancel & Take A Look At The App",
+                            style: textTheme.displayMedium?.rq.copyWith(
+                              color: const Color(0xff4D84FF),
+                              letterSpacing: 0.16,
+                              height: 1.25,
+                              fontSize: 14.sp,
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 54.h),
                       ],
                     ),
                   ],

@@ -26,7 +26,7 @@ Widget get logo {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         SvgPicture.asset(AppAssets.rdb, height: 75.h),
-        SizedBox(height: 12.h),
+        SizedBox(height: 16.h),
         SvgPicture.asset(AppAssets.rammazDigitalBanking, height: 14.h),
       ],
     ),

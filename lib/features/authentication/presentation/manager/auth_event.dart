@@ -23,17 +23,32 @@ class VerifyOtpSignInEvent extends AuthEvent {
   final String sessionInfo;
   final String otp;
   final String phone;
+  final String action;
 
   const VerifyOtpSignInEvent({
     required this.sessionInfo,
     required this.otp,
     required this.phone,
+    required this.action,
   });
   @override
   List<Object?> get props => [otp, sessionInfo, phone];
 }
 
-class VerifyOtpSignUpEvent extends AuthEvent {
+class ResetAllData extends AuthEvent {
+  const ResetAllData();
+  @override
+  List<Object?> get props => [];
+}
+
+class SaveErrorSigneInVerify extends AuthEvent {
+  final String error;
+
+  const SaveErrorSigneInVerify({required this.error});
+  @override
+  List<Object?> get props => [error];
+}
+/*class VerifyOtpSignUpEvent extends AuthEvent {
   final String sessionInfo;
   final String otp;
   final String phone;
@@ -45,7 +60,7 @@ class VerifyOtpSignUpEvent extends AuthEvent {
   });
   @override
   List<Object?> get props => [otp, phone, sessionInfo];
-}
+}*/
 
 /*class LoginToWalletEvent extends AuthEvent {
   final String? otpIdToken;

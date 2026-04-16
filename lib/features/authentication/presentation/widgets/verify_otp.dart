@@ -36,6 +36,7 @@ class VerifyOtp extends StatefulWidget {
     required this.navigateToAddName,
     required this.navigateTocartOrProfile,
     required this.onLoginFailed,
+    required this.goChangeNumber,
     required this.goBack,
     required this.navigateToProfile,
     required this.fromProfile,
@@ -49,6 +50,7 @@ class VerifyOtp extends StatefulWidget {
   final String phoneNumber;
   final void Function() onLoginFailed;
   final void Function() goBack;
+  final void Function() goChangeNumber;
   final void Function() navigateToAddName;
   final void Function() navigateTocartOrProfile;
   final void Function() navigateToProfile;
@@ -124,547 +126,674 @@ class _VerifyOtpState extends State<VerifyOtp> with FormStateMinxin {
               p.verifyOtpSignInStatus != c.verifyOtpSignInStatus,
           listener: (context, state) {
             if (state.verifyOtpSignInStatus == VerifyOtpSignInStatus.failure) {
-              if (!widget.fromExpired && !widget.fromProfile) {
-                if (state.signInErrorMessage == 'auth-001') {
-                  context.go(
-                    '${GRouter.config.applicationRoutes.kNumberNotRegisteredPage}?phoneNumber=${widget.phoneNumber}',
-                    extra: widget.onLoginFailed,
-                  );
-                  /////////////////////////////////////////////
+              if (state.signInErrorMessage == 'User not found') {
+                context.go(
+                  '${GRouter.config.applicationRoutes.kNumberNotRegisteredPage}?phoneNumber=${widget.phoneNumber}',
+                  extra: widget.onLoginFailed,
+                );
+                GetIt.I<AuthBloc>().add(
+                  SaveErrorSigneInVerify(error: "ServerException"),
+                );
+                /////////////////////////////////////////////
 
-                  return;
-                } else {}
-              }
+                return;
+              } else {}
+
               checkOtp.value = 2;
             } else if (state.verifyOtpSignInStatus ==
                 VerifyOtpSignInStatus.success) {
               checkOtp.value = 1;
 
               Future.delayed(const Duration(milliseconds: 700), () {
+                if (state.signInErrorMessage == "existing_user") {
+                  // ignore: use_build_context_synchronously
+                  context.go(
+                    '${GRouter.config.applicationRoutes.kUserExistPage}?phoneNumber=${widget.phoneNumber}',
+                    extra: widget.onLoginFailed,
+                  );
+                  return;
+                }
                 widget.navigateToAddName.call();
               });
               /////////////////////////////////
             }
           },
-          child: BlocListener<AuthBloc, AuthState>(
-            listenWhen: (p, c) =>
-                p.verifyOtpSignUpStatus != c.verifyOtpSignUpStatus,
-            listener: (context, state) {
-              if (state.verifyOtpSignUpStatus ==
-                  VerifyOtpSignUpStatus.failure) {
-                if (state.signUpErrorMessage == 'auth-001') {
-                  debugPrint('auth-00122');
-                  context.go(
-                    '${GRouter.config.applicationRoutes.kUserExistPage}?phoneNumber=${widget.phoneNumber}',
-                  );
-                  /////////////////////////
-
-                  return;
-                }
-
-                checkOtp.value = 2;
-              } else if (state.verifyOtpSignUpStatus ==
-                  VerifyOtpSignUpStatus.success) {
-                checkOtp.value = 1;
-
-                Future.delayed(const Duration(milliseconds: 700), () {
-                  widget.navigateToAddName.call();
-                });
-                /////////////////////////
-              }
-            },
-            child: BlocBuilder<AuthBloc, AuthState>(
-              buildWhen: (p, c) =>
-                  p.verifyOtpSignInStatus != c.verifyOtpSignInStatus ||
-                  p.verifyOtpSignUpStatus != c.verifyOtpSignUpStatus,
-              builder: (context, state) {
-                return Column(
-                  mainAxisAlignment:
-                      (state.verifyOtpFromGuestStatus !=
-                              VerifyOtpFromGuestStatus.loading &&
-                          state.verifyOtpFromGuestStatus !=
-                              VerifyOtpFromGuestStatus.success &&
-                          state.verifyOtpSignInStatus !=
-                              VerifyOtpSignInStatus.loading &&
-                          state.verifyOtpSignUpStatus !=
-                              VerifyOtpSignUpStatus.loading &&
-                          state.verifyOtpSignInStatus !=
-                              VerifyOtpSignInStatus.success &&
-                          state.verifyOtpSignUpStatus !=
-                              VerifyOtpSignUpStatus.success)
-                      ? MainAxisAlignment.start
-                      : MainAxisAlignment.start,
-                  children: [
-                    50.verticalSpace,
-                    MyTextWidget(
-                      LocaleKeys.verify_your_account.tr(),
-                      textAlign: TextAlign.center,
-                      style: context.textTheme.titleMedium?.bq.copyWith(
-                        color: const Color(0xff1D1D1D),
-                        height: 1.25,
-                        fontSize: 24.sp,
-                      ),
-                    ),
-                    30.verticalSpace,
-                    SvgPicture.asset(
-                      AppAssets.phoneCallOutlinedSvg,
-                      width: 50.w,
-                      colorFilter: ColorFilter.mode(
-                        Colors.grey,
-                        BlendMode.srcIn,
-                      ),
-                    ),
-                    30.verticalSpace,
-
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.center,
+          child: BlocBuilder<AuthBloc, AuthState>(
+            buildWhen: (p, c) =>
+                p.verifyOtpSignInStatus != c.verifyOtpSignInStatus,
+            builder: (context, state) {
+              return Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: HWEdgeInsets.symmetric(horizontal: 40.0.w),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        IgnorePointer(
-                          child: Icon(
-                            Icons.info_outline,
-                            color: Color.fromARGB(255, 179, 179, 179),
-                            size: 15.h,
-                          ),
-                        ),
-                        6.horizontalSpace,
                         MyTextWidget(
-                          '${LocaleKeys.please_enter_the_verification_cod.tr()} ${widget.methodIcon == AppAssets.whatsappSvg ? LocaleKeys.whatsApp.tr() : LocaleKeys.sms.tr()}',
-                          style: context.textTheme.titleMedium?.rq.copyWith(
-                            color: const Color(0xff8e8e8e),
+                          widget.fromLogin
+                              ? LocaleKeys.sign_in_exclamation.tr()
+                              : LocaleKeys.sign_up_exclamation.tr(),
+                          textAlign: TextAlign.center,
+                          style: context.textTheme.titleMedium?.bq.copyWith(
+                            color: const Color(0xff1D1D1D),
                             height: 1.25,
-                            fontSize: 13.sp,
+                            fontSize: 30.sp,
                           ),
                         ),
-                        6.horizontalSpace,
-                        InkWell(
-                          onTap: () {
-                            widget.goBack();
-                          },
-                          child: IgnorePointer(
-                            child: Icon(
-                              Icons.swap_horiz_outlined,
-                              color: Color(0xff4D84FF),
-                              size: 15.h,
-                            ),
+
+                        12.verticalSpace,
+                        MyTextWidget(
+                          "Enter Verification Code Sent To Your Whatsapp",
+                          style: context.textTheme.titleMedium?.mq.copyWith(
+                            color: const Color(0xff5D5C5D),
+                            height: 1.42,
+                            fontSize: 16.sp,
                           ),
+                        ),
+                        10.verticalSpace,
+
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            SizedBox(
+                              child: MyTextWidget(
+                                "We Have Sent A Verification Code To The Number",
+                                style: context.textTheme.titleMedium?.rq
+                                    .copyWith(
+                                      color: const Color(0xff1D1D1D),
+                                      height: 1.42,
+                                      fontSize: 12.sp,
+                                    ),
+                              ),
+                            ),
+                            10.horizontalSpace,
+                            SvgPicture.asset(
+                              AppAssets.phoneOtpSvg,
+                              width: 15.h,
+                              height: 15.h,
+                              // ignore: deprecated_member_use
+                              color: const Color(0xff1D1D1D),
+                            ),
+                          ],
+                        ),
+                        10.verticalSpace,
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            MyTextWidget(
+                              "+ ${widget.phoneNumber}",
+                              textAlign: TextAlign.start,
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 2,
+                              style: context.textTheme.titleMedium?.mq.copyWith(
+                                color: const Color(0xff1D1D1D),
+                                height: 1.42,
+                                fontSize: 12.sp,
+                              ),
+                            ),
+                            5.horizontalSpace,
+                            ValueListenableBuilder<bool>(
+                              valueListenable: enabledResendNotifier,
+                              builder: (context, enabledResend, _) {
+                                return (!enabledResend)
+                                    ?
+                                      // ignore: curly_braces_in_flow_control_structures
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          MyTextWidget(
+                                            key: TestVariables.kTestMode
+                                                ? const Key(
+                                                    WidgetsKeys
+                                                        .otpRemainingTimeKey,
+                                                  )
+                                                : null,
+                                            'Resend After ',
+                                            style: context
+                                                .textTheme
+                                                .titleMedium
+                                                ?.rq
+                                                .copyWith(
+                                                  color: const Color(
+                                                    0xffC3C3C3,
+                                                  ),
+                                                  height: 1.25,
+                                                  fontSize: 12.sp,
+                                                ),
+                                          ),
+                                          Directionality(
+                                            textDirection: ui.TextDirection.ltr,
+                                            child: CountdownTimer(
+                                              widgetBuilder: (_, remainingTime) {
+                                                String seconds =
+                                                    (remainingTime?.sec ?? 0) <
+                                                        10
+                                                    ? '0${remainingTime?.sec}'
+                                                    : '${remainingTime?.sec}';
+                                                return MyTextWidget(
+                                                  key: TestVariables.kTestMode
+                                                      ? const Key(
+                                                          WidgetsKeys
+                                                              .otpRemainingTimeKey,
+                                                        )
+                                                      : null,
+                                                  '- 0${remainingTime?.min ?? '0'} : $seconds ',
+                                                  style: context
+                                                      .textTheme
+                                                      .titleMedium
+                                                      ?.mq
+                                                      .copyWith(
+                                                        color: const Color(
+                                                          0xff388CFF,
+                                                        ),
+                                                        height: 1.25,
+                                                        fontSize: 12.sp,
+                                                      ),
+                                                );
+                                              },
+                                              controller:
+                                                  countdownTimerController,
+                                              endWidget: const SizedBox(),
+                                            ),
+                                          ),
+                                        ],
+                                      )
+                                    : MyTextWidget(
+                                        "Didn’t You Receive A Code?",
+                                        textAlign: TextAlign.start,
+
+                                        maxLines: 1,
+                                        style: context.textTheme.titleMedium?.rq
+                                            .copyWith(
+                                              color: const Color(0xffC3C3C3),
+                                              height: 1.42,
+                                              fontSize: 12.sp,
+                                            ),
+                                      );
+                              },
+                            ),
+
+                            SizedBox(width: 5.w),
+                            SvgPicture.asset(
+                              AppAssets.grayQuestion,
+                              width: 15.h,
+                              height: 15.h,
+
+                              // ignore: deprecated_member_use
+                            ),
+                          ],
+                        ),
+
+                        ValueListenableBuilder<bool>(
+                          valueListenable: enabledResendNotifier,
+                          builder: (context, enabledResend, _) {
+                            return (enabledResend)
+                                ? Padding(
+                                    padding: EdgeInsets.only(top: 10.h),
+                                    child: Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      children: [
+                                        InkWell(
+                                          onTap: _onResendSucceed,
+                                          child: MyTextWidget(
+                                            "Resend Code",
+                                            textAlign: TextAlign.start,
+
+                                            maxLines: 2,
+                                            style: context
+                                                .textTheme
+                                                .titleMedium
+                                                ?.mq
+                                                .copyWith(
+                                                  color: const Color(
+                                                    0xff388CFF,
+                                                  ),
+                                                  height: 1.42,
+                                                  decoration:
+                                                      TextDecoration.underline,
+                                                  decorationColor: const Color(
+                                                    0xff388CFF,
+                                                  ),
+                                                  fontSize: 12.sp,
+                                                ),
+                                          ),
+                                        ),
+                                        5.horizontalSpace,
+                                        MyTextWidget(
+                                          "Or",
+                                          textAlign: TextAlign.start,
+
+                                          maxLines: 2,
+                                          style: context
+                                              .textTheme
+                                              .titleMedium
+                                              ?.mq
+                                              .copyWith(
+                                                color: const Color(0xff1D1D1D),
+                                                height: 1.42,
+
+                                                fontSize: 12.sp,
+                                              ),
+                                        ),
+                                        5.horizontalSpace,
+                                        InkWell(
+                                          onTap: widget.goChangeNumber,
+                                          child: MyTextWidget(
+                                            "Change Number",
+                                            textAlign: TextAlign.start,
+
+                                            maxLines: 2,
+                                            style: context
+                                                .textTheme
+                                                .titleMedium
+                                                ?.mq
+                                                .copyWith(
+                                                  color: const Color(
+                                                    0xff388CFF,
+                                                  ),
+                                                  height: 1.42,
+                                                  decoration:
+                                                      TextDecoration.underline,
+                                                  decorationColor: const Color(
+                                                    0xff388CFF,
+                                                  ),
+                                                  fontSize: 12.sp,
+                                                ),
+                                          ),
+                                        ),
+                                        5.horizontalSpace,
+                                        MyTextWidget(
+                                          "Or",
+                                          textAlign: TextAlign.start,
+
+                                          maxLines: 2,
+                                          style: context
+                                              .textTheme
+                                              .titleMedium
+                                              ?.mq
+                                              .copyWith(
+                                                color: const Color(0xff1D1D1D),
+                                                height: 1.42,
+
+                                                fontSize: 12.sp,
+                                              ),
+                                        ),
+                                        5.horizontalSpace,
+                                        InkWell(
+                                          onTap: widget.goBack,
+                                          child: MyTextWidget(
+                                            "Method",
+                                            textAlign: TextAlign.start,
+
+                                            maxLines: 2,
+                                            style: context
+                                                .textTheme
+                                                .titleMedium
+                                                ?.mq
+                                                .copyWith(
+                                                  color: const Color(
+                                                    0xff388CFF,
+                                                  ),
+                                                  height: 1.42,
+                                                  decoration:
+                                                      TextDecoration.underline,
+                                                  decorationColor: const Color(
+                                                    0xff388CFF,
+                                                  ),
+                                                  fontSize: 12.sp,
+                                                ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  )
+                                : SizedBox.shrink();
+                          },
+                        ),
+                        10.verticalSpace,
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            MyTextWidget(
+                              "Your Privacy Is Completely Safe",
+                              textAlign: TextAlign.start,
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 2,
+                              style: context.textTheme.titleMedium?.rq.copyWith(
+                                color: const Color(0xffC3C3C3),
+                                height: 1.42,
+                                fontSize: 11.sp,
+                              ),
+                            ),
+                            10.horizontalSpace,
+                            SvgPicture.asset(
+                              AppAssets.privacySvg,
+                              width: 15.h,
+                              height: 15.h,
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                    15.verticalSpace,
-                    MyTextWidget(
-                      "+${widget.phoneNumber}",
-                      style: context.textTheme.titleMedium?.bq.copyWith(
-                        color: const Color(0xff1D1D1D),
-                        height: 1.25,
-                        fontSize: 13.sp,
-                      ),
-                    ),
-                    15.verticalSpace,
+                  ),
 
-                    /*   ValueListenableBuilder<bool>(
+                  45.verticalSpace,
+                  Padding(
+                    padding: HWEdgeInsets.symmetric(horizontal: 20.0.w),
+                    child: ValueListenableBuilder<bool>(
                       valueListenable: enabledResendNotifier,
-                      builder: (context, resend, _) {
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                SvgPicture.asset(
-                                  AppAssets.registerInfoSvg,
-                                  width: 10,
-                                  height: 10,
-                                ),
-
-                                4.horizontalSpace,
-                              ],
-                            ),
-                             resend
-                                ? Padding(
-                                    padding: HWEdgeInsets.only(left: 15.0),
-                                    child: InkWell(
-                                      onTap: widget.goBack,
-                                      child: MyTextWidget(
-                                        LocaleKeys.the_method_of_receiving.tr(),
-                                        maxLines: 2,
-                                        style: context.textTheme.titleMedium?.rq
-                                            .copyWith(
-                                              color: const Color(0xff4D84FF),
-                                              height: 1.25,
-                                            ),
-                                      ),
+                      builder: (context, isExpired, _) {
+                        return ValueListenableBuilder<int>(
+                          valueListenable: checkOtp,
+                          builder: (context, codeStatus, _) {
+                            return BlocBuilder<AuthBloc, AuthState>(
+                              buildWhen: (p, c) =>
+                                  p.sendOtpStatus != c.sendOtpStatus,
+                              builder: (context, state) {
+                                if (state.sendOtpStatus ==
+                                    SendOtpStatus.loading) {
+                                  return Center(
+                                    child: SizedBox(
+                                      width: 20.w,
+                                      height: 20.h,
+                                      child: RDBLoader(size: 16.h),
                                     ),
-                                  )
-                                : const SizedBox.shrink(),
-                          ],
-                        );
-                      },
-                    ),*/
-                    25.verticalSpace,
-                    Padding(
-                      padding: HWEdgeInsets.symmetric(horizontal: 20.0.w),
-                      child: ValueListenableBuilder<bool>(
-                        valueListenable: enabledResendNotifier,
-                        builder: (context, isExpired, _) {
-                          return ValueListenableBuilder<int>(
-                            valueListenable: checkOtp,
-                            builder: (context, codeStatus, _) {
-                              return BlocBuilder<AuthBloc, AuthState>(
-                                buildWhen: (p, c) =>
-                                    p.sendOtpStatus != c.sendOtpStatus,
-                                builder: (context, state) {
-                                  if (state.sendOtpStatus ==
-                                      SendOtpStatus.loading) {
-                                    return Center(
-                                      child: SizedBox(
-                                        width: 20.w,
-                                        height: 20.h,
-                                        child: RDBLoader(size: 16.h),
-                                      ),
-                                    );
-                                  } else if (state.sendOtpStatus ==
-                                      SendOtpStatus.failure) {
-                                    return const _FailureWithTimerAndTryAgain();
-                                  } else {
-                                    // success أو الحالة الافتراضية: الحقول كما هي الآن
-                                    return Directionality(
-                                      textDirection: ui.TextDirection.ltr,
-                                      child: SizedBox(
-                                        height: 60.w,
-                                        width: 1.sw - 70.w,
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            PinItem(
-                                              key: const Key('otp_item_1'),
-                                              borderColor: codeStatus == 1
-                                                  ? const Color(0xff35CE3F)
-                                                  : codeStatus == 2
-                                                  ? const Color(0xffFF5F61)
-                                                  : isExpired
-                                                  ? const Color(0xffFFBC26)
-                                                  : const Color(0xff4D84FF),
-                                              isExpired: isExpired,
-                                              contentColor: codeStatus == 1
-                                                  ? const Color(0xffF4FFF4)
-                                                  : codeStatus == 2
-                                                  ? const Color(0xffFDF5F5)
-                                                  : const Color(0xffFAFAFA),
-                                              controller: form.controllers[0],
-                                              wrongCode: codeStatus == 2,
-                                              index: 0,
-                                              pasteOtpCode: pasteOtpCode,
-                                              onChange: () {
-                                                checkOtp.value = 0;
-                                              },
-                                              autoFocus: true,
-                                            ),
-                                            PinItem(
-                                              key: const Key('otp_item_2'),
-                                              borderColor: codeStatus == 1
-                                                  ? const Color(0xff35CE3F)
-                                                  : codeStatus == 2
-                                                  ? const Color(0xffFF5F61)
-                                                  : isExpired
-                                                  ? const Color(0xffFFBC26)
-                                                  : const Color(0xff4D84FF),
-                                              contentColor: codeStatus == 1
-                                                  ? const Color(0xffF4FFF4)
-                                                  : codeStatus == 2
-                                                  ? const Color(0xffFDF5F5)
-                                                  : const Color(0xffFAFAFA),
-                                              isExpired: isExpired,
-                                              controller: form.controllers[1],
-                                              wrongCode: codeStatus == 2,
-                                              index: 1,
-                                              onChange: () {
-                                                checkOtp.value = 0;
-                                              },
-                                              autoFocus: false,
-                                            ),
-                                            PinItem(
-                                              key: const Key('otp_item_3'),
-                                              borderColor: codeStatus == 1
-                                                  ? const Color(0xff35CE3F)
-                                                  : codeStatus == 2
-                                                  ? const Color(0xffFF5F61)
-                                                  : isExpired
-                                                  ? const Color(0xffFFBC26)
-                                                  : const Color(0xff4D84FF),
-                                              isExpired: isExpired,
-                                              contentColor: codeStatus == 1
-                                                  ? const Color(0xffF4FFF4)
-                                                  : codeStatus == 2
-                                                  ? const Color(0xffFDF5F5)
-                                                  : const Color(0xffFAFAFA),
-                                              index: 2,
-                                              wrongCode: codeStatus == 2,
-                                              onChange: () {
-                                                checkOtp.value = 0;
-                                              },
-                                              controller: form.controllers[2],
-                                              autoFocus: false,
-                                            ),
-                                            PinItem(
-                                              key: const Key('otp_item_4'),
-                                              borderColor: codeStatus == 1
-                                                  ? const Color(0xff35CE3F)
-                                                  : codeStatus == 2
-                                                  ? const Color(0xffFF5F61)
-                                                  : isExpired
-                                                  ? const Color(0xffFFBC26)
-                                                  : const Color(0xff4D84FF),
-                                              isExpired: isExpired,
-                                              contentColor: codeStatus == 1
-                                                  ? const Color(0xffF4FFF4)
-                                                  : codeStatus == 2
-                                                  ? const Color(0xffFDF5F5)
-                                                  : const Color(0xffFAFAFA),
-                                              index: 3,
-                                              wrongCode: codeStatus == 2,
-                                              onChange: () {
-                                                checkOtp.value = 0;
-                                              },
-                                              controller: form.controllers[3],
-                                              autoFocus: false,
-                                            ),
-                                            PinItem(
-                                              key: const Key('otp_item_5'),
-                                              borderColor: codeStatus == 1
-                                                  ? const Color(0xff35CE3F)
-                                                  : codeStatus == 2
-                                                  ? const Color(0xffFF5F61)
-                                                  : isExpired
-                                                  ? const Color(0xffFFBC26)
-                                                  : const Color(0xff4D84FF),
-                                              contentColor: codeStatus == 1
-                                                  ? const Color(0xffF4FFF4)
-                                                  : codeStatus == 2
-                                                  ? const Color(0xffFDF5F5)
-                                                  : const Color(0xffFAFAFA),
-                                              isExpired: isExpired,
-                                              index: 4,
-                                              wrongCode: codeStatus == 2,
-                                              onChange: () {
-                                                checkOtp.value = 0;
-                                              },
-                                              controller: form.controllers[4],
-                                              autoFocus: false,
-                                            ),
-                                            PinItem(
-                                              key: const Key('otp_item_6'),
-                                              borderColor: codeStatus == 1
-                                                  ? const Color(0xff35CE3F)
-                                                  : codeStatus == 2
-                                                  ? const Color(0xffFF5F61)
-                                                  : isExpired
-                                                  ? const Color(0xffFFBC26)
-                                                  : const Color(0xff4D84FF),
-                                              isExpired: isExpired,
-                                              contentColor: codeStatus == 1
-                                                  ? const Color(0xffF4FFF4)
-                                                  : codeStatus == 2
-                                                  ? const Color(0xffFDF5F5)
-                                                  : const Color(0xffFAFAFA),
-                                              index: 5,
-                                              wrongCode: codeStatus == 2,
-                                              onChange: () {
-                                                checkOtp.value = 0;
-                                              },
-                                              checkOtp: () {
-                                                debugPrint(
-                                                  '/// checkOtp //////',
-                                                );
-                                                debugPrint(
-                                                  prefsRepository.sessionInfo,
-                                                );
-                                                if (prefsRepository
-                                                        .sessionInfo !=
-                                                    null) {
-                                                  debugPrint(
-                                                    '/// verificationId not null //////',
-                                                  );
-                                                  String insertedCode =
-                                                      form.controllers[0].text +
-                                                      form.controllers[1].text +
-                                                      form.controllers[2].text +
-                                                      form.controllers[3].text +
-                                                      form.controllers[4].text +
-                                                      form.controllers[5].text;
-                                                  if (widget.fromLogin) {
-                                                    debugPrint(
-                                                      '/// fromLogin //////',
-                                                    );
-
-                                                    authBloc.add(
-                                                      VerifyOtpSignInEvent(
-                                                        sessionInfo:
-                                                            prefsRepository
-                                                                .sessionInfo!,
-                                                        otp: insertedCode,
-                                                        phone:
-                                                            widget.phoneNumber,
-                                                      ),
-                                                    );
-
-                                                    /////////////////////////////////////
-                                                  } else {
-                                                    authBloc.add(
-                                                      VerifyOtpSignUpEvent(
-                                                        sessionInfo:
-                                                            prefsRepository
-                                                                .sessionInfo!,
-                                                        otp: insertedCode,
-                                                        phone:
-                                                            widget.phoneNumber,
-                                                      ),
-                                                    );
-
-                                                    /////////////////////////////////////
-                                                  }
-                                                } else {
-                                                  debugPrint(
-                                                    '/// verificationId is null //////',
-                                                  );
-                                                  showWarningMessage(
-                                                    context,
-                                                    LocaleKeys
-                                                        .please_wait_5_seconds
-                                                        .tr(),
-                                                  );
-                                                  pasteOtpCode('');
-                                                  //widget.checkOtp.value = 2;
-                                                  /////////////////////////////////////
-                                                }
-                                              },
-                                              controller: form.controllers[5],
-                                              autoFocus: false,
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    );
-                                  }
-                                },
-                              );
-                            },
-                          );
-                        },
-                      ),
-                    ),
-                    10.verticalSpace,
-                    ValueListenableBuilder<bool>(
-                      valueListenable: enabledResendNotifier,
-                      builder: (context, enabledResend, _) {
-                        if (!enabledResend)
-                          // ignore: curly_braces_in_flow_control_structures
-                          return Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              MyTextWidget(
-                                key: TestVariables.kTestMode
-                                    ? const Key(WidgetsKeys.otpRemainingTimeKey)
-                                    : null,
-                                '${LocaleKeys.resend_code.tr()}  ',
-                                style: context.textTheme.titleMedium?.rq
-                                    .copyWith(
-                                      color: enabledResend
-                                          ? const Color(0xff4D84FF)
-                                          : const Color.fromARGB(
-                                              255,
-                                              187,
-                                              187,
-                                              187,
-                                            ),
-                                      height: 1.25,
-                                      fontSize: 13.sp,
-                                    ),
-                              ),
-                              Directionality(
-                                textDirection: ui.TextDirection.ltr,
-                                child: CountdownTimer(
-                                  widgetBuilder: (_, remainingTime) {
-                                    String seconds =
-                                        (remainingTime?.sec ?? 0) < 10
-                                        ? '0${remainingTime?.sec}'
-                                        : '${remainingTime?.sec}';
-                                    return MyTextWidget(
-                                      key: TestVariables.kTestMode
-                                          ? const Key(
-                                              WidgetsKeys.otpRemainingTimeKey,
-                                            )
-                                          : null,
-                                      '0${remainingTime?.min ?? '0'} : $seconds ',
-                                      style: context.textTheme.titleMedium?.rq
-                                          .copyWith(
-                                            color: const Color(0xff4D84FF),
-                                            height: 1.25,
-                                            fontSize: 13.sp,
+                                  );
+                                } else if (state.sendOtpStatus ==
+                                    SendOtpStatus.failure) {
+                                  return const _FailureWithTimerAndTryAgain();
+                                } else {
+                                  // success أو الحالة الافتراضية: الحقول كما هي الآن
+                                  return Directionality(
+                                    textDirection: ui.TextDirection.ltr,
+                                    child: SizedBox(
+                                      height: 60.w,
+                                      width: 1.sw,
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          PinItem(
+                                            key: const Key('otp_item_1'),
+                                            borderColor: codeStatus == 1
+                                                ? const Color(0xff78D97F)
+                                                : codeStatus == 2
+                                                ? const Color(0xffFF5F61)
+                                                : isExpired
+                                                ? const Color(0xffFDCA57)
+                                                : const Color(0xff4D84FF),
+                                            isExpired: isExpired,
+                                            contentColor: codeStatus == 1
+                                                ? const Color(0xffF4FFF4)
+                                                : codeStatus == 2
+                                                ? const Color(0xffFDF5F5)
+                                                : const Color(0xffFAFAFA),
+                                            controller: form.controllers[0],
+                                            wrongCode: codeStatus == 2,
+                                            index: 0,
+                                            pasteOtpCode: pasteOtpCode,
+                                            onChange: () {
+                                              checkOtp.value = 0;
+                                            },
+                                            autoFocus: true,
                                           ),
-                                    );
-                                  },
-                                  controller: countdownTimerController,
-                                  endWidget: const SizedBox(),
-                                ),
-                              ),
-                            ],
-                          );
-                        return InkWell(
-                          onTap: enabledResend ? _onResendSucceed : null,
-                          child: MyTextWidget(
-                            key: TestVariables.kTestMode
-                                ? const Key(WidgetsKeys.resendCodeButtonKey)
-                                : null,
-                            "${LocaleKeys.resend_code.tr()} ",
-                            style: context.textTheme.titleMedium?.rq.copyWith(
-                              color: const Color(0xff4D84FF),
-                              height: 1.25,
-                              fontSize: 13.sp,
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                    40.verticalSpace,
-                    /* (checkOtp.value == 2 || enabledResendNotifier.value)
-                        ? 20.verticalSpace
-                        : 120.verticalSpace,
-                    ValueListenableBuilder<int>(
-                      valueListenable: checkOtp,
-                      builder: (context, codeStatus, _) {
-                        return ValueListenableBuilder<bool>(
-                          valueListenable: enabledResendNotifier,
-                          builder: (context, isExpired, _) {
-                            return codeStatus == 2 || isExpired
-                                ? Column(
-                                    children: [
-                                      MyTextWidget(
-                                        codeStatus == 2
-                                            ? LocaleKeys
-                                                  .please_correct_code_sent_to_your_phone
-                                                  .tr()
-                                            : LocaleKeys
-                                                  .the_code_sent_has_expired
-                                                  .tr(),
-                                        style: context.textTheme.titleMedium?.rq
-                                            .copyWith(
-                                              color: const Color(0xff5D5C5D),
-                                              height: 1.25,
-                                            ),
+                                          PinItem(
+                                            key: const Key('otp_item_2'),
+                                            borderColor: codeStatus == 1
+                                                ? const Color(0xff78D97F)
+                                                : codeStatus == 2
+                                                ? const Color(0xffFF5F61)
+                                                : isExpired
+                                                ? const Color(0xffFDCA57)
+                                                : const Color(0xff4D84FF),
+                                            contentColor: codeStatus == 1
+                                                ? const Color(0xffF4FFF4)
+                                                : codeStatus == 2
+                                                ? const Color(0xffFDF5F5)
+                                                : const Color(0xffFAFAFA),
+                                            isExpired: isExpired,
+                                            controller: form.controllers[1],
+                                            wrongCode: codeStatus == 2,
+                                            index: 1,
+                                            onChange: () {
+                                              checkOtp.value = 0;
+                                            },
+                                            autoFocus: false,
+                                          ),
+                                          PinItem(
+                                            key: const Key('otp_item_3'),
+                                            borderColor: codeStatus == 1
+                                                ? const Color(0xff78D97F)
+                                                : codeStatus == 2
+                                                ? const Color(0xffFF5F61)
+                                                : isExpired
+                                                ? const Color(0xffFDCA57)
+                                                : const Color(0xff4D84FF),
+                                            isExpired: isExpired,
+                                            contentColor: codeStatus == 1
+                                                ? const Color(0xffF4FFF4)
+                                                : codeStatus == 2
+                                                ? const Color(0xffFDF5F5)
+                                                : const Color(0xffFAFAFA),
+                                            index: 2,
+                                            wrongCode: codeStatus == 2,
+                                            onChange: () {
+                                              checkOtp.value = 0;
+                                            },
+                                            controller: form.controllers[2],
+                                            autoFocus: false,
+                                          ),
+                                          PinItem(
+                                            key: const Key('otp_item_4'),
+                                            borderColor: codeStatus == 1
+                                                ? const Color(0xff78D97F)
+                                                : codeStatus == 2
+                                                ? const Color(0xffFF5F61)
+                                                : isExpired
+                                                ? const Color(0xffFDCA57)
+                                                : const Color(0xff4D84FF),
+                                            isExpired: isExpired,
+                                            contentColor: codeStatus == 1
+                                                ? const Color(0xffF4FFF4)
+                                                : codeStatus == 2
+                                                ? const Color(0xffFDF5F5)
+                                                : const Color(0xffFAFAFA),
+                                            index: 3,
+                                            wrongCode: codeStatus == 2,
+                                            onChange: () {
+                                              checkOtp.value = 0;
+                                            },
+                                            controller: form.controllers[3],
+                                            autoFocus: false,
+                                          ),
+                                          PinItem(
+                                            key: const Key('otp_item_5'),
+                                            borderColor: codeStatus == 1
+                                                ? const Color(0xff78D97F)
+                                                : codeStatus == 2
+                                                ? const Color(0xffFF5F61)
+                                                : isExpired
+                                                ? const Color(0xffFDCA57)
+                                                : const Color(0xff4D84FF),
+                                            contentColor: codeStatus == 1
+                                                ? const Color(0xffF4FFF4)
+                                                : codeStatus == 2
+                                                ? const Color(0xffFDF5F5)
+                                                : const Color(0xffFAFAFA),
+                                            isExpired: isExpired,
+                                            index: 4,
+                                            wrongCode: codeStatus == 2,
+                                            onChange: () {
+                                              checkOtp.value = 0;
+                                            },
+                                            controller: form.controllers[4],
+                                            autoFocus: false,
+                                          ),
+                                          PinItem(
+                                            key: const Key('otp_item_6'),
+                                            borderColor: codeStatus == 1
+                                                ? const Color(0xff78D97F)
+                                                : codeStatus == 2
+                                                ? const Color(0xffFF5F61)
+                                                : isExpired
+                                                ? const Color(0xffFDCA57)
+                                                : const Color(0xff4D84FF),
+                                            isExpired: isExpired,
+                                            contentColor: codeStatus == 1
+                                                ? const Color(0xffF4FFF4)
+                                                : codeStatus == 2
+                                                ? const Color(0xffFDF5F5)
+                                                : const Color(0xffFAFAFA),
+                                            index: 5,
+                                            wrongCode: codeStatus == 2,
+                                            onChange: () {
+                                              checkOtp.value = 0;
+                                            },
+                                            checkOtp: () {
+                                              debugPrint('/// checkOtp //////');
+                                              debugPrint(
+                                                prefsRepository.sessionInfo,
+                                              );
+                                              if (prefsRepository.sessionInfo !=
+                                                  null) {
+                                                debugPrint(
+                                                  '/// verificationId not null //////',
+                                                );
+                                                String insertedCode =
+                                                    form.controllers[0].text +
+                                                    form.controllers[1].text +
+                                                    form.controllers[2].text +
+                                                    form.controllers[3].text +
+                                                    form.controllers[4].text +
+                                                    form.controllers[5].text;
+
+                                                authBloc.add(
+                                                  VerifyOtpSignInEvent(
+                                                    sessionInfo: prefsRepository
+                                                        .sessionInfo!,
+                                                    otp: insertedCode,
+                                                    phone: widget.phoneNumber,
+                                                    action: widget.fromLogin
+                                                        ? "signIn"
+                                                        : "signUp",
+                                                  ),
+                                                );
+                                              } else {
+                                                debugPrint(
+                                                  '/// verificationId is null //////',
+                                                );
+                                                showWarningMessage(
+                                                  context,
+                                                  LocaleKeys
+                                                      .please_wait_5_seconds
+                                                      .tr(),
+                                                );
+                                                pasteOtpCode('');
+                                                //widget.checkOtp.value = 2;
+                                                /////////////////////////////////////
+                                              }
+                                            },
+                                            controller: form.controllers[5],
+                                            autoFocus: false,
+                                          ),
+                                        ],
                                       ),
-                                      100.verticalSpace,
-                                    ],
-                                  )
-                                : const SizedBox.shrink();
+                                    ),
+                                  );
+                                }
+                              },
+                            );
                           },
                         );
                       },
-                    ),*/
-                  ],
-                );
-              },
-            ),
+                    ),
+                  ),
+                  10.verticalSpace,
+                  ValueListenableBuilder<int>(
+                    valueListenable: checkOtp,
+                    builder: (context, codeStatus, _) {
+                      return codeStatus == 2
+                          ? Center(
+                              child: MyTextWidget(
+                                "Enter The Correct Code Sent To Your Phone",
+                                style: context.textTheme.titleMedium?.mq
+                                    .copyWith(
+                                      color: const Color(0xff1D1D1D),
+                                      height: 1.25,
+                                      fontSize: 11.sp,
+                                    ),
+                              ),
+                            )
+                          : ValueListenableBuilder<bool>(
+                              valueListenable: enabledResendNotifier,
+                              builder: (context, enabledResend, _) {
+                                return enabledResend
+                                    ? Center(
+                                        child: MyTextWidget(
+                                          "The Code Sent Has Expired",
+                                          style: context
+                                              .textTheme
+                                              .titleMedium
+                                              ?.mq
+                                              .copyWith(
+                                                color: const Color(0xff1D1D1D),
+                                                height: 1.25,
+                                                fontSize: 11.sp,
+                                              ),
+                                        ),
+                                      )
+                                    : SizedBox.shrink();
+                              },
+                            );
+                    },
+                  ),
+                  40.verticalSpace,
+                  /* (checkOtp.value == 2 || enabledResendNotifier.value)
+                      ? 20.verticalSpace
+                      : 120.verticalSpace,
+                  ValueListenableBuilder<int>(
+                    valueListenable: checkOtp,
+                    builder: (context, codeStatus, _) {
+                      return ValueListenableBuilder<bool>(
+                        valueListenable: enabledResendNotifier,
+                        builder: (context, isExpired, _) {
+                          return codeStatus == 2 || isExpired
+                              ? Column(
+                                  children: [
+                                    MyTextWidget(
+                                      codeStatus == 2
+                                          ? LocaleKeys
+                                                .please_correct_code_sent_to_your_phone
+                                                .tr()
+                                          : LocaleKeys
+                                                .the_code_sent_has_expired
+                                                .tr(),
+                                      style: context.textTheme.titleMedium?.rq
+                                          .copyWith(
+                                            color: const Color(0xff5D5C5D),
+                                            height: 1.25,
+                                          ),
+                                    ),
+                                    100.verticalSpace,
+                                  ],
+                                )
+                              : const SizedBox.shrink();
+                        },
+                      );
+                    },
+                  ),*/
+                ],
+              );
+            },
           ),
         ),
       ),
@@ -678,23 +807,15 @@ class _VerifyOtpState extends State<VerifyOtp> with FormStateMinxin {
     form.controllers[3].text = text[3];
     form.controllers[4].text = text[4];
     form.controllers[5].text = text[5];
-    if (widget.fromLogin) {
-      authBloc.add(
-        VerifyOtpSignInEvent(
-          sessionInfo: prefsRepository.sessionInfo!,
-          otp: text,
-          phone: widget.phoneNumber,
-        ),
-      );
-    } else {
-      authBloc.add(
-        VerifyOtpSignUpEvent(
-          sessionInfo: prefsRepository.sessionInfo!,
-          otp: text,
-          phone: widget.phoneNumber,
-        ),
-      );
-    }
+
+    authBloc.add(
+      VerifyOtpSignInEvent(
+        sessionInfo: prefsRepository.sessionInfo!,
+        otp: text,
+        phone: widget.phoneNumber,
+        action: widget.fromLogin ? "signIn" : "signUp",
+      ),
+    );
   }
 
   void _onResendSucceed() {

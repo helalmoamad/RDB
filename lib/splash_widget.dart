@@ -117,12 +117,9 @@ class _SplashOverlay extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(15.r),
-                      border: Border.all(
-                        color: const Color(0xFF707070),
-                        width: 0.8.h,
-                      ),
+                      border: Border.all(color: const Color(0xFF707070)),
                     ),
-                    padding: EdgeInsets.all(1.h),
+
                     child: Stack(
                       children: [
                         Container(

@@ -95,7 +95,7 @@ class GetClient<T> extends BaseApi<T> {
       } else {
         final exception = getException(
           statusCode: response.statusCode!,
-          message: response.data['message'],
+          message: response.data['message'] ?? response.data['status'],
         );
         throw exception;
       }

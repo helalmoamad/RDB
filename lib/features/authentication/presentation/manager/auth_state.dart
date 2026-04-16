@@ -4,7 +4,7 @@ enum CreateUserStatus { init, loading, success, failure }
 
 enum SendOtpStatus { init, loading, success, failure }
 
-enum VerifyOtpSignUpStatus { init, loading, success, failure }
+//enum VerifyOtpSignUpStatus { init, loading, success, failure }
 
 enum VerifyOtpSignInStatus { init, loading, success, failure }
 
@@ -22,7 +22,7 @@ class AuthState {
     this.signUpErrorMessage,
     this.getUserCountryResponseModel,
 
-    this.verifyOtpSignUpStatus = VerifyOtpSignUpStatus.init,
+    // this.verifyOtpSignUpStatus = VerifyOtpSignUpStatus.init,
     this.verifyOtpSignInStatus = VerifyOtpSignInStatus.init,
     this.verifyOtpFromGuestStatus = VerifyOtpFromGuestStatus.init,
     this.getCustomerCountryStatus = GetCustomerCountryStatus.loading,
@@ -30,7 +30,7 @@ class AuthState {
 
   final SendOtpStatus sendOtpStatus;
 
-  final VerifyOtpSignUpStatus verifyOtpSignUpStatus;
+  //final VerifyOtpSignUpStatus verifyOtpSignUpStatus;
   final VerifyOtpSignInStatus verifyOtpSignInStatus;
   final VerifyOtpFromGuestStatus verifyOtpFromGuestStatus;
 
@@ -55,8 +55,8 @@ class AuthState {
     final String? sendOtpError,
 
     final User? walletUser,
-    final VerifyOtpSignUpStatus? verifyOtpSignUpStatus,
 
+    // final VerifyOtpSignUpStatus? verifyOtpSignUpStatus,
     final VerifyOtpSignInStatus? verifyOtpSignInStatus,
     final VerifyOtpFromGuestStatus? verifyOtpFromGuestStatus,
   }) {
@@ -71,8 +71,8 @@ class AuthState {
       walletUser: walletUser ?? this.walletUser,
       getCustomerCountryStatus:
           getCustomerCountryStatus ?? this.getCustomerCountryStatus,
-      verifyOtpSignUpStatus:
-          verifyOtpSignUpStatus ?? this.verifyOtpSignUpStatus,
+      //verifyOtpSignUpStatus:
+      //    verifyOtpSignUpStatus ?? this.verifyOtpSignUpStatus,
       verifyOtpSignInStatus:
           verifyOtpSignInStatus ?? this.verifyOtpSignInStatus,
       verifyOtpFromGuestStatus:

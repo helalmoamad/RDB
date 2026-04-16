@@ -45,7 +45,7 @@ class AuthRepositoryImpl extends AuthRepository with HandlingExceptionRequest {
     );
   }
 
-  @override
+  /*@override
   Future<Either<Failure, VerifyOtpSignUpAndInResponseModel>> verifyOtpSignUp(
     Map<String, dynamic> params,
   ) {
@@ -53,7 +53,7 @@ class AuthRepositoryImpl extends AuthRepository with HandlingExceptionRequest {
       tryCall: () => dataSource.verifyOtpSignUp(params),
     );
   }
-
+*/
   @override
   Future<Either<Failure, GetUserCountryResponseModel>> getUserCountry() {
     return handlingExceptionRequest(tryCall: dataSource.getUserCountry);

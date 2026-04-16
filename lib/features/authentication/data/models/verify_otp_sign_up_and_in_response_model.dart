@@ -14,6 +14,7 @@ String verifyOtpSignUpAndInResponseModelToJson(
 
 class VerifyOtpSignUpAndInResponseModel {
   final User? user;
+  final String? status;
   final Token? accessToken;
   final Token? refreshToken;
 
@@ -21,21 +22,25 @@ class VerifyOtpSignUpAndInResponseModel {
     this.user,
     this.accessToken,
     this.refreshToken,
+    this.status,
   });
 
   VerifyOtpSignUpAndInResponseModel copyWith({
     User? user,
     Token? accessToken,
     Token? refreshToken,
+    String? status,
   }) => VerifyOtpSignUpAndInResponseModel(
     user: user ?? this.user,
     accessToken: accessToken ?? this.accessToken,
     refreshToken: refreshToken ?? this.refreshToken,
+    status: status ?? this.status,
   );
 
   factory VerifyOtpSignUpAndInResponseModel.fromJson(
     Map<String, dynamic> json,
   ) => VerifyOtpSignUpAndInResponseModel(
+    status: json["status"],
     user: json["user"] == null ? null : User.fromJson(json["user"]),
     accessToken: json["accessToken"] == null
         ? null
@@ -47,6 +52,7 @@ class VerifyOtpSignUpAndInResponseModel {
 
   Map<String, dynamic> toJson() => {
     "user": user?.toJson(),
+    "status": status,
     "accessToken": accessToken?.toJson(),
     "refreshToken": refreshToken?.toJson(),
   };

@@ -36,6 +36,5 @@ class SendOtpParams {
     "phoneNumber": "+$phone",
     "channel": (isViaWhatsApp == 1) ? "whatsapp" : "sms",
     "isResend": isResend,
-    "type": (isSignUp) ? "signUp" : "signIn",
   };
 }

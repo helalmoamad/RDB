@@ -24,17 +24,19 @@ class VerifyOtpSignInUseCase
 class VerifyOtpSignInParams {
   String sessionInfo;
   String otp;
+  String action;
   String phone;
 
   VerifyOtpSignInParams({
     required this.sessionInfo,
     required this.otp,
     required this.phone,
+    required this.action,
   });
   Map<String, dynamic> get map => {
     "otpCode": otp,
     "phoneNumber": "+$phone",
     "sessionInfo": sessionInfo,
-    "type": "signIn",
+    "action": action,
   };
 }

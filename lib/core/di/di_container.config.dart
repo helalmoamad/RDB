@@ -31,8 +31,6 @@ import '../../features/authentication/domain/use_cases/send_otp_usecase.dart'
     as _i952;
 import '../../features/authentication/domain/use_cases/verify_otp_signin_usecase.dart'
     as _i574;
-import '../../features/authentication/domain/use_cases/verify_otp_signup_usecase.dart'
-    as _i282;
 import '../../features/authentication/presentation/manager/auth_bloc.dart'
     as _i561;
 import '../data/data_source/common_use_repo_data_source.dart' as _i672;
@@ -91,15 +89,11 @@ Future<_i174.GetIt> $initGetIt(
   gh.factory<_i574.VerifyOtpSignInUseCase>(
     () => _i574.VerifyOtpSignInUseCase(gh<_i742.AuthRepository>()),
   );
-  gh.factory<_i282.VerifyOtpSignUpUseCase>(
-    () => _i282.VerifyOtpSignUpUseCase(gh<_i742.AuthRepository>()),
-  );
   gh.lazySingleton<_i561.AuthBloc>(
     () => _i561.AuthBloc(
       gh<_i952.SendOtpUseCase>(),
       gh<_i574.VerifyOtpSignInUseCase>(),
       gh<_i644.GetUserCountryUseCase>(),
-      gh<_i282.VerifyOtpSignUpUseCase>(),
     ),
   );
   return getIt;

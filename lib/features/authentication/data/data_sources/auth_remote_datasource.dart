@@ -33,7 +33,7 @@ class AuthRemoteDatasource {
     return sendOtp();
   }
 
-  Future<VerifyOtpSignUpAndInResponseModel> verifyOtpSignUp(
+  /*Future<VerifyOtpSignUpAndInResponseModel> verifyOtpSignUp(
     Map<String, dynamic> params,
   ) {
     PostClient<VerifyOtpSignUpAndInResponseModel> verifyOtpSignUp =
@@ -50,7 +50,7 @@ class AuthRemoteDatasource {
         );
     return verifyOtpSignUp();
   }
-
+*/
   Future<GetUserCountryResponseModel> getUserCountry() {
     ///// for test /////
 

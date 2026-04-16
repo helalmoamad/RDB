@@ -29,6 +29,10 @@ abstract class AppAssets {
   static String get rdb => 'rdb'.svg;
   static String get rammazDigitalBanking => 'rammaz_digital_banking'.svg;
   static String get rammaz => 'rammaz'.svg;
+  static String get blueQuestion => 'blue_question'.svg;
+  static String get grayQuestion => 'gray_question'.svg;
+  static String get nBlock => 'n_block'.svg;
+  static String get yallowQuestion => 'yallow_question'.svg;
   static String get syriaFlagSvg => 'syria_flag'.svg;
   static String get kurdishFlagSvg => 'kurdish_flag'.svg;
   static String get cancelSvg => 'cancel'.svg;

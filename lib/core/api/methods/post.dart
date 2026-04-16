@@ -109,7 +109,7 @@ class PostClient<T> extends BaseApi<T> {
       } else {
         throw getException(
           statusCode: response.statusCode!,
-          message: response.data['message'],
+          message: response.data['message'] ?? response.data['status'],
         );
       }
     } catch (exception) {

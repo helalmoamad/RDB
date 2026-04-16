@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rdb/base_page.dart';
 import 'package:rdb/core/utils/extensions/build_context.dart';
+import 'package:rdb/core/utils/responsive_padding.dart';
 import 'package:rdb/features/authentication/presentation/widgets/create_account_section.dart';
 import '../../../../common/helper/show_message.dart';
 import '../../../../core/domin/repositories/prefs_repository.dart';
@@ -126,14 +128,21 @@ class _RegistrationPageState extends State<RegistrationPage>
           valueListenable: animate,
           builder: (context, yes, child) {
             return yes && pageContent.value > 1
-                ? SizedBox.shrink()
+                ? Padding(
+                    padding: EdgeInsets.only(
+                      left: 40.w,
+                      right: 40.w,
+                      top: 270.h,
+                    ),
+                    child: SizedBox(height: 375.h),
+                  )
                 : Directionality(
                     textDirection: TextDirection.ltr,
                     child: AnimatedPositioned(
-                      left: yes ? 40 : null,
-                      right: yes ? 40 : null,
-                      top: yes && pageContent.value > 1 ? 50 : 1.sh / 5,
-                      bottom: yes ? null : 465.h,
+                      left: yes ? 40.w : null,
+                      right: yes ? 40.w : null,
+                      top: 270.h,
+                      bottom: yes ? null : 375.h,
                       duration: animationDuration,
                       child: child!,
                     ),
@@ -152,31 +161,25 @@ class _RegistrationPageState extends State<RegistrationPage>
                 ? context.colorScheme.surface
                 : const Color(0xffF4FFF4),
             body: Stack(
-              alignment: Alignment.bottomCenter,
+              alignment: Alignment.topCenter,
               children: [
                 child!,
-                /*  Positioned(
-                  top: 10,
-                  right: 0,
+                PositionedDirectional(
+                  top: 60.h,
+                  end: 30.h,
                   child: ValueListenableBuilder<int>(
                     valueListenable: pageContent,
                     builder: (context, index, _) {
-                      return index == 0
+                      return index < 2
                           ? SizedBox.shrink()
                           : InkWell(
-                              key: TestVariables.kTestMode
-                                  ? const Key(WidgetsKeys.registerCancelKey)
-                                  : null,
                               highlightColor: Colors.transparent,
                               splashColor: Colors.transparent,
                               onTap: () async {
-                                if (widget.fromLogOut ?? false) {
-                                  return;
-                                }
                                 Future.delayed(
                                   const Duration(milliseconds: 100),
                                   () {
-                                    if (index == 2 || index == 1) {
+                                    /* if (index == 2 || index == 1) {
                                       pageController.animateToPage(
                                         0,
                                         duration: const Duration(
@@ -186,13 +189,35 @@ class _RegistrationPageState extends State<RegistrationPage>
                                       );
                                       pageContent.value = 0;
                                       return;
+                                    }*/
+
+                                    if (index == 2) {
+                                      if (fromLogin) {
+                                        pageContent.value = 0;
+                                        pageController.animateToPage(
+                                          0,
+                                          duration: const Duration(
+                                            milliseconds: 300,
+                                          ),
+                                          curve: Curves.easeInOut,
+                                        );
+                                      } else {
+                                        pageContent.value = 1;
+                                        pageController.animateToPage(
+                                          1,
+                                          duration: const Duration(
+                                            milliseconds: 300,
+                                          ),
+                                          curve: Curves.easeInOut,
+                                        );
+                                      }
                                     }
-                                    if (index >= 3 && index <= 5) {
-                                      pageContent.value = 2;
+                                    if (index >= 3) {
+                                      pageContent.value = index - 1;
                                       pageController.animateToPage(
-                                        2,
+                                        index - 1,
                                         duration: const Duration(
-                                          milliseconds: 500,
+                                          milliseconds: 300,
                                         ),
                                         curve: Curves.easeInOut,
                                       );
@@ -200,35 +225,35 @@ class _RegistrationPageState extends State<RegistrationPage>
                                     }
                                   },
                                 );
-                                if (Navigator.canPop(context)) {
-                                  Navigator.of(context).pop();
-                                }
+
                                 //////////////////////////
                               },
                               child: Padding(
                                 padding: HWEdgeInsets.only(
-                                  top: 60.0,
-                                  right: 30,
-                                  left: 30,
-                                  bottom: 60,
+                                  top: 60.h,
+                                  right: 30.w,
+                                  left: 30.w,
+                                  bottom: 60.h,
                                 ),
-                                child: SvgPicture.asset(AppAssets.cancelSvg),
+                                child: SvgPicture.asset(
+                                  AppAssets.cancelSvg,
+                                  height: 15.h,
+                                ),
                               ),
                             );
                     },
                   ),
-                ),*/
+                ),
                 Column(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    SizedBox(height: 96.h),
                     SizedBox(
                       height:
                           pageContent.value == 2 ||
                               pageContent.value == 3 ||
                               pageContent.value == 4
-                          ? 1.sh / 1.3
-                          : 1.sh / 2.0,
+                          ? 640.h
+                          : 380.h,
                       width: 1.sw,
                       // ignore: deprecated_member_use
                       child: WillPopScope(
@@ -343,6 +368,14 @@ class _RegistrationPageState extends State<RegistrationPage>
                               },
                             ),
                             VerifyOtp(
+                              goChangeNumber: () {
+                                pageController.animateToPage(
+                                  2,
+                                  duration: const Duration(milliseconds: 500),
+                                  curve: Curves.easeInOut,
+                                );
+                                pageContent.value = 3;
+                              },
                               fromProfile: false,
                               navigateToProfile: () {},
                               fromExpired: false,
@@ -351,13 +384,13 @@ class _RegistrationPageState extends State<RegistrationPage>
                                 debugPrint('fromLogin:  $fromLogin');
                                 if (fromLogin) {
                                   context.go(
-                                    GRouter.config.applicationRoutes.kBasePage,
+                                    '${GRouter.config.applicationRoutes.kLoginSuccessfullyPagePath}?phoneNumber=${Uri.encodeQueryComponent(phoneNumber)}',
                                   );
                                   return;
                                 }
                                 fromLogin = false;
                                 context.go(
-                                  GRouter.config.applicationRoutes.kBasePage,
+                                  '${GRouter.config.applicationRoutes.kLoginSuccessfullyPagePath}?phoneNumber=${Uri.encodeQueryComponent(phoneNumber)}',
                                 );
 
                                 /*pageController.animateToPage(
