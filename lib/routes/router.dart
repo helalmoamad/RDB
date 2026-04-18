@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rdb/features/authentication/presentation/pages/first_registeration_page.dart';
 import 'package:rdb/features/authentication/presentation/pages/login_successfully.dart';
-import 'package:rdb/features/authentication/presentation/pages/register_completed.dart';
+// 'package:rdb/features/authentication/presentation/pages/register_completed.dart';
+import 'package:rdb/features/authentication/presentation/pages/pin_code_page.dart';
 import 'package:rdb/splash_page.dart';
 
 import '../base_page.dart';
@@ -41,7 +42,7 @@ class GRouter {
       //         state: state,
       //       );
       //     }),
-      GoRoute(
+      /*  GoRoute(
         path: _config.applicationRoutes.kRegistrationCompletedPage,
         pageBuilder: (BuildContext context, GoRouterState state) {
           return _builderPage(
@@ -51,12 +52,17 @@ class GRouter {
             state: state,
           );
         },
-      ),
-
+      ),*/
       GoRoute(
         path: _config.applicationRoutes.kRegistrationPage,
         pageBuilder: (BuildContext context, GoRouterState state) {
           return _builderPage(child: const RegistrationPage(), state: state);
+        },
+      ),
+      GoRoute(
+        path: _config.applicationRoutes.kPinCodePage,
+        pageBuilder: (BuildContext context, GoRouterState state) {
+          return _builderPage(child: const PinCodePage(), state: state);
         },
       ),
 

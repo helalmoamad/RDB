@@ -186,4 +186,18 @@ class PrefsRepositoryImpl extends PrefsRepository {
   @override
   bool? get isRequestNotificationPermission =>
       _preferences.getBool(PrefsKey.requestNotificationPermission);
+
+  @override
+  String? get passcode => _preferences.getString(PrefsKey.passcode);
+
+  @override
+  Future<bool> setPasscode(String passcode) =>
+      _preferences.setString(PrefsKey.passcode, passcode);
+
+  @override
+  bool? get shouldShowPin => _preferences.getBool(PrefsKey.shouldShowPin);
+
+  @override
+  Future<bool> setShouldShowPin(bool value) =>
+      _preferences.setBool(PrefsKey.shouldShowPin, value);
 }

@@ -38,4 +38,6 @@ abstract class PrefsKey {
 
   static const fcmToken = r'__$__fcmToken__$__';
   static const createWallet = r'__$__createWallet__$__';
+  static const passcode = r'__$__passcode__$__';
+  static const shouldShowPin = r'__$__shouldShowPin__$__';
 }

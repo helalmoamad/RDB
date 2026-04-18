@@ -186,7 +186,7 @@ class _VerifyOtpState extends State<VerifyOtp> with FormStateMinxin {
 
                         12.verticalSpace,
                         MyTextWidget(
-                          "Enter Verification Code Sent To Your Whatsapp",
+                          LocaleKeys.enter_verification_code_whatsapp.tr(),
                           style: context.textTheme.titleMedium?.mq.copyWith(
                             color: const Color(0xff5D5C5D),
                             height: 1.42,
@@ -200,7 +200,7 @@ class _VerifyOtpState extends State<VerifyOtp> with FormStateMinxin {
                           children: [
                             SizedBox(
                               child: MyTextWidget(
-                                "We Have Sent A Verification Code To The Number",
+                                LocaleKeys.we_have_sent_verification_code.tr(),
                                 style: context.textTheme.titleMedium?.rq
                                     .copyWith(
                                       color: const Color(0xff1D1D1D),
@@ -253,7 +253,7 @@ class _VerifyOtpState extends State<VerifyOtp> with FormStateMinxin {
                                                         .otpRemainingTimeKey,
                                                   )
                                                 : null,
-                                            'Resend After ',
+                                            LocaleKeys.resend_after.tr(),
                                             style: context
                                                 .textTheme
                                                 .titleMedium
@@ -304,7 +304,7 @@ class _VerifyOtpState extends State<VerifyOtp> with FormStateMinxin {
                                         ],
                                       )
                                     : MyTextWidget(
-                                        "Didn’t You Receive A Code?",
+                                        LocaleKeys.didnt_receive_code_q.tr(),
                                         textAlign: TextAlign.start,
 
                                         maxLines: 1,
@@ -344,7 +344,7 @@ class _VerifyOtpState extends State<VerifyOtp> with FormStateMinxin {
                                         InkWell(
                                           onTap: _onResendSucceed,
                                           child: MyTextWidget(
-                                            "Resend Code",
+                                            LocaleKeys.resend_code.tr(),
                                             textAlign: TextAlign.start,
 
                                             maxLines: 2,
@@ -368,7 +368,7 @@ class _VerifyOtpState extends State<VerifyOtp> with FormStateMinxin {
                                         ),
                                         5.horizontalSpace,
                                         MyTextWidget(
-                                          "Or",
+                                          LocaleKeys.or.tr(),
                                           textAlign: TextAlign.start,
 
                                           maxLines: 2,
@@ -387,7 +387,7 @@ class _VerifyOtpState extends State<VerifyOtp> with FormStateMinxin {
                                         InkWell(
                                           onTap: widget.goChangeNumber,
                                           child: MyTextWidget(
-                                            "Change Number",
+                                            LocaleKeys.change_number.tr(),
                                             textAlign: TextAlign.start,
 
                                             maxLines: 2,
@@ -411,7 +411,7 @@ class _VerifyOtpState extends State<VerifyOtp> with FormStateMinxin {
                                         ),
                                         5.horizontalSpace,
                                         MyTextWidget(
-                                          "Or",
+                                          LocaleKeys.or.tr(),
                                           textAlign: TextAlign.start,
 
                                           maxLines: 2,
@@ -430,7 +430,7 @@ class _VerifyOtpState extends State<VerifyOtp> with FormStateMinxin {
                                         InkWell(
                                           onTap: widget.goBack,
                                           child: MyTextWidget(
-                                            "Method",
+                                            LocaleKeys.method.tr(),
                                             textAlign: TextAlign.start,
 
                                             maxLines: 2,
@@ -464,7 +464,7 @@ class _VerifyOtpState extends State<VerifyOtp> with FormStateMinxin {
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
                             MyTextWidget(
-                              "Your Privacy Is Completely Safe",
+                              LocaleKeys.your_privacy_safe.tr(),
                               textAlign: TextAlign.start,
                               overflow: TextOverflow.ellipsis,
                               maxLines: 2,
@@ -724,7 +724,7 @@ class _VerifyOtpState extends State<VerifyOtp> with FormStateMinxin {
                       return codeStatus == 2
                           ? Center(
                               child: MyTextWidget(
-                                "Enter The Correct Code Sent To Your Phone",
+                                LocaleKeys.enter_correct_code_phone.tr(),
                                 style: context.textTheme.titleMedium?.mq
                                     .copyWith(
                                       color: const Color(0xff1D1D1D),
@@ -739,7 +739,7 @@ class _VerifyOtpState extends State<VerifyOtp> with FormStateMinxin {
                                 return enabledResend
                                     ? Center(
                                         child: MyTextWidget(
-                                          "The Code Sent Has Expired",
+                                          LocaleKeys.the_code_sent_has_expired.tr(),
                                           style: context
                                               .textTheme
                                               .titleMedium

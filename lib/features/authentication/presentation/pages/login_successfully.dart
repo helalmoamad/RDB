@@ -1,13 +1,13 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rdb/core/utils/extensions/build_context.dart';
 import 'package:rdb/theme/typography.dart';
-import '../../../../core/utils/responsive_padding.dart';
+import 'package:rdb/generated/locale_keys.g.dart';
 import '../../../../core/utils/theme_state.dart';
 import '../../../../routes/router.dart';
-import '../../../app/my_text_widget.dart';
 import 'package:rdb/core/utils/last_pages_tracker.dart';
 
 class LoginSuccessfully extends StatefulWidget {
@@ -29,8 +29,8 @@ class _LoginSuccessfullyState extends ThemeState<LoginSuccessfully> {
       ),
     );
 
-    Future.delayed(const Duration(seconds: 2), () {
-      if (mounted) context.go(GRouter.config.applicationRoutes.kBasePage);
+    Future.delayed(const Duration(seconds: 3), () {
+      if (mounted) context.go(GRouter.config.applicationRoutes.kPinCodePage);
     });
     super.didChangeDependencies();
   }
@@ -47,63 +47,45 @@ class _LoginSuccessfullyState extends ThemeState<LoginSuccessfully> {
       LastPagesTracker.sendErrorToBlocAndLog(error);
       FlutterError.dumpErrorToConsole(error);
     };
-    return SafeArea(
-      bottom: false,
-      left: false,
-      right: false,
-
-      child: Scaffold(
-        backgroundColor: const Color(0xffE0FFEE),
-        body:
-            // ignore: deprecated_member_use
-            WillPopScope(
-              onWillPop: () async {
-                /*  if (pageController.page == 1) {
-                    prefsRepository.setUserName("");
-                    context.go(
-                      '${GRouter.config.applicationRoutes.kRegistrationCompletedPage}?userName=',
-                    );
-                    return false;
-                  }*/
-                return false;
-              },
+    return Scaffold(
+      backgroundColor: const Color(0xffE0FFEE),
+      body:
+          // ignore: deprecated_member_use
+          WillPopScope(
+            onWillPop: () async {
+              return false;
+            },
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 40.w),
               child: Column(
-                mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  SizedBox(height: 300.h),
-                  Padding(
-                    padding: HWEdgeInsets.symmetric(horizontal: 40.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        MyTextWidget(
-                          "Sign Up Successfully !",
-                          textAlign: TextAlign.start,
-                          style: context.textTheme.titleMedium?.mq.copyWith(
-                            color: const Color(0xff1D1D1D),
-                            height: 1.25,
-                            fontSize: 30.sp,
-                          ),
-                        ),
-                        10.verticalSpace,
-                        MyTextWidget(
-                          "Enjoy With Our Services",
-                          textAlign: TextAlign.start,
-                          style: context.textTheme.titleMedium?.mq.copyWith(
-                            color: const Color(0xff1D1D1D),
-                            height: 1.25,
-                            fontSize: 16.sp,
-                          ),
-                        ),
-                      ],
+                  SizedBox(height: 288.h),
+                  Text(
+                    LocaleKeys.sign_up_successfully_exclamation.tr(),
+                    textAlign: TextAlign.start,
+                    style: context.textTheme.titleMedium?.mq.copyWith(
+                      color: const Color(0xff1D1D1D),
+                      height: 1.25,
+                      fontSize: 30.sp,
+                    ),
+                  ),
+                  10.verticalSpace,
+                  Text(
+                    LocaleKeys.enjoy_with_services.tr(),
+                    textAlign: TextAlign.start,
+                    style: context.textTheme.titleMedium?.mq.copyWith(
+                      color: const Color(0xff1D1D1D),
+                      height: 1.25,
+                      fontSize: 16.sp,
                     ),
                   ),
                   const Spacer(),
                 ],
               ),
             ),
-      ),
+          ),
     );
   }
 }

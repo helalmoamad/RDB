@@ -32,6 +32,7 @@ abstract class PrefsRepository {
   String? get sessionInfo;
 
   String? get otpCode;
+  String? get passcode;
 
   Future<bool> setIsCearteWallet(bool isCreate);
 
@@ -83,4 +84,7 @@ abstract class PrefsRepository {
   Future<bool> clearTokenForMarket();
 
   Future<bool> clearVerificationId();
+  Future<bool> setPasscode(String passcode);
+  bool? get shouldShowPin;
+  Future<bool> setShouldShowPin(bool value);
 }

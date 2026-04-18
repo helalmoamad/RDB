@@ -8,6 +8,7 @@ class RouterConfiguration {
 class _ApplicationRoutes {
   final String test = '/test';
   final String kBasePage = '/BasePage';
+  final String kPinCodePage = '/PinCodePage';
   final String kWebView = '/WebView';
 
   final String kRoomCallPage = '/RoomCallPage';

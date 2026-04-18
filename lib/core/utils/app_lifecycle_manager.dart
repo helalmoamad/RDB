@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get_it/get_it.dart';
+import 'package:rdb/core/domin/repositories/prefs_repository.dart';
+import 'package:rdb/routes/router.dart';
 
 /// 🔄 مدير حالة التطبيق - لمنع الشاشة السوداء عند العودة من الخلفية
 class AppLifecycleManager {
@@ -10,6 +13,9 @@ class AppLifecycleManager {
   /// 📊 حالة التطبيق الحالية
   AppLifecycleState? _currentState;
   AppLifecycleState? get currentState => _currentState;
+  
+  /// 🔒 هل يجب طلب الـ PIN عند العودة؟
+  bool _shouldRequestPin = false;
 
   /// ⏱️ وقت آخر مرة كان التطبيق نشطاً
   DateTime? _lastActiveTime;
@@ -45,6 +51,9 @@ class AppLifecycleManager {
   void _handleResumed(AppLifecycleState? previousState) {
     debugPrint('✅ App Resumed');
 
+    final prefs = GetIt.I<PrefsRepository>();
+    final persistentShouldShowPin = prefs.shouldShowPin ?? false;
+
     // حساب المدة في الخلفية
     if (_lastActiveTime != null) {
       final duration = DateTime.now().difference(_lastActiveTime!);
@@ -54,24 +63,53 @@ class AppLifecycleManager {
       if (duration.inMinutes > 5) {
         debugPrint('⚠️ App was in background for long time - may need refresh');
         _handleLongBackgroundReturn();
-      } else {
-        debugPrint('✅ Short background duration - quick restore');
       }
-    } else {
-      // أول مرة يتم فيها resumed (فتح التطبيق لأول مرة أو بعد Process Death)
-      debugPrint('🆕 First resume or after Process Death');
     }
 
     _lastActiveTime = DateTime.now();
 
     // ✅ استعادة واجهة النظام دائماً (حتى في الحالات القصيرة)
     _restoreSystemUI();
+
+    // 🔒 طلب رمز PIN إذا كان مفعلاً وكان التطبيق في الخلفية
+    if (_shouldRequestPin || persistentShouldShowPin) {
+      _requestPinIfNecessary();
+      _shouldRequestPin = false;
+      // لا نقوم بمسح persistentShouldShowPin هنا، بل نقوم بمسحه عند نجاح إدخال الرمز في صفحة الـ PIN
+    }
+  }
+
+  /// 🔒 التحقق من ضرورة طلب رمز PIN
+  void _requestPinIfNecessary() {
+    try {
+      final prefs = GetIt.I<PrefsRepository>();
+      final isLoggedIn = prefs.walletToken != null &&
+          ((prefs.isVerifiedPhone ?? false) ||
+              (prefs.isVerifiedPhonePeforeExpiredToken ?? false));
+
+      if (isLoggedIn) {
+        // التحقق من أننا لسنا بالفعل في صفحة PIN لتجنب التكرار
+        final currentRoute = GRouter.router.routerDelegate.currentConfiguration.last.matchedLocation;
+        if (currentRoute != GRouter.config.applicationRoutes.kPinCodePage) {
+          debugPrint('🔒 Security: Requesting PIN code on app resume');
+          GRouter.router.push(GRouter.config.applicationRoutes.kPinCodePage);
+        } else {
+          debugPrint('ℹ️ Security: User already on PIN page');
+        }
+      }
+    } catch (e) {
+      debugPrint('❌ Error requesting PIN: $e');
+    }
   }
 
   /// ⏸️ معالجة دخول التطبيق للخلفية
   void _handlePaused() {
     debugPrint('⏸️ App Paused');
     _lastActiveTime = DateTime.now();
+    _shouldRequestPin = true;
+    
+    // حفظ الحالة في التخزين الدائم لضمان طلب الرموز حتى لو تم إغلاق التطبيق من قبل النظام
+    GetIt.I<PrefsRepository>().setShouldShowPin(true);
   }
 
   /// 🔄 معالجة حالة غير نشط

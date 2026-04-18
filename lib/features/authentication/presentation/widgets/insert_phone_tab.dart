@@ -139,7 +139,7 @@ class _InsertPhoneTabState extends State<InsertPhoneTab> with FormStateMinxin {
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       MyTextWidget(
-                        "Your Privacy Is Completely Safe",
+                        LocaleKeys.your_privacy_safe.tr(),
                         textAlign: TextAlign.start,
                         overflow: TextOverflow.ellipsis,
                         maxLines: 2,
@@ -259,7 +259,7 @@ class _InsertPhoneTabState extends State<InsertPhoneTab> with FormStateMinxin {
                           },
                           maxLength: maxLength - 1,
                           prefixIcon: Padding(
-                            padding: HWEdgeInsets.only(left: 10.0.w, top: 0.h),
+                            padding: HWEdgeInsets.only(left: 10.0.w, top: 7.h),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               crossAxisAlignment: CrossAxisAlignment.center,
@@ -356,7 +356,8 @@ class _InsertPhoneTabState extends State<InsertPhoneTab> with FormStateMinxin {
                                     ),
                                   ),
                           ),
-                          hintText: "  Enter Your Phone Number",
+                          hintText: LocaleKeys.enter_your_phone_number_hint
+                              .tr(),
                           controller: form.controllers[0],
                         );
                       },

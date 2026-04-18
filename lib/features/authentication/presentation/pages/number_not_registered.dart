@@ -81,7 +81,7 @@ class _NumberNotRegisteredState extends ThemeState<NumberNotRegistered> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               MyTextWidget(
-                                "Not Registered !",
+                                LocaleKeys.not_registered_exclamation.tr(),
                                 style: context.textTheme.titleLarge?.bq
                                     .copyWith(
                                       color: const Color(0xff1D1D1D),
@@ -168,7 +168,7 @@ class _NumberNotRegisteredState extends ThemeState<NumberNotRegistered> {
                         30.verticalSpace,
                         Center(
                           child: MyTextWidget(
-                            "Cancel & Take A Look At The App",
+                            LocaleKeys.cancel_take_look.tr(),
                             style: textTheme.displayMedium?.rq.copyWith(
                               color: const Color(0xff4D84FF),
                               letterSpacing: 0.16,

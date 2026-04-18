@@ -40,7 +40,7 @@ class _CreateAccountSectionState extends State<CreateAccountSection> {
               children: [
                 TextSpan(
                   text:
-                      "To Create New Account Tap “Agree & Continue” To Accept ",
+                      LocaleKeys.create_account_tap_agree.tr(),
                   style: context.textTheme.titleLarge?.mq.copyWith(
                     color: const Color(0xff1D1D1D),
                     letterSpacing: 0.14,

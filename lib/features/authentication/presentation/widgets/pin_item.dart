@@ -7,17 +7,29 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:rdb/core/utils/extensions/build_context.dart';
 import 'package:rdb/theme/typography.dart';
+import 'package:rdb/common/constant/design/assets_provider.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../manager/auth_bloc.dart';
 
 List<FocusNode> focusNodes = List.generate(6, (index) => FocusNode());
 int currentToType = 0;
 bool checkingOtp = false;
 
+void resetPinGlobalState() {
+  currentToType = 0;
+  checkingOtp = false;
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    focusNodes[0].requestFocus();
+  });
+}
+
 // ignore: must_be_immutable
 class PinItem extends StatefulWidget {
   final TextEditingController controller;
   bool isExpired;
   final bool autoFocus;
+  bool fromPasscose;
+  bool verfySucessful;
   bool wrongCode;
   final Color borderColor;
   final Color contentColor;
@@ -28,6 +40,8 @@ class PinItem extends StatefulWidget {
 
   PinItem({
     this.checkOtp,
+    this.fromPasscose = false,
+    this.verfySucessful = false,
     required this.contentColor,
     required this.isExpired,
     this.wrongCode = false,
@@ -64,6 +78,10 @@ class _PinItemState extends State<PinItem> with TickerProviderStateMixin {
       duration: const Duration(seconds: 1),
     );
     animationController.addStatusListener(_updateStatus);
+
+    // إضافة مستمع لتغيير التركيز لضمان أن التركيز دائماً في المربع الصحيح
+    focusNodes[widget.index].addListener(_handleFocusChange);
+
     Future.delayed(
       const Duration(seconds: 1),
       () => focusNodes[0].requestFocus(),
@@ -73,8 +91,19 @@ class _PinItemState extends State<PinItem> with TickerProviderStateMixin {
     super.initState();
   }
 
+  void _handleFocusChange() {
+    if (focusNodes[widget.index].hasFocus) {
+      // إذا حصل هذا المربع على التركيز ولكنه ليس المربع الذي يجب الكتابة فيه حالياً
+      if (widget.index != currentToType && !checkingOtp) {
+        // إعادة توجيه التركيز للمربع الصحيح
+        focusNodes[currentToType].requestFocus();
+      }
+    }
+  }
+
   @override
   void dispose() {
+    focusNodes[widget.index].removeListener(_handleFocusChange);
     animationController.dispose();
     fadingController.dispose();
     super.dispose();
@@ -141,120 +170,145 @@ class _PinItemState extends State<PinItem> with TickerProviderStateMixin {
                 animation: fadingController,
                 builder: (context, child) {
                   return SizedBox(
-                    height: 60.h,
-                    width: 60.w,
+                    height: 58.h,
+                    width: 58.w,
                     child: DottedBorder(
                       padding: EdgeInsets.zero,
                       borderType: BorderType.RRect,
+                      borderPadding: EdgeInsets.zero,
                       strokeCap: StrokeCap.round,
                       strokeWidth: 1 - fadingController.value,
                       dashPattern: const [3, 3],
                       radius: Radius.circular(15.r),
-                      color: hasValue || isVerifying
+                      color: widget.fromPasscose
+                          ? withBorder
+                                ? widget.borderColor
+                                : const Color(0xffC3C3C3)
+                          : hasValue || isVerifying
                           ? widget.borderColor
                           : !withBorder
                           ? widget.borderColor
                           : const Color(0xffC3C3C3),
                       child: ClipRRect(
                         borderRadius: BorderRadius.all(Radius.circular(18.r)),
-                        child: Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            TextFormField(
-                              controller: widget.controller,
-                              enabled:
-                                  (state.verifyOtpSignInStatus !=
-                                      VerifyOtpSignInStatus.loading &&
-                                  state.verifyOtpFromGuestStatus !=
-                                      VerifyOtpFromGuestStatus.loading),
-                              focusNode: focusNodes[widget.index],
-                              onTap: () {
-                                if (widget.index != currentToType) {
-                                  focusNodes[currentToType].requestFocus();
-                                }
-                              },
-                              onChanged: (String? text) {
-                                debugPrint(widget.index.toString());
-                                debugPrint(text);
-                                debugPrint(widget.index.toString());
-                                debugPrint(text?.length.toString());
-                                widget.onChange.call();
-                                if (widget.index == 0 &&
-                                    (text?.length ?? 0) == 6) {
-                                  widget.pasteOtpCode!.call(text!);
-                                }
-                                if ((text?.length ?? 0) > 1) {
-                                  widget.controller.text = text![0];
-                                  text = text[0];
-                                }
-                                setState(() {
-                                  if ((text?.length ?? 0) == 1) {
-                                    widget.onChange.call();
-                                    focusNodes[min(5, widget.index + 1)]
-                                        .requestFocus();
-                                    currentToType = min(5, widget.index + 1);
-                                    withBorder = widget.index == 5;
-                                    if (widget.index == 5) {
-                                      checkingOtp = true;
-                                      widget.checkOtp!.call();
-                                    }
-                                  } else if (text?.isEmpty ?? true) {
-                                    widget.onChange.call();
-                                    checkingOtp = false;
-                                    widget.controller.value = zwspEditingValue;
-                                    focusNodes[max(0, widget.index - 1)]
-                                        .requestFocus();
-                                    currentToType = max(0, widget.index - 1);
-                                    withBorder = true;
+                        child: SizedBox(
+                          height: 65.h,
+                          width: 60.w,
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              TextFormField(
+                                controller: widget.controller,
+                                enabled:
+                                    (state.verifyOtpSignInStatus !=
+                                        VerifyOtpSignInStatus.loading &&
+                                    state.verifyOtpFromGuestStatus !=
+                                        VerifyOtpFromGuestStatus.loading),
+                                focusNode: focusNodes[widget.index],
+                                onTap: () {
+                                  if (widget.index != currentToType) {
+                                    focusNodes[currentToType].requestFocus();
                                   }
-                                });
-                              },
-                              textAlign: TextAlign.center,
-                              keyboardType: TextInputType.number,
-                              textDirection: TextDirection.ltr,
-                              autocorrect: false,
-                              cursorColor: const Color(0xff5D5C5D),
-                              cursorHeight: 0,
-                              enableInteractiveSelection: widget.index == 0,
-                              cursorWidth: 0,
-                              textAlignVertical: TextAlignVertical.center,
-                              inputFormatters: [
-                                FilteringTextInputFormatter.digitsOnly,
-                              ],
-                              style: context.textTheme.headlineSmall?.mq
-                                  .copyWith(
-                                    color: const Color(0xffFFFFFF),
-
-                                    height: 0.6,
-                                    fontSize: 0.sp,
-                                    decoration: TextDecoration.none,
-                                  ),
-                              maxLines: 1,
-                              decoration: InputDecoration(
-                                border: InputBorder.none,
-
-                                focusedBorder: InputBorder.none,
-                                filled: true,
-                                fillColor: !withBorder
-                                    ? const Color(0xffFFFFFF)
-                                    : const Color(0xffFCFCFC),
-                              ),
-                            ),
-                            Positioned(
-                              top: 30.h,
-                              child: Text(
-                                widget.controller.value.text,
+                                },
+                                onChanged: (String? text) {
+                                  debugPrint(widget.index.toString());
+                                  debugPrint(text);
+                                  debugPrint(widget.index.toString());
+                                  debugPrint(text?.length.toString());
+                                  widget.onChange.call();
+                                  if (widget.index == 0 &&
+                                      (text?.length ?? 0) == 6) {
+                                    widget.pasteOtpCode!.call(text!);
+                                  }
+                                  if ((text?.length ?? 0) > 1) {
+                                    widget.controller.text = text![0];
+                                    text = text[0];
+                                  }
+                                  setState(() {
+                                    if ((text?.length ?? 0) == 1) {
+                                      widget.onChange.call();
+                                      focusNodes[min(5, widget.index + 1)]
+                                          .requestFocus();
+                                      currentToType = min(5, widget.index + 1);
+                                      withBorder = widget.index == 5;
+                                      if (widget.index == 5) {
+                                        checkingOtp = true;
+                                        widget.checkOtp!.call();
+                                      }
+                                    } else if (text?.isEmpty ?? true) {
+                                      widget.onChange.call();
+                                      checkingOtp = false;
+                                      widget.controller.value =
+                                          zwspEditingValue;
+                                      focusNodes[max(0, widget.index - 1)]
+                                          .requestFocus();
+                                      currentToType = max(0, widget.index - 1);
+                                      withBorder = true;
+                                    }
+                                  });
+                                },
+                                textAlign: TextAlign.center,
+                                keyboardType: TextInputType.number,
+                                textDirection: TextDirection.ltr,
+                                autocorrect: false,
+                                cursorColor: const Color(0xff5D5C5D),
+                                cursorHeight: 0,
+                                enableInteractiveSelection: widget.index == 0,
+                                cursorWidth: 0,
+                                textAlignVertical: TextAlignVertical.center,
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.digitsOnly,
+                                ],
                                 style: context.textTheme.headlineSmall?.mq
                                     .copyWith(
-                                      color: const Color(0xff1D1D1D),
+                                      color: const Color(0xffFFFFFF),
 
                                       height: 0.6,
-                                      fontSize: 16.sp,
+                                      fontSize: 0.sp,
                                       decoration: TextDecoration.none,
                                     ),
+                                maxLines: 1,
+                                decoration: InputDecoration(
+                                  border: InputBorder.none,
+
+                                  focusedBorder: InputBorder.none,
+                                  filled: true,
+                                  fillColor: widget.fromPasscose
+                                      ? widget.verfySucessful
+                                            ? const Color(0xffE0FFEE)
+                                            : withBorder
+                                            ? const Color(0xffFFFFFF)
+                                            : const Color(0xffFCFCFC)
+                                      : !withBorder
+                                      ? const Color(0xffFFFFFF)
+                                      : const Color(0xffFCFCFC),
+                                ),
                               ),
-                            ),
-                          ],
+                              Positioned(
+                                child: (widget.fromPasscose && hasValue)
+                                    ? SvgPicture.asset(
+                                        AppAssets.nBlock,
+                                        width: 20.w,
+                                      )
+                                    : Text(
+                                        widget.controller.value.text == '\u200b'
+                                            ? ""
+                                            : widget.controller.value.text,
+                                        style: context
+                                            .textTheme
+                                            .headlineSmall
+                                            ?.mq
+                                            .copyWith(
+                                              color: const Color(0xff1D1D1D),
+
+                                              height: 1.3,
+                                              fontSize: 16.sp,
+                                              decoration: TextDecoration.none,
+                                            ),
+                                      ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),

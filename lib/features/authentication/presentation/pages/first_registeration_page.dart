@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart' as easy;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -9,6 +10,7 @@ import 'package:rdb/base_page.dart';
 import 'package:rdb/core/utils/extensions/build_context.dart';
 import 'package:rdb/core/utils/responsive_padding.dart';
 import 'package:rdb/features/authentication/presentation/widgets/create_account_section.dart';
+import 'package:rdb/generated/locale_keys.g.dart';
 import '../../../../common/helper/show_message.dart';
 import '../../../../core/domin/repositories/prefs_repository.dart';
 import '../../../../routes/router.dart';
@@ -117,7 +119,7 @@ class _RegistrationPageState extends State<RegistrationPage>
             return;
           }
           // ignore: use_build_context_synchronously
-          context.go(GRouter.config.applicationRoutes.kBasePage);
+          //context.go(GRouter.config.applicationRoutes.kBasePage);
         });
       },
       child: ValueListenableBuilder<int>(
@@ -157,6 +159,7 @@ class _RegistrationPageState extends State<RegistrationPage>
             focusNode.requestFocus();
           }
           return Scaffold(
+            resizeToAvoidBottomInset: false,
             backgroundColor: index != 6
                 ? context.colorScheme.surface
                 : const Color(0xffF4FFF4),
@@ -253,7 +256,7 @@ class _RegistrationPageState extends State<RegistrationPage>
                               pageContent.value == 3 ||
                               pageContent.value == 4
                           ? 640.h
-                          : 380.h,
+                          : 385.h,
                       width: 1.sw,
                       // ignore: deprecated_member_use
                       child: WillPopScope(
@@ -337,7 +340,9 @@ class _RegistrationPageState extends State<RegistrationPage>
                                     false) {
                                   showWarningMessage(
                                     context,
-                                    'you must wait for some seconds before try again',
+                                    LocaleKeys
+                                        .you_must_wait_for_some_seconds_before_try_again
+                                        .tr(),
                                   );
                                   return;
                                 }

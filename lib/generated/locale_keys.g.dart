@@ -913,4 +913,29 @@ abstract class LocaleKeys {
   static const sign_in_exclamation = 'sign_in_exclamation';
   static const sign_up_exclamation = 'sign_up_exclamation';
   static const verify_your_account = 'verify_your_account';
+  static const set_passcode = 'set_passcode';
+  static const reenter_passcode = 'reenter_passcode';
+  static const enter_passcode = 'enter_passcode';
+  static const set_passcode_done = 'set_passcode_done';
+  static const new_customer = 'new_customer';
+  static const choose_verification_method = 'choose_verification_method';
+  static const enter_verification_code_whatsapp =
+      'enter_verification_code_whatsapp';
+  static const change_number = 'change_number';
+  static const method = 'method';
+  static const enter_your_phone_number_hint = 'enter_your_phone_number_hint';
+  static const create_account_tap_agree = 'create_account_tap_agree';
+  static const your_privacy_safe = 'your_privacy_safe';
+  static const we_have_sent_verification_code =
+      'we_have_sent_verification_code';
+  static const resend_after = 'resend_after';
+  static const didnt_receive_code_q = 'didnt_receive_code_q';
+  static const enter_correct_code_phone = 'enter_correct_code_phone';
+  static const already_registered_exclamation = 'already_registered_exclamation';
+  static const number_already_registered = 'number_already_registered';
+  static const not_registered_exclamation = 'not_registered_exclamation';
+  static const cancel_take_look = 'cancel_take_look';
+  static const sign_up_successfully_exclamation =
+      'sign_up_successfully_exclamation';
+  static const enjoy_with_services = 'enjoy_with_services';
 }

@@ -85,7 +85,7 @@ class _AlreadyExistAccountState extends ThemeState<AlreadyExistAccount> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           MyTextWidget(
-                            "Already Registered !",
+                            LocaleKeys.already_registered_exclamation.tr(),
                             style: context.textTheme.titleLarge?.bq.copyWith(
                               color: const Color(0xff1D1D1D),
                               height: 1.42,
@@ -94,7 +94,7 @@ class _AlreadyExistAccountState extends ThemeState<AlreadyExistAccount> {
                           ),
                           10.verticalSpace,
                           MyTextWidget(
-                            "This Number Already Registered With Us",
+                            LocaleKeys.number_already_registered.tr(),
                             style: context.textTheme.titleLarge?.mq.copyWith(
                               color: const Color(0xff1D1D1D),
                               height: 1.42,
@@ -162,7 +162,7 @@ class _AlreadyExistAccountState extends ThemeState<AlreadyExistAccount> {
                     30.verticalSpace,
                     Center(
                       child: MyTextWidget(
-                        "Cancel & Take A Look At The App",
+                        LocaleKeys.cancel_take_look.tr(),
                         style: textTheme.displayMedium?.rq.copyWith(
                           color: const Color(0xff4D84FF),
                           letterSpacing: 0.16,

@@ -152,7 +152,7 @@ class _VerificationMethodsState extends State<VerificationMethods> {
                 }
               },
               child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 8.h),
+                padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 3.h),
                 decoration: BoxDecoration(
                   color: const Color(0xff388cff),
                   borderRadius: BorderRadius.circular(12.r),
@@ -235,7 +235,7 @@ class _VerificationMethodsState extends State<VerificationMethods> {
 
                     12.verticalSpace,
                     MyTextWidget(
-                      "Choose Verification Method",
+                      LocaleKeys.choose_verification_method.tr(),
                       style: context.textTheme.titleMedium?.mq.copyWith(
                         color: const Color(0xff5D5C5D),
                         height: 1.42,
@@ -287,7 +287,7 @@ class _VerificationMethodsState extends State<VerificationMethods> {
                         InkWell(
                           onTap: widget.goBackToPhone,
                           child: MyTextWidget(
-                            "Edit",
+                            LocaleKeys.edit.tr(),
                             textAlign: TextAlign.start,
                             overflow: TextOverflow.ellipsis,
                             maxLines: 2,
@@ -310,7 +310,7 @@ class _VerificationMethodsState extends State<VerificationMethods> {
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         MyTextWidget(
-                          "Your Privacy Is Completely Safe",
+                          LocaleKeys.your_privacy_safe.tr(),
                           textAlign: TextAlign.start,
                           overflow: TextOverflow.ellipsis,
                           maxLines: 2,

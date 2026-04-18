@@ -172,7 +172,7 @@ class _WelcomeSectionState extends State<WelcomeSection> {
                     valueListenable: clickButton,
                     builder: (context, index, _) {
                       return MyTextWidget(
-                        "New Customer",
+                        LocaleKeys.new_customer.tr(),
                         style: context.textTheme.displayMedium?.rq.copyWith(
                           color: const Color(0xff5D5C5D),
                           letterSpacing: 0.16,

@@ -155,7 +155,7 @@ class PhoneFormField extends StatelessWidget {
                     onChanged: (String? text) {
                       if (text != null) {
                         onChange?.call(text) ?? false;
-                        offset = (controller!.text.length * 12.sp);
+                        offset = ((controller!.text.length * 9.w));
                         rebuildCursor.value = !rebuildCursor.value;
                       }
                     },
@@ -225,7 +225,7 @@ class PhoneFormField extends StatelessWidget {
                           builder: (context, rebuild, _) {
                             return Container(
                               margin: HWEdgeInsets.only(
-                                left: 120.w + offset,
+                                left: 70.w + offset,
                                 bottom: 25.h,
                               ),
                               width: 10.w,

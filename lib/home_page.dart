@@ -88,6 +88,7 @@ class _HomePageState extends State<HomePage> {
       if (kDebugMode) {
         print('User logged out from wallet. Clearing verification status.');
       }
+      GetIt.I<PrefsRepository>().setPasscode("");
       GetIt.I<PrefsRepository>().setVerifiedPhone(false);
       GetIt.I<PrefsRepository>().setVerifiedPhonePeforeExpiredToken(false);
       GRouter.router.go(GRouter.config.kRootRoute);
