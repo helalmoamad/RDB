@@ -12,7 +12,6 @@ import '../features/authentication/presentation/pages/already_exist_account.dart
 import '../features/authentication/presentation/pages/number_not_registered.dart';
 
 import '../main.dart';
-import 'error_screen.dart';
 import 'router_config.dart';
 
 class GRouter {
@@ -24,7 +23,8 @@ class GRouter {
 
   static final GoRouter _router = GoRouter(
     observers: [BotToastNavigatorObserver()],
-    // initialLocation: _config.applicationRoutes.kWebView,
+    initialLocation: _config.kRootRoute,
+    overridePlatformDefaultLocation: true,
     navigatorKey: navigatorKey,
     routes: <RouteBase>[
       GoRoute(
@@ -177,7 +177,7 @@ class GRouter {
       //   },
       // ),
     ],
-    errorBuilder: (context, state) => ErrorScreen(exception: state.error),
+    errorBuilder: (context, state) => const SplashPage(),
   );
 
   static Page<dynamic> _builderPage<T>({

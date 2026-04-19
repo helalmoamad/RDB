@@ -805,6 +805,11 @@
   "reenter_passcode": "Reenter Passcode",
   "enter_passcode": "Enter Passcode",
   "set_passcode_done": "Set Passcode Done",
+  "biometric_reason_face": "Use face recognition to continue",
+  "biometric_reason_fingerprint": "Use your fingerprint to continue",
+  "face_login_move_closer_message": "Move your face closer to sign in",
+  "fingerprint_login_tooltip": "Fingerprint Login",
+  "face_login_tooltip": "Face Login",
   "new_customer": "New Customer",
   "choose_verification_method": "Choose Verification Method",
   "enter_verification_code_whatsapp": "Enter Verification Code Sent To Your Whatsapp",
@@ -822,5 +827,8 @@
   "not_registered_exclamation": "Not Registered !",
   "cancel_take_look": "Cancel & Take A Look At The App",
   "sign_up_successfully_exclamation": "Sign Up Successfully !",
-  "enjoy_with_services": "Enjoy With Our Services"
+  "enjoy_with_services": "Enjoy With Our Services",
+  "security_issues_found_title": "Security Issues Found",
+  "security_issues_found_message": "This app cannot be opened because your device appears to be rooted or compromised.",
+  "security_issues_found_details": "For your safety and to protect your account and transactions, please remove root access and try again."
 }

@@ -787,6 +787,11 @@
   "reenter_passcode": "Şifreyi Tekrar Girin",
   "enter_passcode": "Şifreyi Girin",
   "set_passcode_done": "Şifre Başarıyla Belirlendi",
+  "biometric_reason_face": "Devam etmek için yüz tanımayı kullanın",
+  "biometric_reason_fingerprint": "Devam etmek için parmak izinizi kullanın",
+  "face_login_move_closer_message": "Giriş yapmak için yüzünüzü biraz yaklaştırın",
+  "fingerprint_login_tooltip": "Parmak İzi ile Giriş",
+  "face_login_tooltip": "Yüz ile Giriş",
   "new_customer": "Yeni Müşteri",
   "choose_verification_method": "Doğrulama Yöntemini Seçin",
   "enter_verification_code_whatsapp": "Whatsapp'a Gönderilen Doğrulama Kodunu Girin",
@@ -804,5 +809,8 @@
   "not_registered_exclamation": "Kayıtlı Değil !",
   "cancel_take_look": "İptal Et ve Uygulamaya Göz At",
   "sign_up_successfully_exclamation": "Başarıyla Kayıt Olundu !",
-  "enjoy_with_services": "Hizmetlerimizin Tadını Çıkarın"
+  "enjoy_with_services": "Hizmetlerimizin Tadını Çıkarın",
+  "security_issues_found_title": "Güvenlik Sorunları Bulundu",
+  "security_issues_found_message": "Cihazınız rootlu veya güvenliği ihlal edilmiş göründüğü için bu uygulama açılamaz.",
+  "security_issues_found_details": "Güvenliğiniz ve hesap işlemlerinizin korunması için lütfen root erişimini kaldırıp tekrar deneyin."
 }

@@ -12,6 +12,7 @@ import 'package:rdb/trydos_application.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:rdb/core/di/di_container.dart';
 import 'package:rdb/features/authentication/presentation/manager/auth_bloc.dart';
+import 'package:root_check_flutter/root_check_flutter.dart';
 import 'core/domin/repositories/prefs_repository.dart';
 
 bool declineCallBecauseOfNotificationButton = false;
@@ -58,5 +59,20 @@ void main() async {
   GetIt.I<PrefsRepository>().setTimerForOtpRunning(false);
   isDependencyInitialized = true;
   GetIt.I<AuthBloc>().add(GetUserCountryEvent());
-  runApp(TrydosApplication(navKey: navigatorKey));
+  final bool isDeviceRooted = await _isDeviceRooted();
+  runApp(
+    TrydosApplication(
+      navKey: navigatorKey,
+      isSecurityIssueFound: isDeviceRooted,
+    ),
+  );
+}
+
+Future<bool> _isDeviceRooted() async {
+  try {
+    return await RootCheckFlutter.isDeviceRooted;
+  } catch (e, st) {
+    dev.log('Root check failed: $e', stackTrace: st);
+    return false;
+  }
 }

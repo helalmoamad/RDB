@@ -6,8 +6,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:rdb/common/constant/design/constant_design.dart';
 import 'package:rdb/core/utils/app_lifecycle_manager.dart';
 import 'package:rdb/core/utils/extensions/state_ext.dart';
+import 'package:rdb/features/security/presentation/root_security_issue_page.dart';
 import 'package:rdb/routes/router.dart';
 import 'package:rdb/service/ku_fallback_localizations.dart';
+import 'package:rdb/service/app_deep_link_service.dart';
 import 'package:rdb/service/language_service.dart';
 import 'package:rdb/service/localization_service.dart';
 import 'package:rdb/service/screen_service.dart';
@@ -17,8 +19,13 @@ import 'package:rdb/theme/my_color_scheme.dart';
 import 'package:bot_toast/bot_toast.dart';
 
 class TrydosApplication extends StatefulWidget {
-  const TrydosApplication({super.key, required this.navKey});
+  const TrydosApplication({
+    super.key,
+    required this.navKey,
+    required this.isSecurityIssueFound,
+  });
   final GlobalKey<NavigatorState> navKey;
+  final bool isSecurityIssueFound;
 
   @override
   State<TrydosApplication> createState() => _TrydosApplicationState();
@@ -30,6 +37,8 @@ final ValueNotifier<bool> denySlidingBackForSlidingUpPanels = ValueNotifier(
 
 class _TrydosApplicationState extends State<TrydosApplication>
     with WidgetsBindingObserver {
+  final AppDeepLinkService _deepLinkService = AppDeepLinkService();
+
   @override
   void didChangeDependencies() {
     SystemChrome.setSystemUIOverlayStyle(
@@ -50,12 +59,16 @@ class _TrydosApplicationState extends State<TrydosApplication>
     // FirebaseAnalyticsService.startAnalyticsSession();
     /////////////////////
     super.initState();
+    if (!widget.isSecurityIssueFound) {
+      _deepLinkService.init();
+    }
     // FirebasePresence.sendUserStatus("online");
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _deepLinkService.dispose();
 
     super.dispose();
   }
@@ -119,26 +132,40 @@ class _TrydosApplicationState extends State<TrydosApplication>
                 builder: (context) {
                   return ValueListenableBuilder<bool>(
                     valueListenable: denySlidingBackForSlidingUpPanels,
-                    child: MaterialApp.router(
-                      debugShowCheckedModeBanner: false,
-                      locale: context.locale,
-                      routerConfig: GRouter.router,
-                      theme: AppTheme.light,
-                      supportedLocales: context.supportedLocales,
-                      localizationsDelegates: [
-                        ...context.localizationDelegates,
-                        const KuMaterialLocalizationsDelegate(),
-                        const KuWidgetsLocalizationsDelegate(),
-                        const KuCupertinoLocalizationsDelegate(),
-                      ],
+                    child: widget.isSecurityIssueFound
+                        ? MaterialApp(
+                            debugShowCheckedModeBanner: false,
+                            locale: context.locale,
+                            theme: AppTheme.light,
+                            supportedLocales: context.supportedLocales,
+                            localizationsDelegates: [
+                              ...context.localizationDelegates,
+                              const KuMaterialLocalizationsDelegate(),
+                              const KuWidgetsLocalizationsDelegate(),
+                              const KuCupertinoLocalizationsDelegate(),
+                            ],
+                            home: const RootSecurityIssuePage(),
+                          )
+                        : MaterialApp.router(
+                            debugShowCheckedModeBanner: false,
+                            locale: context.locale,
+                            routerConfig: GRouter.router,
+                            theme: AppTheme.light,
+                            supportedLocales: context.supportedLocales,
+                            localizationsDelegates: [
+                              ...context.localizationDelegates,
+                              const KuMaterialLocalizationsDelegate(),
+                              const KuWidgetsLocalizationsDelegate(),
+                              const KuCupertinoLocalizationsDelegate(),
+                            ],
 
-                      builder: (context, child) {
-                        LanguageService(context);
-                        ScreenService(context);
+                            builder: (context, child) {
+                              LanguageService(context);
+                              ScreenService(context);
 
-                        return botToastBuilder(context, child);
-                      },
-                    ),
+                              return botToastBuilder(context, child);
+                            },
+                          ),
                     builder: (context, deny, child) {
                       return BackGestureWidthTheme(
                         backGestureWidth: BackGestureWidth.fraction(

@@ -200,4 +200,12 @@ class PrefsRepositoryImpl extends PrefsRepository {
   @override
   Future<bool> setShouldShowPin(bool value) =>
       _preferences.setBool(PrefsKey.shouldShowPin, value);
+
+  @override
+  bool? get isFaceLoginEnabled =>
+      _preferences.getBool(PrefsKey.faceLoginEnabled);
+
+  @override
+  Future<bool> setFaceLoginEnabled(bool value) =>
+      _preferences.setBool(PrefsKey.faceLoginEnabled, value);
 }

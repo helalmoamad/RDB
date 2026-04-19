@@ -917,6 +917,12 @@ abstract class LocaleKeys {
   static const reenter_passcode = 'reenter_passcode';
   static const enter_passcode = 'enter_passcode';
   static const set_passcode_done = 'set_passcode_done';
+  static const biometric_reason_face = 'biometric_reason_face';
+  static const biometric_reason_fingerprint = 'biometric_reason_fingerprint';
+  static const face_login_move_closer_message =
+      'face_login_move_closer_message';
+  static const fingerprint_login_tooltip = 'fingerprint_login_tooltip';
+  static const face_login_tooltip = 'face_login_tooltip';
   static const new_customer = 'new_customer';
   static const choose_verification_method = 'choose_verification_method';
   static const enter_verification_code_whatsapp =
@@ -931,11 +937,15 @@ abstract class LocaleKeys {
   static const resend_after = 'resend_after';
   static const didnt_receive_code_q = 'didnt_receive_code_q';
   static const enter_correct_code_phone = 'enter_correct_code_phone';
-  static const already_registered_exclamation = 'already_registered_exclamation';
+  static const already_registered_exclamation =
+      'already_registered_exclamation';
   static const number_already_registered = 'number_already_registered';
   static const not_registered_exclamation = 'not_registered_exclamation';
   static const cancel_take_look = 'cancel_take_look';
   static const sign_up_successfully_exclamation =
       'sign_up_successfully_exclamation';
   static const enjoy_with_services = 'enjoy_with_services';
+  static const security_issues_found_title = 'security_issues_found_title';
+  static const security_issues_found_message = 'security_issues_found_message';
+  static const security_issues_found_details = 'security_issues_found_details';
 }

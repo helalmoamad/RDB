@@ -814,6 +814,11 @@
   "reenter_passcode": "دووبارە وشەی نهێنی بنووسەرەوە",
   "enter_passcode": "وشەی نهێنی بنووسە",
   "set_passcode_done": "وشەی نهێنی بە سەرکەوتوویی دانرا",
+  "biometric_reason_face": "بۆ بەردەوامبوون ناسینەوەی ڕوو بەکاربهێنە",
+  "biometric_reason_fingerprint": "بۆ بەردەوامبوون پەنجەمۆری خۆت بەکاربهێنە",
+  "face_login_move_closer_message": "تکایە ڕووت نزیکتر بکە بۆ چوونە ژوورەوە",
+  "fingerprint_login_tooltip": "چوونە ژوورەوە بە پەنجەمۆر",
+  "face_login_tooltip": "چوونە ژوورەوە بە ناسینەوەی ڕوو",
   "new_customer": "بەکارهێنەری نوێ",
   "choose_verification_method": "ڕێگای پشتڕاستکردنەوە هەڵبژێرە",
   "enter_verification_code_whatsapp": "کۆدی پشتڕاستکردنەوە کە بۆ واتسئەپ نێردراوە بنووسە",
@@ -831,5 +836,8 @@
   "not_registered_exclamation": "تۆمار نەکراوە !",
   "cancel_take_look": "پاشگەزبوونەوە و سەیرکردنی ئەپەکە",
   "sign_up_successfully_exclamation": "بە سەرکەوتوویی تۆمارکرا !",
-  "enjoy_with_services": "چێژ لە خزمەتگوزارییەکانمان وەربگرە"
+  "enjoy_with_services": "چێژ لە خزمەتگوزارییەکانمان وەربگرە",
+  "security_issues_found_title": "کێشەی ئەمنی دۆزرایەوە",
+  "security_issues_found_message": "ئەم ئەپە ناکرێت بکرێتەوە چونکە ئامێرەکەت روتکراو یان ناسەقامگیر دیارە.",
+  "security_issues_found_details": "بۆ پاراستنی تۆ و هەژمار و مامەڵەکانت، تکایە دەسەڵاتی روت لاببە و دووبارە هەوڵبدە."
 }

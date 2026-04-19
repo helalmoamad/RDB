@@ -51,6 +51,9 @@ dependencies:
   json_annotation: ^4.9.0
   json_serializable: ^6.8.0
   connectivity_plus: ^5.0.1
+  root_check_flutter: ^1.0.5
+  app_links: ^6.4.0
+  local_auth: ^2.3.0
   dotted_border: ^2.1.0
   form_field_validator: ^1.1.0
   trydos_wallet:

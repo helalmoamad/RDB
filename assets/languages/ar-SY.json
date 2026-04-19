@@ -804,6 +804,11 @@
   "reenter_passcode": "إعادة إدخال الرمز",
   "enter_passcode": "إدخال رمز المرور",
   "set_passcode_done": "تم تعيين رمز المرور بنجاح",
+  "biometric_reason_face": "استخدم بصمة الوجه للمتابعة",
+  "biometric_reason_fingerprint": "استخدم بصمة الإصبع للمتابعة",
+  "face_login_move_closer_message": "يفضل تقريب الوجه لتسجيل الدخول",
+  "fingerprint_login_tooltip": "تسجيل الدخول بالبصمة",
+  "face_login_tooltip": "تسجيل الدخول بالوجه",
   "new_customer": "عميل جديد",
   "choose_verification_method": "اختر طريقة التحقق",
   "enter_verification_code_whatsapp": "أدخل رمز التحقق المرسل إلى الواتساب",
@@ -821,5 +826,8 @@
   "not_registered_exclamation": "غير مسجل !",
   "cancel_take_look": "إلغاء وإلقاء نظرة على التطبيق",
   "sign_up_successfully_exclamation": "تم إنشاء الحساب بنجاح !",
-  "enjoy_with_services": "استمتع بخدماتنا"
+  "enjoy_with_services": "استمتع بخدماتنا",
+  "security_issues_found_title": "تم اكتشاف مشاكل أمنية",
+  "security_issues_found_message": "لا يمكن فتح التطبيق لأن جهازك يبدو أنه مروّت أو غير آمن.",
+  "security_issues_found_details": "لحمايتك ولحماية حسابك وعملياتك، يرجى إزالة صلاحيات الروت ثم إعادة المحاولة."
 }

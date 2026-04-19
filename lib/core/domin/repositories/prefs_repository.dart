@@ -87,4 +87,6 @@ abstract class PrefsRepository {
   Future<bool> setPasscode(String passcode);
   bool? get shouldShowPin;
   Future<bool> setShouldShowPin(bool value);
+  bool? get isFaceLoginEnabled;
+  Future<bool> setFaceLoginEnabled(bool value);
 }
