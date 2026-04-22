@@ -208,4 +208,27 @@ class PrefsRepositoryImpl extends PrefsRepository {
   @override
   Future<bool> setFaceLoginEnabled(bool value) =>
       _preferences.setBool(PrefsKey.faceLoginEnabled, value);
+
+  @override
+  int get pinFailedAttempts =>
+      _preferences.getInt(PrefsKey.pinFailedAttempts) ?? 0;
+
+  @override
+  Future<bool> setPinFailedAttempts(int count) =>
+      _preferences.setInt(PrefsKey.pinFailedAttempts, count);
+
+  @override
+  int get pinLockoutLevel => _preferences.getInt(PrefsKey.pinLockoutLevel) ?? 0;
+
+  @override
+  Future<bool> setPinLockoutLevel(int level) =>
+      _preferences.setInt(PrefsKey.pinLockoutLevel, level);
+
+  @override
+  int get pinLockoutUntilMs =>
+      _preferences.getInt(PrefsKey.pinLockoutUntil) ?? 0;
+
+  @override
+  Future<bool> setPinLockoutUntilMs(int timestampMs) =>
+      _preferences.setInt(PrefsKey.pinLockoutUntil, timestampMs);
 }

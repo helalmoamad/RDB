@@ -811,6 +811,8 @@
   "face_login_move_closer_message": "Move your face closer to sign in",
   "fingerprint_login_tooltip": "Fingerprint Login",
   "face_login_tooltip": "Face Login",
+  "pin_lockout_too_many_attempts": "Too many attempts",
+  "pin_lockout_try_again_in": "Try again in",
   "new_customer": "New Customer",
   "choose_verification_method": "Choose Verification Method",
   "enter_verification_code_whatsapp": "Enter Verification Code Sent To Your Whatsapp",

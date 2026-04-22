@@ -41,4 +41,7 @@ abstract class PrefsKey {
   static const passcode = r'__$__passcode__$__';
   static const shouldShowPin = r'__$__shouldShowPin__$__';
   static const faceLoginEnabled = r'__$__faceLoginEnabled__$__';
+  static const pinFailedAttempts = r'__$__pinFailedAttempts__$__';
+  static const pinLockoutUntil = r'__$__pinLockoutUntil__$__';
+  static const pinLockoutLevel = r'__$__pinLockoutLevel__$__';
 }

@@ -793,6 +793,8 @@
   "face_login_move_closer_message": "Giriş yapmak için yüzünüzü biraz yaklaştırın",
   "fingerprint_login_tooltip": "Parmak İzi ile Giriş",
   "face_login_tooltip": "Yüz ile Giriş",
+  "pin_lockout_too_many_attempts": "Çok fazla deneme",
+  "pin_lockout_try_again_in": "Sonra tekrar deneyin",
   "new_customer": "Yeni Müşteri",
   "choose_verification_method": "Doğrulama Yöntemini Seçin",
   "enter_verification_code_whatsapp": "Whatsapp'a Gönderilen Doğrulama Kodunu Girin",

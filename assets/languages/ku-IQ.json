@@ -820,6 +820,8 @@
   "face_login_move_closer_message": "تکایە ڕووت نزیکتر بکە بۆ چوونە ژوورەوە",
   "fingerprint_login_tooltip": "چوونە ژوورەوە بە پەنجەمۆر",
   "face_login_tooltip": "چوونە ژوورەوە بە ناسینەوەی ڕوو",
+  "pin_lockout_too_many_attempts": "زۆر هەوڵێکی خاتا",
+  "pin_lockout_try_again_in": "دووبارە هەوڵ بدەرەوە لە",
   "new_customer": "بەکارهێنەری نوێ",
   "choose_verification_method": "ڕێگای پشتڕاستکردنەوە هەڵبژێرە",
   "enter_verification_code_whatsapp": "کۆدی پشتڕاستکردنەوە کە بۆ واتسئەپ نێردراوە بنووسە",

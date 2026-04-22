@@ -810,6 +810,8 @@
   "face_login_move_closer_message": "يفضل تقريب الوجه لتسجيل الدخول",
   "fingerprint_login_tooltip": "تسجيل الدخول بالبصمة",
   "face_login_tooltip": "تسجيل الدخول بالوجه",
+  "pin_lockout_too_many_attempts": "محاولات كثيرة جداً",
+  "pin_lockout_try_again_in": "حاول مجدداً بعد",
   "new_customer": "عميل جديد",
   "choose_verification_method": "اختر طريقة التحقق",
   "enter_verification_code_whatsapp": "أدخل رمز التحقق المرسل إلى الواتساب",

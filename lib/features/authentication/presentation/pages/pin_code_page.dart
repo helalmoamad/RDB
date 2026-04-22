@@ -14,9 +14,30 @@ import 'package:rdb/theme/typography.dart';
 import 'package:rdb/generated/locale_keys.g.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:local_auth/error_codes.dart' as auth_error;
+import 'dart:async';
 import 'dart:ui' as ui;
 
 enum PinCodeState { set, confirm, verify, done }
+
+/// Progressive lockout durations (index = lockout level).
+/// Level 0: 5 wrong attempts → 30 s
+/// Level 1: 1 wrong attempt  → 1 min
+/// Level 2: 1 wrong attempt  → 30 min
+/// Level 3: 1 wrong attempt  → 1 h
+/// Level 4: 1 wrong attempt  → 1 day
+/// Level 5: 1 wrong attempt  → 1 week
+/// Level 6+: 1 wrong attempt → 1 month
+const List<Duration> _kLockoutDurations = [
+  Duration(seconds: 30),
+  Duration(minutes: 1),
+  Duration(minutes: 30),
+  Duration(hours: 1),
+  Duration(days: 1),
+  Duration(days: 7),
+  Duration(days: 30),
+];
+
+const int _kMaxAttemptsBeforeFirstLock = 5;
 
 class PinCodePage extends StatefulWidget {
   const PinCodePage({super.key});
@@ -36,8 +57,14 @@ class _PinCodePageState extends State<PinCodePage> with FormStateMinxin {
   bool _supportsFingerprint = false;
   bool _isAuthenticating = false;
 
+  // ── Lockout state ──
+  bool _isLockedOut = false;
+  int _lockoutRemainingSeconds = 0;
+  Timer? _lockoutTimer;
+
   @override
   void initState() {
+    super.initState();
     checkOtp = ValueNotifier<int>(0);
     final storedPin = prefsRepository.passcode;
     if (storedPin == null || storedPin.isEmpty) {
@@ -46,8 +73,120 @@ class _PinCodePageState extends State<PinCodePage> with FormStateMinxin {
       _state = PinCodeState.verify;
     }
     _checkBiometricAvailability();
-    super.initState();
+    _resumeLockoutIfActive();
   }
+
+  @override
+  void dispose() {
+    _lockoutTimer?.cancel();
+    super.dispose();
+  }
+
+  // ── Lockout helpers ──
+
+  /// Returns the lockout duration for the given [level], capped at the max.
+  Duration _durationForLevel(int level) {
+    final idx = level.clamp(0, _kLockoutDurations.length - 1);
+    return _kLockoutDurations[idx];
+  }
+
+  /// Formats remaining seconds into a human-readable countdown string.
+  String _formatRemaining(int totalSeconds) {
+    if (totalSeconds <= 0) return '0s';
+    if (totalSeconds < 60) return '${totalSeconds}s';
+    if (totalSeconds < 3600) {
+      final m = totalSeconds ~/ 60;
+      final s = totalSeconds % 60;
+      return s > 0 ? '${m}m ${s}s' : '${m}m';
+    }
+    if (totalSeconds < 86400) {
+      final h = totalSeconds ~/ 3600;
+      final m = (totalSeconds % 3600) ~/ 60;
+      return m > 0 ? '${h}h ${m}m' : '${h}h';
+    }
+    final d = totalSeconds ~/ 86400;
+    final h = (totalSeconds % 86400) ~/ 3600;
+    return h > 0 ? '${d}d ${h}h' : '${d}d';
+  }
+
+  /// Called on app start / resume: re-activates lockout if timer hasn't expired.
+  void _resumeLockoutIfActive() {
+    final lockoutUntilMs = prefsRepository.pinLockoutUntilMs;
+    if (lockoutUntilMs <= 0) return;
+    final remaining = lockoutUntilMs - DateTime.now().millisecondsSinceEpoch;
+    if (remaining <= 0) {
+      // Lock has expired while app was closed; clear stored timestamp only,
+      // but keep level and failed attempts for escalation.
+      prefsRepository.setPinLockoutUntilMs(0);
+      return;
+    }
+    _startLockoutCountdown(remaining ~/ 1000);
+  }
+
+  /// Persists a new lockout at [level] and starts the UI countdown.
+  Future<void> _applyLockout(int level) async {
+    final duration = _durationForLevel(level);
+    final untilMs =
+        DateTime.now().millisecondsSinceEpoch + duration.inMilliseconds;
+    await prefsRepository.setPinLockoutUntilMs(untilMs);
+    await prefsRepository.setPinLockoutLevel(level + 1);
+    await prefsRepository.setPinFailedAttempts(0);
+    _startLockoutCountdown(duration.inSeconds);
+  }
+
+  /// Starts the visual countdown timer.
+  void _startLockoutCountdown(int seconds) {
+    _lockoutTimer?.cancel();
+    setState(() {
+      _isLockedOut = true;
+      _lockoutRemainingSeconds = seconds;
+    });
+    _lockoutTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
+      setState(() {
+        _lockoutRemainingSeconds--;
+      });
+      if (_lockoutRemainingSeconds <= 0) {
+        timer.cancel();
+        prefsRepository.setPinLockoutUntilMs(0);
+        setState(() {
+          _isLockedOut = false;
+        });
+        _clearRotation();
+      }
+    });
+  }
+
+  /// Records a wrong attempt and applies lockout escalation when needed.
+  Future<void> _recordWrongAttempt() async {
+    final level = prefsRepository.pinLockoutLevel;
+
+    if (level == 0) {
+      // First lockout phase: count up to 5 attempts.
+      final attempts = prefsRepository.pinFailedAttempts + 1;
+      await prefsRepository.setPinFailedAttempts(attempts);
+      if (attempts >= _kMaxAttemptsBeforeFirstLock) {
+        await _applyLockout(0); // 30 s lockout
+      }
+    } else {
+      // Every wrong attempt after the first lockout triggers escalation.
+      await _applyLockout(level);
+    }
+  }
+
+  /// Resets all lockout state on successful authentication.
+  Future<void> _resetLockoutState() async {
+    _lockoutTimer?.cancel();
+    await prefsRepository.setPinFailedAttempts(0);
+    await prefsRepository.setPinLockoutLevel(0);
+    await prefsRepository.setPinLockoutUntilMs(0);
+    if (mounted) setState(() => _isLockedOut = false);
+  }
+
+  // ── Biometric helpers ──
 
   Future<void> _checkBiometricAvailability() async {
     try {
@@ -55,9 +194,7 @@ class _PinCodePageState extends State<PinCodePage> with FormStateMinxin {
       final bool isDeviceSupported = await _localAuth.isDeviceSupported();
       final List<BiometricType> availableBiometrics = await _localAuth
           .getAvailableBiometrics();
-
       final bool hasAnyAvailableBiometric = availableBiometrics.isNotEmpty;
-
       if (!mounted) return;
       setState(() {
         final bool canUseBiometric =
@@ -66,25 +203,15 @@ class _PinCodePageState extends State<PinCodePage> with FormStateMinxin {
       });
     } catch (_) {
       if (!mounted) return;
-      setState(() {
-        _supportsFingerprint = false;
-      });
+      setState(() => _supportsFingerprint = false);
     }
   }
 
   Future<void> _authenticateWithBiometric({required bool isFace}) async {
-    if (_isAuthenticating) {
-      return;
-    }
+    if (_isAuthenticating) return;
+    if (!isFace && !_supportsFingerprint) return;
 
-    if (!isFace && !_supportsFingerprint) {
-      return;
-    }
-
-    setState(() {
-      _isAuthenticating = true;
-    });
-
+    setState(() => _isAuthenticating = true);
     try {
       final bool didAuthenticate = await _localAuth.authenticate(
         localizedReason: LocaleKeys.information_securely.tr(),
@@ -93,11 +220,11 @@ class _PinCodePageState extends State<PinCodePage> with FormStateMinxin {
           stickyAuth: true,
         ),
       );
-
       if (!mounted) return;
-
       if (didAuthenticate) {
+        await _resetLockoutState();
         prefsRepository.setShouldShowPin(false);
+        // ignore: use_build_context_synchronously
         context.go(GRouter.config.applicationRoutes.kBasePage);
       }
     } on PlatformException catch (e) {
@@ -105,26 +232,20 @@ class _PinCodePageState extends State<PinCodePage> with FormStateMinxin {
           e.code == auth_error.notEnrolled ||
           e.code == auth_error.passcodeNotSet) {
         if (!mounted) return;
-        setState(() {
-          _supportsFingerprint = false;
-        });
+        setState(() => _supportsFingerprint = false);
       }
     } catch (_) {
-      // Ignore transient auth errors and keep PIN as fallback.
+      // Ignore transient auth errors.
     } finally {
       // ignore: control_flow_in_finally
       if (!mounted) return;
-      setState(() {
-        _isAuthenticating = false;
-      });
+      setState(() => _isAuthenticating = false);
     }
   }
 
-  void _onPinChanged() {
-    setState(() {
-      codeStatus = 0;
-    });
-  }
+  // ── PIN helpers ──
+
+  void _onPinChanged() => setState(() => codeStatus = 0);
 
   void _clearRotation() {
     for (var controller in form.controllers) {
@@ -133,11 +254,11 @@ class _PinCodePageState extends State<PinCodePage> with FormStateMinxin {
     resetPinGlobalState();
   }
 
-  String _getEnteredPin() {
-    return form.controllers.map((c) => c.text.replaceAll('\u200b', '')).join();
-  }
+  String _getEnteredPin() =>
+      form.controllers.map((c) => c.text.replaceAll('\u200b', '')).join();
 
   void _handlePinComplete() async {
+    if (_isLockedOut) return;
     final inputPin = _getEnteredPin();
     if (inputPin.length < numberOfFields) return;
 
@@ -150,6 +271,7 @@ class _PinCodePageState extends State<PinCodePage> with FormStateMinxin {
           _clearRotation();
         });
         break;
+
       case PinCodeState.confirm:
         if (inputPin == _firstPin) {
           await prefsRepository.setPasscode(inputPin);
@@ -164,9 +286,7 @@ class _PinCodePageState extends State<PinCodePage> with FormStateMinxin {
             }
           });
         } else {
-          setState(() {
-            codeStatus = 2;
-          });
+          setState(() => codeStatus = 2);
           Future.delayed(const Duration(seconds: 2), () {
             if (mounted) {
               setState(() {
@@ -179,11 +299,11 @@ class _PinCodePageState extends State<PinCodePage> with FormStateMinxin {
           });
         }
         break;
+
       case PinCodeState.verify:
         if (inputPin == prefsRepository.passcode) {
-          setState(() {
-            codeStatus = 1;
-          });
+          await _resetLockoutState();
+          setState(() => codeStatus = 1);
           Future.delayed(const Duration(seconds: 2), () {
             if (mounted) {
               prefsRepository.setShouldShowPin(false);
@@ -191,26 +311,37 @@ class _PinCodePageState extends State<PinCodePage> with FormStateMinxin {
             }
           });
         } else {
-          setState(() {
-            codeStatus = 2;
-          });
-          Future.delayed(const Duration(seconds: 2), () {
-            if (mounted) {
-              setState(() {
-                codeStatus = 0;
-                _clearRotation();
-              });
-            }
-          });
+          setState(() => codeStatus = 2);
+          await _recordWrongAttempt();
+          if (!_isLockedOut) {
+            Future.delayed(const Duration(seconds: 2), () {
+              if (mounted) {
+                setState(() {
+                  codeStatus = 0;
+                  _clearRotation();
+                });
+              }
+            });
+          } else {
+            // Clear error state immediately when transitioning to lockout screen.
+            Future.delayed(const Duration(milliseconds: 400), () {
+              if (mounted) setState(() => codeStatus = 0);
+            });
+          }
         }
         break;
+
       case PinCodeState.done:
         break;
     }
   }
 
+  // ── Build ──
+
   @override
   Widget build(BuildContext context) {
+    if (_isLockedOut) return _buildLockoutScreen(context);
+
     String title = '';
     String subtitle = LocaleKeys.last_step.tr();
     String label = '';
@@ -243,7 +374,6 @@ class _PinCodePageState extends State<PinCodePage> with FormStateMinxin {
         canPop: _state == PinCodeState.set,
         onPopInvokedWithResult: (didPop, result) {
           if (didPop) return;
-
           if (_state == PinCodeState.confirm) {
             setState(() {
               _state = PinCodeState.set;
@@ -289,7 +419,6 @@ class _PinCodePageState extends State<PinCodePage> with FormStateMinxin {
                     ),
                   ),
                 ),
-
                 SizedBox(height: 130.h),
                 _buildPinSlot(),
                 SizedBox(height: 10.h),
@@ -308,17 +437,15 @@ class _PinCodePageState extends State<PinCodePage> with FormStateMinxin {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        if (_supportsFingerprint)
-                          IconButton(
-                            onPressed: _isAuthenticating
-                                ? null
-                                : () =>
-                                      _authenticateWithBiometric(isFace: false),
-                            tooltip: LocaleKeys.fingerprint_login_tooltip.tr(),
-                            iconSize: 40.sp,
-                            color: const Color(0xff4D84FF),
-                            icon: const Icon(Icons.fingerprint_rounded),
-                          ),
+                        IconButton(
+                          onPressed: _isAuthenticating
+                              ? null
+                              : () => _authenticateWithBiometric(isFace: false),
+                          tooltip: LocaleKeys.fingerprint_login_tooltip.tr(),
+                          iconSize: 40.sp,
+                          color: const Color(0xff4D84FF),
+                          icon: const Icon(Icons.fingerprint_rounded),
+                        ),
                       ],
                     ),
                   ),
@@ -330,6 +457,58 @@ class _PinCodePageState extends State<PinCodePage> with FormStateMinxin {
                       child: const CircularProgressIndicator(strokeWidth: 2.0),
                     ),
                   ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Lockout screen — shown instead of the normal PIN UI while locked out.
+  Widget _buildLockoutScreen(BuildContext context) {
+    final remaining = _formatRemaining(_lockoutRemainingSeconds);
+    return Scaffold(
+      backgroundColor: const Color(0xffF4FFF4),
+      body: PopScope(
+        canPop: false,
+        child: Center(
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 40.w),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  LocaleKeys.pin_lockout_too_many_attempts.tr(),
+                  textAlign: TextAlign.center,
+                  style: context.textTheme.titleLarge?.bq.copyWith(
+                    color: const Color(0xff1D1D1D),
+                    fontSize: 22.sp,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 12.h),
+                RichText(
+                  textAlign: TextAlign.center,
+                  text: TextSpan(
+                    style: context.textTheme.bodyMedium?.copyWith(
+                      color: Colors.black54,
+                      fontSize: 14.sp,
+                    ),
+                    children: [
+                      TextSpan(
+                        text: '${LocaleKeys.pin_lockout_try_again_in.tr()} ',
+                      ),
+                      TextSpan(
+                        text: remaining,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xff1D1D1D),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
