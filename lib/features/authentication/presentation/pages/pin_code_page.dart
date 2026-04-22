@@ -170,6 +170,8 @@ class _PinCodePageState extends State<PinCodePage> with FormStateMinxin {
           Future.delayed(const Duration(seconds: 2), () {
             if (mounted) {
               setState(() {
+                _state = PinCodeState.set;
+                _firstPin = '';
                 codeStatus = 0;
                 _clearRotation();
               });
@@ -220,7 +222,9 @@ class _PinCodePageState extends State<PinCodePage> with FormStateMinxin {
         break;
       case PinCodeState.confirm:
         title = LocaleKeys.set_passcode.tr();
-        label = LocaleKeys.reenter_passcode.tr();
+        label = codeStatus == 2
+            ? LocaleKeys.passcode_mismatch_restart.tr()
+            : LocaleKeys.reenter_passcode.tr();
         break;
       case PinCodeState.verify:
         title = LocaleKeys.enter_passcode.tr();

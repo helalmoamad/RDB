@@ -917,6 +917,7 @@ abstract class LocaleKeys {
   static const reenter_passcode = 'reenter_passcode';
   static const enter_passcode = 'enter_passcode';
   static const set_passcode_done = 'set_passcode_done';
+  static const passcode_mismatch_restart = 'passcode_mismatch_restart';
   static const biometric_reason_face = 'biometric_reason_face';
   static const biometric_reason_fingerprint = 'biometric_reason_fingerprint';
   static const face_login_move_closer_message =
@@ -944,6 +945,8 @@ abstract class LocaleKeys {
   static const cancel_take_look = 'cancel_take_look';
   static const sign_up_successfully_exclamation =
       'sign_up_successfully_exclamation';
+  static const sign_in_successfully_exclamation =
+      'sign_in_successfully_exclamation';
   static const enjoy_with_services = 'enjoy_with_services';
   static const security_issues_found_title = 'security_issues_found_title';
   static const security_issues_found_message = 'security_issues_found_message';

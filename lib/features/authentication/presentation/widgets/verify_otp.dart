@@ -70,10 +70,21 @@ class _VerifyOtpState extends State<VerifyOtp> with FormStateMinxin {
 
   int attempt = 1;
 
+  static const TextEditingValue _emptyOtpValue = TextEditingValue(
+    text: '\u200b',
+    selection: TextSelection(baseOffset: 1, extentOffset: 1),
+  );
+
   void onEnd() {
     prefsRepository.setTimerForOtpRunning(false);
     checkOtp.value = 0;
     enabledResendNotifier.value = true;
+    for (final controller in form.controllers) {
+      controller.value = _emptyOtpValue;
+    }
+    currentToType = 0;
+    checkingOtp = false;
+    FocusManager.instance.primaryFocus?.unfocus();
     ///////////////////////////
   }
 
@@ -739,7 +750,8 @@ class _VerifyOtpState extends State<VerifyOtp> with FormStateMinxin {
                                 return enabledResend
                                     ? Center(
                                         child: MyTextWidget(
-                                          LocaleKeys.the_code_sent_has_expired.tr(),
+                                          LocaleKeys.the_code_sent_has_expired
+                                              .tr(),
                                           style: context
                                               .textTheme
                                               .titleMedium

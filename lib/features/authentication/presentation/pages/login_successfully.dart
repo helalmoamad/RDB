@@ -11,8 +11,13 @@ import '../../../../routes/router.dart';
 import 'package:rdb/core/utils/last_pages_tracker.dart';
 
 class LoginSuccessfully extends StatefulWidget {
-  const LoginSuccessfully({required this.phoneNumber, super.key});
+  const LoginSuccessfully({
+    required this.phoneNumber,
+    required this.fromLogin,
+    super.key,
+  });
   final String phoneNumber;
+  final bool fromLogin;
 
   @override
   State<LoginSuccessfully> createState() => _LoginSuccessfullyState();
@@ -63,7 +68,10 @@ class _LoginSuccessfullyState extends ThemeState<LoginSuccessfully> {
                 children: [
                   SizedBox(height: 288.h),
                   Text(
-                    LocaleKeys.sign_up_successfully_exclamation.tr(),
+                    (widget.fromLogin
+                            ? LocaleKeys.sign_in_successfully_exclamation
+                            : LocaleKeys.sign_up_successfully_exclamation)
+                        .tr(),
                     textAlign: TextAlign.start,
                     style: context.textTheme.titleMedium?.mq.copyWith(
                       color: const Color(0xff1D1D1D),

@@ -109,6 +109,8 @@ class GRouter {
                   return _builderPage(
                     child: LoginSuccessfully(
                       phoneNumber: state.uri.queryParameters['phoneNumber']!,
+                      fromLogin:
+                          state.uri.queryParameters['fromLogin'] == 'true',
                     ),
                     state: state,
                   );

@@ -389,13 +389,13 @@ class _RegistrationPageState extends State<RegistrationPage>
                                 debugPrint('fromLogin:  $fromLogin');
                                 if (fromLogin) {
                                   context.go(
-                                    '${GRouter.config.applicationRoutes.kLoginSuccessfullyPagePath}?phoneNumber=${Uri.encodeQueryComponent(phoneNumber)}',
+                                    '${GRouter.config.applicationRoutes.kLoginSuccessfullyPagePath}?phoneNumber=${Uri.encodeQueryComponent(phoneNumber)}&fromLogin=true',
                                   );
                                   return;
                                 }
                                 fromLogin = false;
                                 context.go(
-                                  '${GRouter.config.applicationRoutes.kLoginSuccessfullyPagePath}?phoneNumber=${Uri.encodeQueryComponent(phoneNumber)}',
+                                  '${GRouter.config.applicationRoutes.kLoginSuccessfullyPagePath}?phoneNumber=${Uri.encodeQueryComponent(phoneNumber)}&fromLogin=false',
                                 );
 
                                 /*pageController.animateToPage(

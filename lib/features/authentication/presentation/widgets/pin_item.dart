@@ -160,6 +160,15 @@ class _PinItemState extends State<PinItem> with TickerProviderStateMixin {
             state.verifyOtpFromGuestStatus ==
                 VerifyOtpFromGuestStatus.failure ||
             widget.isExpired;
+        final isInputEnabled =
+            state.verifyOtpSignInStatus != VerifyOtpSignInStatus.loading &&
+            state.verifyOtpFromGuestStatus !=
+                VerifyOtpFromGuestStatus.loading &&
+            !widget.isExpired;
+
+        if (!isInputEnabled && focusNodes[widget.index].hasFocus) {
+          focusNodes[widget.index].unfocus();
+        }
         return AnimatedBuilder(
           animation: animationController,
           builder: (context, child) {
@@ -199,18 +208,16 @@ class _PinItemState extends State<PinItem> with TickerProviderStateMixin {
                             children: [
                               TextFormField(
                                 controller: widget.controller,
-                                enabled:
-                                    (state.verifyOtpSignInStatus !=
-                                        VerifyOtpSignInStatus.loading &&
-                                    state.verifyOtpFromGuestStatus !=
-                                        VerifyOtpFromGuestStatus.loading),
+                                enabled: isInputEnabled,
                                 focusNode: focusNodes[widget.index],
                                 onTap: () {
+                                  if (!isInputEnabled) return;
                                   if (widget.index != currentToType) {
                                     focusNodes[currentToType].requestFocus();
                                   }
                                 },
                                 onChanged: (String? text) {
+                                  if (!isInputEnabled) return;
                                   debugPrint(widget.index.toString());
                                   debugPrint(text);
                                   debugPrint(widget.index.toString());

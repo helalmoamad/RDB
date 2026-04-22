@@ -192,7 +192,10 @@ class PhoneFormField extends StatelessWidget {
                     textCapitalization: textCapitalization,
                     // ignore: deprecated_member_use
                     toolbarOptions: toolbarOptions,
-                    inputFormatters: [PhoneNumberFormatter()],
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                      PhoneNumberFormatter(),
+                    ],
                     style: context.textTheme.headlineSmall?.mq.copyWith(
                       color: const Color(0xff1D1D1D),
                       height: 0.6.h,
@@ -246,14 +249,17 @@ class PhoneFormField extends StatelessWidget {
 }
 
 class PhoneNumberFormatter extends TextInputFormatter {
-  final validationRegex = RegExp(r'[ 0-9]');
+  final validationRegex = RegExp(r'^\d*$');
 
   @override
   TextEditingValue formatEditUpdate(
     TextEditingValue oldValue,
     TextEditingValue newValue,
   ) {
-    String result = getFormattedText(oldValue.text, newValue.text);
+    final oldDigits = oldValue.text.replaceAll(RegExp(r'[^0-9]'), '');
+    final newDigits = newValue.text.replaceAll(RegExp(r'[^0-9]'), '');
+
+    String result = getFormattedText(oldDigits, newDigits);
     return newValue.copyWith(
       text: result,
       selection: TextSelection.collapsed(offset: result.length),
@@ -262,13 +268,8 @@ class PhoneNumberFormatter extends TextInputFormatter {
 
   String getFormattedText(String oldText, String newText) {
     if (newText.length < oldText.length) {
-      if (oldText[oldText.length - 1] == ' ') {
-        return newText.substring(0, newText.length - 1);
-      }
       return newText;
     }
-    newText = newText.replaceAll(' ', '');
-    oldText = oldText.replaceAll(' ', '');
     if (!validationRegex.hasMatch(newText)) {
       return oldText;
     }

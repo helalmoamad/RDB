@@ -132,7 +132,7 @@ class _AlreadyExistAccountState extends ThemeState<AlreadyExistAccount> {
                           : null,
                       onTap: () {
                         context.go(
-                          '${GRouter.config.applicationRoutes.kLoginSuccessfullyPagePath}?phoneNumber=${Uri.encodeQueryComponent(widget.phoneNumber)}',
+                          '${GRouter.config.applicationRoutes.kLoginSuccessfullyPagePath}?phoneNumber=${Uri.encodeQueryComponent(widget.phoneNumber)}&fromLogin=true',
                         );
                       },
                       child: Container(
