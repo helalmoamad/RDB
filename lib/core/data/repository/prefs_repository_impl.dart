@@ -1,12 +1,54 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../common/constant/configuration/prefs_key.dart';
 import '../../domin/repositories/prefs_repository.dart';
 
 class PrefsRepositoryImpl extends PrefsRepository {
-  PrefsRepositoryImpl(this._preferences);
+  PrefsRepositoryImpl._(this._preferences, this._secureStorage);
+
+  static Future<PrefsRepositoryImpl> create(
+    SharedPreferences preferences,
+    FlutterSecureStorage secureStorage,
+  ) async {
+    final repository = PrefsRepositoryImpl._(preferences, secureStorage);
+    await repository._initializeSensitiveValues();
+    return repository;
+  }
 
   final SharedPreferences _preferences;
+  final FlutterSecureStorage _secureStorage;
+
+  String? _walletTokenCache;
+  String? _passcodeCache;
+
+  Future<void> _initializeSensitiveValues() async {
+    _walletTokenCache = await _readWithMigration(
+      PrefsKey.walletToken,
+      _preferences.getString,
+    );
+    _passcodeCache = await _readWithMigration(
+      PrefsKey.passcode,
+      _preferences.getString,
+    );
+  }
+
+  Future<String?> _readWithMigration(
+    String key,
+    String? Function(String key) legacyReader,
+  ) async {
+    final secureValue = await _secureStorage.read(key: key);
+    if (secureValue != null) {
+      return secureValue;
+    }
+
+    final legacyValue = legacyReader(key);
+    if (legacyValue != null) {
+      await _secureStorage.write(key: key, value: legacyValue);
+      await _preferences.remove(key);
+    }
+    return legacyValue;
+  }
 
   @override
   Future<bool> setUserChoosedCountryIso(String? countryIso) =>
@@ -27,11 +69,23 @@ class PrefsRepositoryImpl extends PrefsRepository {
       _preferences.setString(PrefsKey.memberSince, memberSince!);
 
   @override
-  Future<bool> setWalletToken(String token) =>
-      _preferences.setString(PrefsKey.walletToken, token);
+  Future<bool> setWalletToken(String token) async {
+    try {
+      if (token.isEmpty) {
+        await _secureStorage.delete(key: PrefsKey.walletToken);
+      } else {
+        await _secureStorage.write(key: PrefsKey.walletToken, value: token);
+      }
+      await _preferences.remove(PrefsKey.walletToken);
+      _walletTokenCache = token.isEmpty ? null : token;
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
 
   @override
-  String? get walletToken => _preferences.getString(PrefsKey.walletToken);
+  String? get walletToken => _walletTokenCache;
 
   @override
   Future<bool> setTheme(ThemeMode themeMode) =>
@@ -188,11 +242,23 @@ class PrefsRepositoryImpl extends PrefsRepository {
       _preferences.getBool(PrefsKey.requestNotificationPermission);
 
   @override
-  String? get passcode => _preferences.getString(PrefsKey.passcode);
+  String? get passcode => _passcodeCache;
 
   @override
-  Future<bool> setPasscode(String passcode) =>
-      _preferences.setString(PrefsKey.passcode, passcode);
+  Future<bool> setPasscode(String passcode) async {
+    try {
+      if (passcode.isEmpty) {
+        await _secureStorage.delete(key: PrefsKey.passcode);
+      } else {
+        await _secureStorage.write(key: PrefsKey.passcode, value: passcode);
+      }
+      await _preferences.remove(PrefsKey.passcode);
+      _passcodeCache = passcode.isEmpty ? null : passcode;
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
 
   @override
   bool? get shouldShowPin => _preferences.getBool(PrefsKey.shouldShowPin);

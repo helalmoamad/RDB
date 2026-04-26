@@ -88,10 +88,6 @@ class User {
   final String? phoneNumber;
   final String? profilePictureUrl;
   final String? userType;
-  final BrowserInfo? ratingStats;
-  final BrowserInfo? browserInfo;
-  final BrowserInfo? locationInfo;
-  final BrowserInfo? guestToken;
   final bool? isEmailVerified;
   final bool? isPhoneVerified;
   final bool? isBlocked;
@@ -112,10 +108,7 @@ class User {
     this.phoneNumber,
     this.profilePictureUrl,
     this.userType,
-    this.ratingStats,
-    this.browserInfo,
-    this.locationInfo,
-    this.guestToken,
+
     this.isEmailVerified,
     this.isPhoneVerified,
     this.isBlocked,
@@ -160,10 +153,6 @@ class User {
     phoneNumber: phoneNumber ?? this.phoneNumber,
     profilePictureUrl: profilePictureUrl ?? this.profilePictureUrl,
     userType: userType ?? this.userType,
-    ratingStats: ratingStats ?? this.ratingStats,
-    browserInfo: browserInfo ?? this.browserInfo,
-    locationInfo: locationInfo ?? this.locationInfo,
-    guestToken: guestToken ?? this.guestToken,
     isEmailVerified: isEmailVerified ?? this.isEmailVerified,
     isPhoneVerified: isPhoneVerified ?? this.isPhoneVerified,
     isBlocked: isBlocked ?? this.isBlocked,
@@ -185,18 +174,6 @@ class User {
     phoneNumber: json["phoneNumber"],
     profilePictureUrl: json["profilePictureURL"],
     userType: json["userType"],
-    ratingStats: json["ratingStats"] == null
-        ? null
-        : BrowserInfo.fromJson(json["ratingStats"]),
-    browserInfo: json["browserInfo"] == null
-        ? null
-        : BrowserInfo.fromJson(json["browserInfo"]),
-    locationInfo: json["locationInfo"] == null
-        ? null
-        : BrowserInfo.fromJson(json["locationInfo"]),
-    guestToken: json["guestToken"] == null
-        ? null
-        : BrowserInfo.fromJson(json["guestToken"]),
     isEmailVerified: json["isEmailVerified"],
     isPhoneVerified: json["isPhoneVerified"],
     isBlocked: json["isBlocked"],
@@ -226,10 +203,6 @@ class User {
     "phoneNumber": phoneNumber,
     "profilePictureURL": profilePictureUrl,
     "userType": userType,
-    "ratingStats": ratingStats?.toJson(),
-    "browserInfo": browserInfo?.toJson(),
-    "locationInfo": locationInfo?.toJson(),
-    "guestToken": guestToken?.toJson(),
     "isEmailVerified": isEmailVerified,
     "isPhoneVerified": isPhoneVerified,
     "isBlocked": isBlocked,

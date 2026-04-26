@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:injectable/injectable.dart';
 import 'package:logger/logger.dart';
@@ -21,14 +22,12 @@ Future<GetIt> configureDependencies() async => $initGetIt(_getIt);
 @module
 abstract class AppModule {
   BaseOptions get dioOption => BaseOptions(
-        connectTimeout: const Duration(minutes: 2),
-        receiveTimeout: const Duration(minutes: 2),
-        sendTimeout: const Duration(minutes: 2),
-        contentType: 'application/json',
-        headers: <String, String>{
-          HttpHeaders.acceptHeader: 'application/json',
-        },
-      );
+    connectTimeout: const Duration(minutes: 2),
+    receiveTimeout: const Duration(minutes: 2),
+    sendTimeout: const Duration(minutes: 2),
+    contentType: 'application/json',
+    headers: <String, String>{HttpHeaders.acceptHeader: 'application/json'},
+  );
 
   @singleton
   Logger get logger => Logger();
@@ -42,7 +41,7 @@ abstract class AppModule {
   @singleton
   Future<PrefsRepository> get prefsRepository async {
     SharedPreferences prefs = await sharedPreferences;
-    return PrefsRepositoryImpl(prefs);
+    return PrefsRepositoryImpl.create(prefs, const FlutterSecureStorage());
   }
 
   @singleton
