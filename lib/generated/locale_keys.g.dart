@@ -132,6 +132,9 @@ abstract class LocaleKeys {
   static const last_step = 'last_step';
   static const rdb = 'rdb';
   static const enter_your_name = 'enter_your_name';
+  static const ensure_greater_security_and_protect_your_funds =
+      'ensure_greater_security_and_protect_your_funds';
+  static const enter_your_name_exact_id = 'enter_your_name_exact_id';
   static const the_method_of_receiving = 'the_method_of_receiving';
   static const please_correct_code_sent_to_your_phone =
       'please_correct_code_sent_to_your_phone';
@@ -196,6 +199,8 @@ abstract class LocaleKeys {
   static const my_stories = 'my_stories';
   static const click_to_add_story = 'click_to_add_story';
   static const insert_name_to_continue = 'insert_name_to_continue';
+  static const name_must_be_at_least_6_characters =
+      'name_must_be_at_least_6_characters';
   static const must_be_at_least_8_characters = 'must_be_at_least_8_characters';
   static const read_more = 'read_more';
   static const read_less = 'read_less';
@@ -949,6 +954,7 @@ abstract class LocaleKeys {
       'sign_up_successfully_exclamation';
   static const sign_in_successfully_exclamation =
       'sign_in_successfully_exclamation';
+  static const welcome_exclamation = 'welcome_exclamation';
   static const enjoy_with_services = 'enjoy_with_services';
   static const security_issues_found_title = 'security_issues_found_title';
   static const security_issues_found_message = 'security_issues_found_message';

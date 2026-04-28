@@ -13,7 +13,7 @@ class AppLifecycleManager {
   /// 📊 حالة التطبيق الحالية
   AppLifecycleState? _currentState;
   AppLifecycleState? get currentState => _currentState;
-  
+
   /// 🔒 هل يجب طلب الـ PIN عند العودة؟
   bool _shouldRequestPin = false;
 
@@ -83,18 +83,28 @@ class AppLifecycleManager {
   void _requestPinIfNecessary() {
     try {
       final prefs = GetIt.I<PrefsRepository>();
-      final isLoggedIn = prefs.walletToken != null &&
+      final isLoggedIn =
+          prefs.walletToken != null &&
           ((prefs.isVerifiedPhone ?? false) ||
               (prefs.isVerifiedPhonePeforeExpiredToken ?? false));
+      final hasStoredName = (prefs.userName ?? '').trim().isNotEmpty;
 
       if (isLoggedIn) {
         // التحقق من أننا لسنا بالفعل في صفحة PIN لتجنب التكرار
-        final currentRoute = GRouter.router.routerDelegate.currentConfiguration.last.matchedLocation;
-        if (currentRoute != GRouter.config.applicationRoutes.kPinCodePage) {
-          debugPrint('🔒 Security: Requesting PIN code on app resume');
-          GRouter.router.push(GRouter.config.applicationRoutes.kPinCodePage);
+        final currentRoute = GRouter
+            .router
+            .routerDelegate
+            .currentConfiguration
+            .last
+            .matchedLocation;
+        final targetRoute = hasStoredName
+            ? GRouter.config.applicationRoutes.kPinCodePage
+            : GRouter.config.applicationRoutes.kEnterNamePage;
+        if (currentRoute != targetRoute) {
+          debugPrint('🔒 Security: Requesting secure auth step on app resume');
+          GRouter.router.push(targetRoute);
         } else {
-          debugPrint('ℹ️ Security: User already on PIN page');
+          debugPrint('ℹ️ Security: User already on auth step page');
         }
       }
     } catch (e) {
@@ -107,7 +117,7 @@ class AppLifecycleManager {
     debugPrint('⏸️ App Paused');
     _lastActiveTime = DateTime.now();
     _shouldRequestPin = true;
-    
+
     // حفظ الحالة في التخزين الدائم لضمان طلب الرموز حتى لو تم إغلاق التطبيق من قبل النظام
     GetIt.I<PrefsRepository>().setShouldShowPin(true);
   }

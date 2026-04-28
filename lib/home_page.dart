@@ -91,6 +91,7 @@ class _HomePageState extends State<HomePage> {
       GetIt.I<PrefsRepository>().setPasscode("");
       GetIt.I<PrefsRepository>().setVerifiedPhone(false);
       GetIt.I<PrefsRepository>().setVerifiedPhonePeforeExpiredToken(false);
+      GetIt.I<PrefsRepository>().setUserName("");
       GRouter.router.go(GRouter.config.kRootRoute);
     });
 

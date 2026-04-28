@@ -2,7 +2,9 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
+import 'package:rdb/core/domin/repositories/prefs_repository.dart';
 import 'package:rdb/core/utils/extensions/build_context.dart';
 import 'package:rdb/theme/typography.dart';
 import 'package:rdb/generated/locale_keys.g.dart';
@@ -24,6 +26,8 @@ class LoginSuccessfully extends StatefulWidget {
 }
 
 class _LoginSuccessfullyState extends ThemeState<LoginSuccessfully> {
+  final PrefsRepository _prefsRepository = GetIt.I<PrefsRepository>();
+
   @override
   void didChangeDependencies() async {
     SystemChrome.setSystemUIOverlayStyle(
@@ -35,7 +39,16 @@ class _LoginSuccessfullyState extends ThemeState<LoginSuccessfully> {
     );
 
     Future.delayed(const Duration(seconds: 3), () {
-      if (mounted) context.go(GRouter.config.applicationRoutes.kPinCodePage);
+      if (!mounted) {
+        return;
+      }
+
+      final hasStoredName = (_prefsRepository.userName ?? '').trim().isNotEmpty;
+      context.go(
+        hasStoredName
+            ? GRouter.config.applicationRoutes.kPinCodePage
+            : GRouter.config.applicationRoutes.kEnterNamePage,
+      );
     });
     super.didChangeDependencies();
   }
@@ -66,7 +79,7 @@ class _LoginSuccessfullyState extends ThemeState<LoginSuccessfully> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  SizedBox(height: 288.h),
+                  SizedBox(height: 300.h),
                   Text(
                     (widget.fromLogin
                             ? LocaleKeys.sign_in_successfully_exclamation

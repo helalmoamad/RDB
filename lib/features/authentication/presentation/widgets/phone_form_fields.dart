@@ -140,7 +140,6 @@ class PhoneFormField extends StatelessWidget {
         radius: Radius.circular(20.r),
         color: ready ? const Color(0xff388CFF) : const Color(0xff8D8D8D),
         child: SizedBox(
-          height: 60.h,
           width: 1.sw,
           child: Stack(
             alignment: Alignment.bottomLeft,
@@ -155,7 +154,7 @@ class PhoneFormField extends StatelessWidget {
                     onChanged: (String? text) {
                       if (text != null) {
                         onChange?.call(text) ?? false;
-                        offset = ((controller!.text.length * 9.w));
+                        offset = ((controller!.text.length * 8));
                         rebuildCursor.value = !rebuildCursor.value;
                       }
                     },
@@ -228,7 +227,7 @@ class PhoneFormField extends StatelessWidget {
                           builder: (context, rebuild, _) {
                             return Container(
                               margin: HWEdgeInsets.only(
-                                left: 70.w + offset,
+                                left: 75 + offset,
                                 bottom: 25.h,
                               ),
                               width: 10.w,

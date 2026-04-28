@@ -275,15 +275,9 @@ class _PinCodePageState extends State<PinCodePage> with FormStateMinxin {
       case PinCodeState.confirm:
         if (inputPin == _firstPin) {
           await prefsRepository.setPasscode(inputPin);
-          setState(() {
-            _state = PinCodeState.done;
-            codeStatus = 1;
-          });
-          Future.delayed(const Duration(seconds: 2), () {
-            if (mounted) {
-              prefsRepository.setShouldShowPin(false);
-              context.go(GRouter.config.applicationRoutes.kBasePage);
-            }
+          Future.delayed(const Duration(seconds: 1), () {
+            if (!mounted) return;
+            context.go(GRouter.config.applicationRoutes.kPasscodeWelcomePage);
           });
         } else {
           setState(() => codeStatus = 2);

@@ -1,8 +1,10 @@
 import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:rdb/features/authentication/presentation/pages/enter_name_page.dart';
 import 'package:rdb/features/authentication/presentation/pages/first_registeration_page.dart';
 import 'package:rdb/features/authentication/presentation/pages/login_successfully.dart';
+import 'package:rdb/features/authentication/presentation/pages/passcode_welcome_page.dart';
 // 'package:rdb/features/authentication/presentation/pages/register_completed.dart';
 import 'package:rdb/features/authentication/presentation/pages/pin_code_page.dart';
 import 'package:rdb/splash_page.dart';
@@ -63,6 +65,18 @@ class GRouter {
         path: _config.applicationRoutes.kPinCodePage,
         pageBuilder: (BuildContext context, GoRouterState state) {
           return _builderPage(child: const PinCodePage(), state: state);
+        },
+      ),
+      GoRoute(
+        path: _config.applicationRoutes.kEnterNamePage,
+        pageBuilder: (BuildContext context, GoRouterState state) {
+          return _builderPage(child: const EnterNamePage(), state: state);
+        },
+      ),
+      GoRoute(
+        path: _config.applicationRoutes.kPasscodeWelcomePage,
+        pageBuilder: (BuildContext context, GoRouterState state) {
+          return _builderPage(child: const PasscodeWelcomePage(), state: state);
         },
       ),
 

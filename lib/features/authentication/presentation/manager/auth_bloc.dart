@@ -221,9 +221,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         ErrorManager.resetRetry('VerifyOtpSignInEvent');
         try {
           _prefsRepository.setUserId(r.user!.id.toString());
-          if ((r.user!.firstName?.replaceAll(' ', '') ?? '') != '') {
-            _prefsRepository.setUserName(r.user!.firstName!);
-          }
+
+          _prefsRepository.setUserName(r.user?.firstName ?? "");
+
           _prefsRepository.setEmail(r.user?.email ?? "");
           _prefsRepository.setPhoto(r.user?.profilePictureUrl ?? "");
           _prefsRepository.setMemberSince((r.user?.createdAt ?? '').toString());
