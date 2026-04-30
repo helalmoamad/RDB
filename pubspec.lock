@@ -1567,7 +1567,7 @@ packages:
     description:
       path: "."
       ref: main
-      resolved-ref: e03ba97b46c0f2812f4f8ac809b3a53718669828
+      resolved-ref: "21f29d12156302c5398f848619c2d3fd05ead2ed"
       url: "https://github.com/helalmoamad/trydos_wallet.git"
     source: git
     version: "0.0.1"

@@ -23,15 +23,12 @@ class _SplashPageState extends State<SplashPage> {
       final isVerified =
           (prefsRepository.isVerifiedPhone ?? false) ||
           (prefsRepository.isVerifiedPhonePeforeExpiredToken ?? false);
-      final hasStoredName = (prefsRepository.userName ?? '').trim().isNotEmpty;
 
       // ignore: use_build_context_synchronously
       context.go(
         !hasToken || !isVerified
             ? GRouter.config.applicationRoutes.kRegistrationPage
-            : hasStoredName
-            ? GRouter.config.applicationRoutes.kPinCodePage
-            : GRouter.config.applicationRoutes.kEnterNamePage,
+            : GRouter.config.applicationRoutes.kPinCodePage,
       );
     });
 

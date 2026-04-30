@@ -87,7 +87,6 @@ class AppLifecycleManager {
           prefs.walletToken != null &&
           ((prefs.isVerifiedPhone ?? false) ||
               (prefs.isVerifiedPhonePeforeExpiredToken ?? false));
-      final hasStoredName = (prefs.userName ?? '').trim().isNotEmpty;
 
       if (isLoggedIn) {
         // التحقق من أننا لسنا بالفعل في صفحة PIN لتجنب التكرار
@@ -97,9 +96,7 @@ class AppLifecycleManager {
             .currentConfiguration
             .last
             .matchedLocation;
-        final targetRoute = hasStoredName
-            ? GRouter.config.applicationRoutes.kPinCodePage
-            : GRouter.config.applicationRoutes.kEnterNamePage;
+        final targetRoute = GRouter.config.applicationRoutes.kPinCodePage;
         if (currentRoute != targetRoute) {
           debugPrint('🔒 Security: Requesting secure auth step on app resume');
           GRouter.router.push(targetRoute);

@@ -58,50 +58,69 @@ class _PasscodeWelcomePageState extends State<PasscodeWelcomePage> {
 
     final userName = (_prefsRepository.userName ?? '').trim();
 
+    final languageCode = context.locale.languageCode.toLowerCase();
+    final isRtlLanguage = languageCode == 'ar' || languageCode == 'ku';
+    final textAlign = isRtlLanguage ? TextAlign.right : TextAlign.left;
+    final textAlignment = isRtlLanguage
+        ? Alignment.centerRight
+        : Alignment.centerLeft;
+
     return Scaffold(
       backgroundColor: const Color(0xffE0FFEE),
       body: PopScope(
         canPop: false,
         child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 40.w),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(height: 288.h),
-              Text(
-                LocaleKeys.welcome_exclamation.tr(),
-                textAlign: TextAlign.start,
-                style: context.textTheme.titleLarge?.bq.copyWith(
-                  color: const Color(0xff1D1D1D),
-                  height: 1.25,
-                  fontSize: 30.sp,
-                ),
-              ),
-              if (userName.isNotEmpty) ...[
-                10.verticalSpace,
-                Text(
-                  userName,
-                  textAlign: TextAlign.start,
-                  style: context.textTheme.displayMedium?.mq.copyWith(
-                    color: const Color(0xff1D1D1D),
-                    height: 1.25,
-                    fontSize: 14.sp,
+          padding: EdgeInsetsDirectional.only(start: 40.w, end: 40.w),
+          child: SizedBox(
+            width: double.infinity,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                SizedBox(height: 290.h),
+                Align(
+                  alignment: textAlignment,
+                  child: Text(
+                    LocaleKeys.welcome_exclamation.tr(),
+                    textAlign: textAlign,
+                    style: context.textTheme.titleLarge?.bq.copyWith(
+                      color: const Color(0xff1D1D1D),
+                      height: 1.25,
+                      fontSize: 30.sp,
+                    ),
                   ),
                 ),
-              ],
-              10.verticalSpace,
-              Text(
-                LocaleKeys.enjoy_with_services.tr(),
-                textAlign: TextAlign.start,
-                style: context.textTheme.titleLarge?.mq.copyWith(
-                  color: const Color(0xff1D1D1D),
-                  height: 1.25,
-                  fontSize: 12.sp,
+                if (userName.isNotEmpty) ...[
+                  10.verticalSpace,
+                  Align(
+                    alignment: textAlignment,
+                    child: Text(
+                      userName,
+                      textAlign: textAlign,
+                      style: context.textTheme.displayMedium?.mq.copyWith(
+                        color: const Color(0xff1D1D1D),
+                        height: 1.25,
+                        fontSize: 14.sp,
+                      ),
+                    ),
+                  ),
+                ],
+                10.verticalSpace,
+                Align(
+                  alignment: textAlignment,
+                  child: Text(
+                    LocaleKeys.enjoy_with_services.tr(),
+                    textAlign: textAlign,
+                    style: context.textTheme.titleLarge?.mq.copyWith(
+                      color: const Color(0xff1D1D1D),
+                      height: 1.25,
+                      fontSize: 12.sp,
+                    ),
+                  ),
                 ),
-              ),
-              const Spacer(),
-            ],
+                const Spacer(),
+              ],
+            ),
           ),
         ),
       ),

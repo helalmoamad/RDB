@@ -12,6 +12,7 @@ import 'package:rdb/core/utils/extensions/build_context.dart';
 import 'package:rdb/core/utils/last_pages_tracker.dart';
 import 'package:rdb/generated/locale_keys.g.dart';
 import 'package:rdb/routes/router.dart';
+import 'package:rdb/service/language_service.dart';
 import 'package:rdb/theme/typography.dart';
 
 class EnterNamePage extends StatefulWidget {
@@ -102,7 +103,7 @@ class _EnterNamePageState extends State<EnterNamePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(height: 288.h),
+              SizedBox(height: 255.h),
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 20.w),
                 child: Text(
@@ -206,7 +207,7 @@ class _NameInputField extends StatelessWidget {
                   ),
                   contentPadding: EdgeInsets.symmetric(
                     horizontal: 18.w,
-                    vertical: 25.h,
+                    vertical: 22.h,
                   ),
                   border: InputBorder.none,
                   suffixIcon: canContinue
@@ -223,10 +224,13 @@ class _NameInputField extends StatelessWidget {
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    SvgPicture.asset(
-                                      AppAssets.submitArrowSvg,
-                                      width: 10,
-                                      height: 20,
+                                    RotatedBox(
+                                      quarterTurns: LanguageService.rtl ? 2 : 0,
+                                      child: SvgPicture.asset(
+                                        AppAssets.submitArrowSvg,
+                                        width: 10,
+                                        height: 20,
+                                      ),
                                     ),
                                   ],
                                 ),

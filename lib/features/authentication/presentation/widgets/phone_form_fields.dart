@@ -141,6 +141,7 @@ class PhoneFormField extends StatelessWidget {
         color: ready ? const Color(0xff388CFF) : const Color(0xff8D8D8D),
         child: SizedBox(
           width: 1.sw,
+          height: 60.h,
           child: Stack(
             alignment: Alignment.bottomLeft,
             children: [
@@ -203,6 +204,7 @@ class PhoneFormField extends StatelessWidget {
                     ),
                     decoration: InputDecoration(
                       border: InputBorder.none,
+                      contentPadding: EdgeInsets.only(top: 10.h),
                       focusedBorder: InputBorder.none,
 
                       prefix: prefixIcon,

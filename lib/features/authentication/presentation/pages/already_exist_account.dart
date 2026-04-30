@@ -77,7 +77,7 @@ class _AlreadyExistAccountState extends ThemeState<AlreadyExistAccount> {
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Spacer(),
+                    SizedBox(height: 288.h),
                     Padding(
                       padding: HWEdgeInsets.symmetric(horizontal: 40.0),
                       child: Column(
