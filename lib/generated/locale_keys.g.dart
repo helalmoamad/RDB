@@ -921,6 +921,7 @@ abstract class LocaleKeys {
   static const set_passcode = 'set_passcode';
   static const reenter_passcode = 'reenter_passcode';
   static const enter_passcode = 'enter_passcode';
+  static const verify_passcode_to_login = 'verify_passcode_to_login';
   static const set_passcode_done = 'set_passcode_done';
   static const passcode_mismatch_restart = 'passcode_mismatch_restart';
   static const pin_lockout_too_many_attempts = 'pin_lockout_too_many_attempts';

@@ -62,6 +62,7 @@ class VerifyOtp extends StatefulWidget {
 class _VerifyOtpState extends State<VerifyOtp> with FormStateMinxin {
   late AuthBloc authBloc;
   CountdownTimerController? countdownTimerController;
+  bool _isDisposed = false;
 
   PrefsRepository prefsRepository = GetIt.I<PrefsRepository>();
   int endTime = (DateTime.now().millisecondsSinceEpoch + 1000 * 120);
@@ -76,6 +77,10 @@ class _VerifyOtpState extends State<VerifyOtp> with FormStateMinxin {
   );
 
   void onEnd() {
+    if (!mounted || _isDisposed) {
+      return;
+    }
+
     prefsRepository.setTimerForOtpRunning(false);
     checkOtp.value = 0;
     enabledResendNotifier.value = true;
@@ -834,6 +839,7 @@ class _VerifyOtpState extends State<VerifyOtp> with FormStateMinxin {
     attempt = attempt + 1;
 
     endTime = DateTime.now().millisecondsSinceEpoch + 1000 * 120;
+    countdownTimerController?.disposeTimer();
     countdownTimerController = CountdownTimerController(
       endTime: endTime,
       onEnd: onEnd,
@@ -849,6 +855,15 @@ class _VerifyOtpState extends State<VerifyOtp> with FormStateMinxin {
       ),
     );
     ////////////////////
+  }
+
+  @override
+  void dispose() {
+    _isDisposed = true;
+    countdownTimerController?.disposeTimer();
+    enabledResendNotifier.dispose();
+    checkOtp.dispose();
+    super.dispose();
   }
 
   @override

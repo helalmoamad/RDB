@@ -807,6 +807,7 @@
   "set_passcode": "Set Passcode",
   "reenter_passcode": "Reenter Passcode",
   "enter_passcode": "Enter Passcode",
+  "verify_passcode_to_login": "You must verify the passcode to log in",
   "set_passcode_done": "Set Passcode Done",
   "passcode_mismatch_restart": "Wrong passcode entered, start over",
   "biometric_reason_face": "Use face recognition to continue",

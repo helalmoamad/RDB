@@ -789,6 +789,7 @@
   "set_passcode": "Şifre Belirle",
   "reenter_passcode": "Şifreyi Tekrar Girin",
   "enter_passcode": "Şifreyi Girin",
+  "verify_passcode_to_login": "Giriş için şifre doğrulaması gereklidir",
   "set_passcode_done": "Şifre Başarıyla Belirlendi",
   "passcode_mismatch_restart": "Yanlış şifre girdiniz, baştan tekrar deneyin",
   "biometric_reason_face": "Devam etmek için yüz tanımayı kullanın",

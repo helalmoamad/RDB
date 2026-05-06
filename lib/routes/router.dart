@@ -1,6 +1,8 @@
 import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
+import 'package:rdb/core/domin/repositories/prefs_repository.dart';
 import 'package:rdb/features/authentication/presentation/pages/enter_name_page.dart';
 import 'package:rdb/features/authentication/presentation/pages/first_registeration_page.dart';
 import 'package:rdb/features/authentication/presentation/pages/login_successfully.dart';
@@ -28,6 +30,43 @@ class GRouter {
     initialLocation: _config.kRootRoute,
     overridePlatformDefaultLocation: true,
     navigatorKey: navigatorKey,
+    redirect: (BuildContext context, GoRouterState state) {
+      // Security guard: if PIN lock is active, keep user on PIN flow.
+      if (!GetIt.I.isRegistered<PrefsRepository>()) {
+        return null;
+      }
+
+      final prefs = GetIt.I<PrefsRepository>();
+      final shouldShowPin = prefs.shouldShowPin ?? false;
+      if (!shouldShowPin) {
+        return null;
+      }
+
+      final isLoggedIn =
+          prefs.walletToken != null &&
+          ((prefs.isVerifiedPhone ?? false) ||
+              (prefs.isVerifiedPhonePeforeExpiredToken ?? false));
+      if (!isLoggedIn) {
+        return null;
+      }
+
+      final rootPath = _config.kRootRoute;
+      final pinPath = _config.applicationRoutes.kPinCodePage;
+      final passcodeWelcomePath =
+          _config.applicationRoutes.kPasscodeWelcomePage;
+      final currentPath = state.matchedLocation;
+
+      // Let splash route run initial app bootstrap logic.
+      if (currentPath == rootPath) {
+        return null;
+      }
+
+      if (currentPath == pinPath || currentPath == passcodeWelcomePath) {
+        return null;
+      }
+
+      return pinPath;
+    },
     routes: <RouteBase>[
       GoRoute(
         path: _config.kRootRoute,
@@ -200,8 +239,19 @@ class GRouter {
     required Widget child,
     required GoRouterState state,
   }) {
+    final prefs = GetIt.I.isRegistered<PrefsRepository>()
+        ? GetIt.I<PrefsRepository>()
+        : null;
+    final isPinRoute =
+        state.matchedLocation == _config.applicationRoutes.kPinCodePage;
+    final lockActive = (prefs?.shouldShowPin ?? false) && isPinRoute;
+
     //if (Platform.isIOS) {
-    return MaterialPage<T>(child: child, key: state.pageKey);
+    return MaterialPage<T>(
+      child: child,
+      key: state.pageKey,
+      canPop: !lockActive,
+    );
     // } else {
     //   return MaterialPage<T>(child: child, key: state.pageKey);
     // }

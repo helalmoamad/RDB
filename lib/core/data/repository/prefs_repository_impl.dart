@@ -276,6 +276,21 @@ class PrefsRepositoryImpl extends PrefsRepository {
       _preferences.setBool(PrefsKey.faceLoginEnabled, value);
 
   @override
+  bool? get isAccountActive => _preferences.getBool(PrefsKey.isAccountActive);
+
+  @override
+  Future<bool> setIsAccountActive(bool value) =>
+      _preferences.setBool(PrefsKey.isAccountActive, value);
+
+  @override
+  bool? get isTwoFactorEnabled =>
+      _preferences.getBool(PrefsKey.isTwoFactorEnabled);
+
+  @override
+  Future<bool> setIsTwoFactorEnabled(bool value) =>
+      _preferences.setBool(PrefsKey.isTwoFactorEnabled, value);
+
+  @override
   int get pinFailedAttempts =>
       _preferences.getInt(PrefsKey.pinFailedAttempts) ?? 0;
 

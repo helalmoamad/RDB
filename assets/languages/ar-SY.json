@@ -806,6 +806,7 @@
   "set_passcode": "تعيين رمز المرور",
   "reenter_passcode": "إعادة إدخال الرمز",
   "enter_passcode": "إدخال رمز المرور",
+  "verify_passcode_to_login": "يجب التحقق من رقم القفل للدخول",
   "set_passcode_done": "تم تعيين رمز المرور بنجاح",
   "passcode_mismatch_restart": "قمت بإدخال رمز مرور خاطئ، أعد الإدخال من البداية",
   "biometric_reason_face": "استخدم بصمة الوجه للمتابعة",

@@ -89,6 +89,10 @@ abstract class PrefsRepository {
   Future<bool> setShouldShowPin(bool value);
   bool? get isFaceLoginEnabled;
   Future<bool> setFaceLoginEnabled(bool value);
+  bool? get isAccountActive;
+  Future<bool> setIsAccountActive(bool value);
+  bool? get isTwoFactorEnabled;
+  Future<bool> setIsTwoFactorEnabled(bool value);
 
   // PIN lockout state
   int get pinFailedAttempts;

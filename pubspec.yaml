@@ -12,6 +12,10 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   flutter_screenutil: ^5.9.0
+  trydos_wallet:
+    git:
+        url: https://github.com/helalmoamad/trydos_wallet.git
+        ref: main
   flutter_svg: ^2.0.10+1
   tuple: ^2.0.2
   device_info_plus: ^9.1.0
@@ -51,16 +55,13 @@ dependencies:
   dio: ^5.7.0
   json_annotation: ^4.9.0
   json_serializable: ^6.8.0
-  connectivity_plus: ^5.0.1
+  connectivity_plus: ^6.1.5
   root_check_flutter: ^1.0.5
   app_links: ^6.4.0
   local_auth: ^2.3.0
   dotted_border: ^2.1.0
   form_field_validator: ^1.1.0
-  trydos_wallet:
-    git:
-        url: https://github.com/helalmoamad/trydos_wallet.git
-        ref: main
+ 
   dio_http2_adapter: ^2.5.3
   #flutter_svg_image: ^1.1.0+1
   #lottie: 2.7.0

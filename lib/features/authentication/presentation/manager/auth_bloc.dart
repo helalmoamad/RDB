@@ -234,6 +234,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           // ignore: unrelated_type_equality_checks
           _prefsRepository.setVerifiedPhone(r.user?.isPhoneVerified ?? false);
           _prefsRepository.setPhoneNumber((r.user?.phoneNumber).toString());
+          _prefsRepository.setIsAccountActive(!(r.user?.isBlocked ?? false));
+          _prefsRepository.setIsTwoFactorEnabled(
+            r.user?.isTwoFactorEnabled ?? false,
+          );
           _prefsRepository.setVerifiedPhonePeforeExpiredToken(false);
 
           ////////////////////////
@@ -369,5 +373,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     );
     GetIt.I<PrefsRepository>().setVerifiedPhone(false);
     GetIt.I<PrefsRepository>().setVerifiedPhonePeforeExpiredToken(false);
+    GetIt.I<PrefsRepository>().setIsAccountActive(false);
+    GetIt.I<PrefsRepository>().setIsTwoFactorEnabled(false);
   }
 }

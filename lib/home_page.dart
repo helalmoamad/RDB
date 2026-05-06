@@ -68,13 +68,13 @@ class _HomePageState extends State<HomePage> {
             ? "Registered"
             : "Guest",
         profileImageUrl: GetIt.I<PrefsRepository>().photo ?? "",
-        isAccountActive: !(authBloc.state.walletUser?.isBlocked ?? false),
+        isAccountActive: GetIt.I<PrefsRepository>().isAccountActive ?? false,
         isPhoneVerified: GetIt.I<PrefsRepository>().isVerifiedPhone ?? false,
         memberSince: memberSince,
         phoneNumber: GetIt.I<PrefsRepository>().myPhoneNumber,
         isKurdish: LanguageService.languageCode == "ku",
         isTwoFactorEnabled:
-            authBloc.state.walletUser?.isTwoFactorEnabled ?? false,
+            GetIt.I<PrefsRepository>().isTwoFactorEnabled ?? false,
         applicationVersion: "1.0.0",
         skipSplash: true,
         disableWalletOverscrollIndicator: true,
@@ -91,6 +91,8 @@ class _HomePageState extends State<HomePage> {
       GetIt.I<PrefsRepository>().setPasscode("");
       GetIt.I<PrefsRepository>().setVerifiedPhone(false);
       GetIt.I<PrefsRepository>().setVerifiedPhonePeforeExpiredToken(false);
+      GetIt.I<PrefsRepository>().setIsAccountActive(false);
+      GetIt.I<PrefsRepository>().setIsTwoFactorEnabled(false);
       GetIt.I<PrefsRepository>().setUserName("");
       GRouter.router.go(GRouter.config.kRootRoute);
     });

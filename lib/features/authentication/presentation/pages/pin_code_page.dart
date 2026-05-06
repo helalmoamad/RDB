@@ -336,8 +336,21 @@ class _PinCodePageState extends State<PinCodePage> with FormStateMinxin {
   Widget build(BuildContext context) {
     if (_isLockedOut) return _buildLockoutScreen(context);
 
+    final keyboardInset = MediaQuery.of(context).viewInsets.bottom;
+    final isKeyboardOpen = keyboardInset > 0;
+    final topSpace =
+        isKeyboardOpen && _state == PinCodeState.verify && _supportsFingerprint
+        ? 230.h
+        : 288.h;
+    final pinSectionSpace =
+        isKeyboardOpen && _state == PinCodeState.verify && _supportsFingerprint
+        ? 75.h
+        : 130.h;
+
     String title = '';
-    String subtitle = LocaleKeys.last_step.tr();
+    String subtitle = _state == PinCodeState.verify
+        ? LocaleKeys.verify_passcode_to_login.tr()
+        : LocaleKeys.last_step.tr();
     String label = '';
 
     switch (_state) {
@@ -362,7 +375,7 @@ class _PinCodePageState extends State<PinCodePage> with FormStateMinxin {
     }
 
     return Scaffold(
-      resizeToAvoidBottomInset: false,
+      resizeToAvoidBottomInset: true,
       backgroundColor: const Color(0xffF4FFF4),
       body: PopScope(
         canPop: _state == PinCodeState.set,
@@ -383,13 +396,13 @@ class _PinCodePageState extends State<PinCodePage> with FormStateMinxin {
             padding: EdgeInsets.only(
               left: 20.h,
               right: 20.h,
-              bottom: MediaQuery.of(context).viewInsets.bottom + 20.h,
+              bottom: keyboardInset + 20.h,
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SizedBox(height: 288.h),
+                SizedBox(height: topSpace),
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: 20.h),
                   child: Text(
@@ -413,7 +426,7 @@ class _PinCodePageState extends State<PinCodePage> with FormStateMinxin {
                     ),
                   ),
                 ),
-                SizedBox(height: 130.h),
+                SizedBox(height: pinSectionSpace),
                 _buildPinSlot(),
                 SizedBox(height: 10.h),
                 Center(
