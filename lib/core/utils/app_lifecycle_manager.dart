@@ -99,7 +99,9 @@ class AppLifecycleManager {
         final targetRoute = GRouter.config.applicationRoutes.kPinCodePage;
         if (currentRoute != targetRoute) {
           debugPrint('🔒 Security: Requesting secure auth step on app resume');
-          GRouter.router.push(targetRoute);
+          // Use replacement-style navigation so no previous sensitive page
+          // remains beneath PIN screen (prevents swipe-back bypass).
+          GRouter.router.go(targetRoute);
         } else {
           debugPrint('ℹ️ Security: User already on auth step page');
         }

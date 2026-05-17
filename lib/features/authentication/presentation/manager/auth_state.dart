@@ -8,6 +8,8 @@ enum SendOtpStatus { init, loading, success, failure }
 
 enum VerifyOtpSignInStatus { init, loading, success, failure }
 
+enum UpdateUserProfileStatus { init, loading, success, failure }
+
 enum VerifyOtpFromGuestStatus { init, loading, success, failure }
 
 enum GetCustomerCountryStatus { loading, success, failure }
@@ -20,10 +22,12 @@ class AuthState {
     this.signInErrorMessage,
     this.sendOtpError,
     this.signUpErrorMessage,
+    this.updateUserProfileError,
     this.getUserCountryResponseModel,
 
     // this.verifyOtpSignUpStatus = VerifyOtpSignUpStatus.init,
     this.verifyOtpSignInStatus = VerifyOtpSignInStatus.init,
+    this.updateUserProfileStatus = UpdateUserProfileStatus.init,
     this.verifyOtpFromGuestStatus = VerifyOtpFromGuestStatus.init,
     this.getCustomerCountryStatus = GetCustomerCountryStatus.loading,
   });
@@ -32,6 +36,7 @@ class AuthState {
 
   //final VerifyOtpSignUpStatus verifyOtpSignUpStatus;
   final VerifyOtpSignInStatus verifyOtpSignInStatus;
+  final UpdateUserProfileStatus updateUserProfileStatus;
   final VerifyOtpFromGuestStatus verifyOtpFromGuestStatus;
 
   final GetCustomerCountryStatus getCustomerCountryStatus;
@@ -40,6 +45,7 @@ class AuthState {
   final GetUserCountryResponseModel? getUserCountryResponseModel;
   final String? signInErrorMessage;
   final String? signUpErrorMessage;
+  final String? updateUserProfileError;
 
   final String? sendOtpError;
   final String? countryName;
@@ -52,12 +58,14 @@ class AuthState {
     final GetCustomerCountryStatus? getCustomerCountryStatus,
 
     final String? signUpErrorMessage,
+    final String? updateUserProfileError,
     final String? sendOtpError,
 
     final User? walletUser,
 
     // final VerifyOtpSignUpStatus? verifyOtpSignUpStatus,
     final VerifyOtpSignInStatus? verifyOtpSignInStatus,
+    final UpdateUserProfileStatus? updateUserProfileStatus,
     final VerifyOtpFromGuestStatus? verifyOtpFromGuestStatus,
   }) {
     return AuthState(
@@ -68,6 +76,8 @@ class AuthState {
           getUserCountryResponseModel ?? this.getUserCountryResponseModel,
       signUpErrorMessage: signUpErrorMessage ?? this.signUpErrorMessage,
       signInErrorMessage: signInErrorMessage ?? this.signInErrorMessage,
+      updateUserProfileError:
+          updateUserProfileError ?? this.updateUserProfileError,
       walletUser: walletUser ?? this.walletUser,
       getCustomerCountryStatus:
           getCustomerCountryStatus ?? this.getCustomerCountryStatus,
@@ -75,6 +85,8 @@ class AuthState {
       //    verifyOtpSignUpStatus ?? this.verifyOtpSignUpStatus,
       verifyOtpSignInStatus:
           verifyOtpSignInStatus ?? this.verifyOtpSignInStatus,
+      updateUserProfileStatus:
+          updateUserProfileStatus ?? this.updateUserProfileStatus,
       verifyOtpFromGuestStatus:
           verifyOtpFromGuestStatus ?? this.verifyOtpFromGuestStatus,
     );

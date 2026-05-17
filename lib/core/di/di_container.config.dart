@@ -29,6 +29,8 @@ import '../../features/authentication/domain/use_cases/login_to_wallet_usecase.d
     as _i304;
 import '../../features/authentication/domain/use_cases/send_otp_usecase.dart'
     as _i952;
+import '../../features/authentication/domain/use_cases/update_user_profile_usecase.dart'
+    as _i492;
 import '../../features/authentication/domain/use_cases/verify_otp_signin_usecase.dart'
     as _i574;
 import '../../features/authentication/presentation/manager/auth_bloc.dart'
@@ -86,6 +88,9 @@ Future<_i174.GetIt> $initGetIt(
   gh.factory<_i952.SendOtpUseCase>(
     () => _i952.SendOtpUseCase(gh<_i742.AuthRepository>()),
   );
+  gh.factory<_i492.UpdateUserProfileUseCase>(
+    () => _i492.UpdateUserProfileUseCase(gh<_i742.AuthRepository>()),
+  );
   gh.factory<_i574.VerifyOtpSignInUseCase>(
     () => _i574.VerifyOtpSignInUseCase(gh<_i742.AuthRepository>()),
   );
@@ -93,6 +98,7 @@ Future<_i174.GetIt> $initGetIt(
     () => _i561.AuthBloc(
       gh<_i952.SendOtpUseCase>(),
       gh<_i574.VerifyOtpSignInUseCase>(),
+      gh<_i492.UpdateUserProfileUseCase>(),
       gh<_i644.GetUserCountryUseCase>(),
     ),
   );

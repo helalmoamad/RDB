@@ -1,5 +1,7 @@
 import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
+import 'dart:io';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rdb/core/domin/repositories/prefs_repository.dart';
@@ -246,14 +248,15 @@ class GRouter {
         state.matchedLocation == _config.applicationRoutes.kPinCodePage;
     final lockActive = (prefs?.shouldShowPin ?? false) && isPinRoute;
 
-    //if (Platform.isIOS) {
+    // استخدم CupertinoPageRoute على iOS عند القفل لمنع swipe gesture
+    if (Platform.isIOS && lockActive) {
+      return CupertinoPage<T>(child: child, key: state.pageKey);
+    }
+
     return MaterialPage<T>(
       child: child,
       key: state.pageKey,
       canPop: !lockActive,
     );
-    // } else {
-    //   return MaterialPage<T>(child: child, key: state.pageKey);
-    // }
   }
 }

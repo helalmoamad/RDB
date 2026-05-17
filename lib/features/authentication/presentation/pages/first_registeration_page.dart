@@ -156,7 +156,9 @@ class _RegistrationPageState extends State<RegistrationPage>
           if (index < 2) {
             FocusScope.of(context).unfocus();
           } else if (index != 6) {
-            focusNode.requestFocus();
+            Future.delayed(const Duration(seconds: 1), () {
+              focusNode.requestFocus();
+            });
           }
           return Scaffold(
             resizeToAvoidBottomInset: false,
@@ -273,11 +275,7 @@ class _RegistrationPageState extends State<RegistrationPage>
                                 animationDuration = const Duration(seconds: 1);
                                 animate.value = true;
                                 pageContent.value = 2;
-                                pageController.animateToPage(
-                                  2,
-                                  duration: const Duration(milliseconds: 100),
-                                  curve: Curves.easeInOut,
-                                );
+                                pageController.jumpToPage(2);
                               },
                               goToCreateAccount: () {
                                 fromLogin = false;
@@ -293,16 +291,12 @@ class _RegistrationPageState extends State<RegistrationPage>
                             ),
                             CreateAccountSection(
                               moveToNextStep: () {
+                                animationDuration = const Duration(seconds: 1);
+                                pageContent.value = 2;
                                 pageController.animateToPage(
                                   2,
-                                  duration: const Duration(milliseconds: 50),
+                                  duration: const Duration(milliseconds: 500),
                                   curve: Curves.easeInOut,
-                                );
-                                Future.delayed(
-                                  const Duration(milliseconds: 50),
-                                  () {
-                                    pageContent.value = 2;
-                                  },
                                 );
                               },
                             ),

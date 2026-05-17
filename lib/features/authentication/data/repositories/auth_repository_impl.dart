@@ -16,6 +16,15 @@ class AuthRepositoryImpl extends AuthRepository with HandlingExceptionRequest {
   final AuthRemoteDatasource dataSource;
 
   @override
+  Future<Either<Failure, bool>> updateUserProfile(
+    Map<String, dynamic> params,
+  ) {
+    return handlingExceptionRequest(
+      tryCall: () => dataSource.updateUserProfile(params),
+    );
+  }
+
+  @override
   Future<Either<Failure, LoginToWalletModel>> loginToWallet(
     Map<String, dynamic> params,
   ) {

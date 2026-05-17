@@ -48,6 +48,16 @@ class SaveErrorSigneInVerify extends AuthEvent {
   @override
   List<Object?> get props => [error];
 }
+
+class UpdateUserProfileEvent extends AuthEvent {
+  const UpdateUserProfileEvent({required this.fullName});
+
+  final String fullName;
+
+  @override
+  List<Object?> get props => [fullName];
+}
+
 /*class VerifyOtpSignUpEvent extends AuthEvent {
   final String sessionInfo;
   final String otp;

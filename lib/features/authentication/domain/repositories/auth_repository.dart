@@ -11,6 +11,10 @@ import '../../data/models/verify_otp_sign_up_and_in_response_model.dart';
 abstract class AuthRepository {
   Future<Either<Failure, GetUserCountryResponseModel>> getUserCountry();
 
+  Future<Either<Failure, bool>> updateUserProfile(
+    Map<String, dynamic> params,
+  );
+
   Future<Either<Failure, LoginToWalletModel>> loginToWallet(
     Map<String, dynamic> params,
   );

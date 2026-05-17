@@ -14,6 +14,7 @@ import 'package:rdb/core/di/di_container.dart';
 import 'package:rdb/features/authentication/presentation/manager/auth_bloc.dart';
 import 'package:root_check_flutter/root_check_flutter.dart';
 import 'core/domin/repositories/prefs_repository.dart';
+import 'package:rdb/services/security_service.dart';
 
 bool declineCallBecauseOfNotificationButton = false;
 bool isHydratedStorageInitialized = false;
@@ -26,7 +27,7 @@ bool notificationClicked = false;
 List<String> isFailedTheFirstTime = [];
 List<String> apisMustNotToRequest = [];
 ////////////////////////////////////////
-int applicationVersion = 13;
+int applicationVersion = 20;
 request() async {
   final Stopwatch stopWatch = Stopwatch();
   stopWatch.start();
@@ -60,6 +61,10 @@ void main() async {
   isDependencyInitialized = true;
   GetIt.I<AuthBloc>().add(GetUserCountryEvent());
   final bool isDeviceRooted = await _isDeviceRooted();
+
+  // تهيئة خدمة الأمان
+  await SecurityService.instance.initialize();
+
   runApp(
     TrydosApplication(
       navKey: navigatorKey,

@@ -56,8 +56,10 @@ class _HomePageState extends State<HomePage> {
     TrydosWallet.init(
       TrydosWalletConfig(
         baseUrl: dotenv.env['WALLET_URL'] ?? '', // رابط الـ API
+        kycBaseUrl: dotenv.env['KYC_URL'] ?? '', // رابط KYC
         token: GetIt.I<PrefsRepository>().walletToken, // استخدم القيمة الفعلية
         languageCode: LanguageService.languageCode,
+
         email: GetIt.I<PrefsRepository>().email ?? '',
         firstName: (GetIt.I<PrefsRepository>().userName ?? '').split(" ").first,
         lastName:

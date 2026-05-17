@@ -155,7 +155,19 @@ class PhoneFormField extends StatelessWidget {
                     onChanged: (String? text) {
                       if (text != null) {
                         onChange?.call(text) ?? false;
-                        offset = ((controller!.text.length * 8));
+                        final tp = TextPainter(
+                          text: TextSpan(
+                            text: controller!.text,
+                            style: context.textTheme.headlineSmall?.mq.copyWith(
+                              color: const Color(0xff1D1D1D),
+                              height: 0.6.h,
+                              decoration: TextDecoration.none,
+                              fontSize: 16.sp,
+                            ),
+                          ),
+                          textDirection: TextDirection.ltr,
+                        )..layout();
+                        offset = tp.width;
                         rebuildCursor.value = !rebuildCursor.value;
                       }
                     },
@@ -230,7 +242,7 @@ class PhoneFormField extends StatelessWidget {
                             return Container(
                               margin: HWEdgeInsets.only(
                                 left: 75 + offset,
-                                bottom: 25.h,
+                                bottom: 18.h,
                               ),
                               width: 10.w,
                               height: 1,
@@ -268,7 +280,8 @@ class PhoneNumberFormatter extends TextInputFormatter {
   }
 
   String getFormattedText(String oldText, String newText) {
-    if (newText.length < oldText.length) {
+    // Treat deleting a formatting separator (space) as a delete step.
+    if (newText.length <= oldText.length) {
       return newText;
     }
     if (!validationRegex.hasMatch(newText)) {

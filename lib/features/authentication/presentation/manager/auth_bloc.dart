@@ -14,6 +14,7 @@ import 'package:rdb/core/use_case/use_case.dart';
 import 'package:rdb/features/authentication/domain/use_cases/get_user_country_usecase.dart';
 
 import 'package:rdb/features/authentication/domain/use_cases/send_otp_usecase.dart';
+import 'package:rdb/features/authentication/domain/use_cases/update_user_profile_usecase.dart';
 
 import 'package:rdb/features/authentication/domain/use_cases/verify_otp_signin_usecase.dart';
 import '../../../../common/helper/show_message.dart';
@@ -39,6 +40,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     //this.loginToWalletUseCase,
     this.sendOtpUseCase,
     this.verifyOtpSignInUseCase,
+    this.updateUserProfileUseCase,
     this.getUserCountryUseCase,
     // this.verifyOtpSignUpUseCase,
   ) : super(const AuthState()) {
@@ -56,6 +58,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<SaveErrorSigneInVerify>(_onSaveErrorSigneInVerify);
     on<ResetAllData>(_onResetAllData);
     on<VerifyOtpSignInEvent>(_onVerifyOtpSignInEvent);
+    on<UpdateUserProfileEvent>(_onUpdateUserProfileEvent);
 
     // on<VerifyOtpSignUpEvent>(_onVerifyOtpSignUpEvent);
 
@@ -68,11 +71,61 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   final SendOtpUseCase sendOtpUseCase;
   final VerifyOtpSignInUseCase verifyOtpSignInUseCase;
+  final UpdateUserProfileUseCase updateUserProfileUseCase;
   //final VerifyOtpSignUpUseCase verifyOtpSignUpUseCase;
   //final CreateWalletUseCase createWalletUseCase;
   // final LoginToWalletUseCase loginToWalletUseCase;
   final GetUserCountryUseCase getUserCountryUseCase;
   final PrefsRepository _prefsRepository = GetIt.I<PrefsRepository>();
+
+  FutureOr<void> _onUpdateUserProfileEvent(
+    UpdateUserProfileEvent event,
+    Emitter<AuthState> emit,
+  ) async {
+    final nameParts = event.fullName
+        .split(RegExp(r'\s+'))
+        .where((part) => part.isNotEmpty)
+        .toList();
+    final firstName = nameParts.isEmpty ? '' : nameParts.first;
+    final lastName = nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '';
+
+    emit(
+      state.copyWith(
+        updateUserProfileStatus: UpdateUserProfileStatus.loading,
+        updateUserProfileError: '',
+      ),
+    );
+
+    final response = await updateUserProfileUseCase(
+      UpdateUserProfileParams(
+        profilePictureUrl: _prefsRepository.photo ?? '',
+        firstName: firstName,
+        lastName: lastName,
+      ),
+    );
+
+    response.fold(
+      (failure) {
+        emit(
+          state.copyWith(
+            updateUserProfileStatus: UpdateUserProfileStatus.failure,
+            updateUserProfileError: failure.message.isEmpty
+                ? 'Failed to update profile'
+                : failure.message,
+          ),
+        );
+      },
+      (_) {
+        _prefsRepository.setUserName(event.fullName);
+        emit(
+          state.copyWith(
+            updateUserProfileStatus: UpdateUserProfileStatus.success,
+            updateUserProfileError: '',
+          ),
+        );
+      },
+    );
+  }
 
   FutureOr<void> _onSendOtpEvent(
     SendOtpEvent event,
@@ -222,7 +275,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         try {
           _prefsRepository.setUserId(r.user!.id.toString());
 
-          _prefsRepository.setUserName(r.user?.firstName ?? "");
+          _prefsRepository.setUserName(
+            "${r.user?.firstName ?? ''} ${r.user?.lastName ?? ''}",
+          );
 
           _prefsRepository.setEmail(r.user?.email ?? "");
           _prefsRepository.setPhoto(r.user?.profilePictureUrl ?? "");
@@ -366,6 +421,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       state.copyWith(
         signInErrorMessage: "",
         sendOtpStatus: SendOtpStatus.init,
+        updateUserProfileStatus: UpdateUserProfileStatus.init,
+        updateUserProfileError: '',
         walletUser: User(),
         verifyOtpFromGuestStatus: VerifyOtpFromGuestStatus.init,
         verifyOtpSignInStatus: VerifyOtpSignInStatus.init,

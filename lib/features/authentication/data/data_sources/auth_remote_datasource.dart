@@ -5,6 +5,7 @@ import 'package:rdb/core/api/methods/detect_server.dart';
 import 'package:rdb/features/authentication/data/models/login_to_wallet_model.dart';
 import '../../../../core/api/client_config.dart';
 import '../../../../core/api/methods/get.dart';
+import '../../../../core/api/methods/patch.dart';
 import '../../../../core/api/methods/post.dart';
 
 import '../models/get_user_country_response_model.dart';
@@ -14,6 +15,18 @@ import '../models/verify_otp_sign_up_and_in_response_model.dart';
 
 @injectable
 class AuthRemoteDatasource {
+  Future<bool> updateUserProfile(Map<String, dynamic> params) {
+    PatchClient<bool> updateUserProfile = PatchClient<bool>(
+      serverName: ServerName.wallet,
+      requestPrams: RequestConfig<bool>(
+        endpoint: WalletEndPoints.updateProfileEP,
+        data: params,
+        response: ResponseValue<bool>(returnValueOnSuccess: true),
+      ),
+    );
+    return updateUserProfile();
+  }
+
   Future<SendOtpResponseModel> sendOtp(Map<String, dynamic> params) {
     bool isResend = params['isResend'] ?? false;
     Map<String, dynamic> param = params;

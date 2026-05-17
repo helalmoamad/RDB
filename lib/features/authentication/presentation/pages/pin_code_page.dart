@@ -390,81 +390,88 @@ class _PinCodePageState extends State<PinCodePage> with FormStateMinxin {
             });
           }
         },
-        child: SingleChildScrollView(
-          physics: const ClampingScrollPhysics(),
-          child: Padding(
-            padding: EdgeInsets.only(
-              left: 20.h,
-              right: 20.h,
-              bottom: keyboardInset + 20.h,
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(height: topSpace),
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 20.h),
-                  child: Text(
-                    title,
-                    style: context.textTheme.titleLarge?.bq.copyWith(
-                      color: const Color(0xff1D1D1D),
-                      height: 1.42,
-                      fontSize: 30.sp,
+        child: GestureDetector(
+          // منع swipe gesture من الحافة (back gesture)
+          onHorizontalDragStart: (_state != PinCodeState.set) ? (_) {} : null,
+          child: SingleChildScrollView(
+            physics: const ClampingScrollPhysics(),
+            child: Padding(
+              padding: EdgeInsets.only(
+                left: 20.h,
+                right: 20.h,
+                bottom: keyboardInset + 20.h,
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(height: topSpace),
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 20.h),
+                    child: Text(
+                      title,
+                      style: context.textTheme.titleLarge?.bq.copyWith(
+                        color: const Color(0xff1D1D1D),
+                        height: 1.42,
+                        fontSize: 30.sp,
+                      ),
                     ),
                   ),
-                ),
-                SizedBox(height: 10.h),
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 20.h),
-                  child: Text(
-                    subtitle,
-                    style: context.textTheme.titleLarge?.mq.copyWith(
-                      color: const Color(0xff1D1D1D),
-                      height: 1.42,
-                      fontSize: 16.sp,
+                  SizedBox(height: 10.h),
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 20.h),
+                    child: Text(
+                      subtitle,
+                      style: context.textTheme.titleLarge?.mq.copyWith(
+                        color: const Color(0xff1D1D1D),
+                        height: 1.42,
+                        fontSize: 16.sp,
+                      ),
                     ),
                   ),
-                ),
-                SizedBox(height: pinSectionSpace),
-                _buildPinSlot(),
-                SizedBox(height: 10.h),
-                Center(
-                  child: Text(
-                    label,
-                    style: context.textTheme.titleLarge?.bq.copyWith(
-                      fontSize: 14.sp,
-                      color: Colors.black45,
-                    ),
-                  ),
-                ),
-                10.verticalSpace,
-                if (_supportsFingerprint)
+                  SizedBox(height: pinSectionSpace),
+                  _buildPinSlot(),
+                  SizedBox(height: 10.h),
                   Center(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        IconButton(
-                          onPressed: _isAuthenticating
-                              ? null
-                              : () => _authenticateWithBiometric(isFace: false),
-                          tooltip: LocaleKeys.fingerprint_login_tooltip.tr(),
-                          iconSize: 40.sp,
-                          color: const Color(0xff4D84FF),
-                          icon: const Icon(Icons.fingerprint_rounded),
+                    child: Text(
+                      label,
+                      style: context.textTheme.titleLarge?.bq.copyWith(
+                        fontSize: 14.sp,
+                        color: Colors.black45,
+                      ),
+                    ),
+                  ),
+                  10.verticalSpace,
+                  if (_supportsFingerprint)
+                    Center(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          IconButton(
+                            onPressed: _isAuthenticating
+                                ? null
+                                : () =>
+                                      _authenticateWithBiometric(isFace: false),
+                            tooltip: LocaleKeys.fingerprint_login_tooltip.tr(),
+                            iconSize: 40.sp,
+                            color: const Color(0xff4D84FF),
+                            icon: const Icon(Icons.fingerprint_rounded),
+                          ),
+                        ],
+                      ),
+                    ),
+                  if (_isAuthenticating)
+                    Center(
+                      child: SizedBox(
+                        width: 22.w,
+                        height: 22.w,
+                        child: const CircularProgressIndicator(
+                          strokeWidth: 2.0,
                         ),
-                      ],
+                      ),
                     ),
-                  ),
-                if (_isAuthenticating)
-                  Center(
-                    child: SizedBox(
-                      width: 22.w,
-                      height: 22.w,
-                      child: const CircularProgressIndicator(strokeWidth: 2.0),
-                    ),
-                  ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
@@ -479,44 +486,48 @@ class _PinCodePageState extends State<PinCodePage> with FormStateMinxin {
       backgroundColor: const Color(0xffF4FFF4),
       body: PopScope(
         canPop: false,
-        child: Center(
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 40.w),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  LocaleKeys.pin_lockout_too_many_attempts.tr(),
-                  textAlign: TextAlign.center,
-                  style: context.textTheme.titleLarge?.bq.copyWith(
-                    color: const Color(0xff1D1D1D),
-                    fontSize: 22.sp,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                SizedBox(height: 12.h),
-                RichText(
-                  textAlign: TextAlign.center,
-                  text: TextSpan(
-                    style: context.textTheme.bodyMedium?.copyWith(
-                      color: Colors.black54,
-                      fontSize: 14.sp,
+        child: GestureDetector(
+          // منع swipe gesture من الحافة أثناء القفل
+          onHorizontalDragStart: (_) {},
+          child: Center(
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 40.w),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    LocaleKeys.pin_lockout_too_many_attempts.tr(),
+                    textAlign: TextAlign.center,
+                    style: context.textTheme.titleLarge?.bq.copyWith(
+                      color: const Color(0xff1D1D1D),
+                      fontSize: 22.sp,
+                      fontWeight: FontWeight.bold,
                     ),
-                    children: [
-                      TextSpan(
-                        text: '${LocaleKeys.pin_lockout_try_again_in.tr()} ',
-                      ),
-                      TextSpan(
-                        text: remaining,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xff1D1D1D),
-                        ),
-                      ),
-                    ],
                   ),
-                ),
-              ],
+                  SizedBox(height: 12.h),
+                  RichText(
+                    textAlign: TextAlign.center,
+                    text: TextSpan(
+                      style: context.textTheme.bodyMedium?.copyWith(
+                        color: Colors.black54,
+                        fontSize: 14.sp,
+                      ),
+                      children: [
+                        TextSpan(
+                          text: '${LocaleKeys.pin_lockout_try_again_in.tr()} ',
+                        ),
+                        TextSpan(
+                          text: remaining,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xff1D1D1D),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

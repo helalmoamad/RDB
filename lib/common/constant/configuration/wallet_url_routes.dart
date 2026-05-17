@@ -13,6 +13,7 @@ abstract class WalletEndPoints {
   static final loginWithIdTokenEP = 'login-with-id-token'.authScope();
   static const createWalletEP = "wallets";
   static const currenciesEP = "currencies";
+  static const updateProfileEP = 'users/me';
   static final sendOtpEP = "send-otp".authScope();
   static final reSendOtpEP = "resend-otp".authScope();
   static final verifyEP = "verify".authScope();
