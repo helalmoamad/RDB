@@ -1,17 +1,17 @@
-package com.example.rdb
+package com.rdb.www
 
 import android.os.Bundle
+import android.util.Log
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.FrameLayout
 import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
-import android.util.Log
 
 class MainActivity : FlutterFragmentActivity() {
     companion object {
-        private const val CHANNEL = "com.example.rdb/security"
+        private const val CHANNEL = "com.rdb.www/security"
         private const val TAG = "SecurityService"
     }
 
@@ -60,28 +60,25 @@ class MainActivity : FlutterFragmentActivity() {
                     ViewGroup.LayoutParams.MATCH_PARENT,
                 )
                 root.addView(overlay, params)
-                Log.d(TAG, "تم إضافة overlay أسود")
+                overlay.bringToFront()
             }
+            overlay?.visibility = android.view.View.VISIBLE
+            Log.d(TAG, "تم إخفاء المحتوى بإضافة Overlay")
         } catch (e: Exception) {
-            Log.e(TAG, "خطأ في hideContent: ${e.message}", e)
+            Log.e(TAG, "خطأ أثناء إخفاء المحتوى", e)
         }
     }
 
     private fun showContent() {
         try {
-            // إزالة FLAG_SECURE
+            // إزالة FLAG_SECURE للسماح بعرض المحتوى طبيعياً
             window.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
             Log.d(TAG, "تم إزالة FLAG_SECURE")
 
-            // إزالة الـ overlay الأسود
-            val overlay = overlayView
-            val parent = overlay?.parent
-            if (overlay != null && parent is ViewGroup) {
-                parent.removeView(overlay)
-                Log.d(TAG, "تم إزالة overlay أسود")
-            }
+            overlayView?.visibility = android.view.View.GONE
+            Log.d(TAG, "تم إظهار المحتوى وإخفاء Overlay")
         } catch (e: Exception) {
-            Log.e(TAG, "خطأ في showContent: ${e.message}", e)
+            Log.e(TAG, "خطأ أثناء إظهار المحتوى", e)
         }
     }
 
@@ -89,44 +86,14 @@ class MainActivity : FlutterFragmentActivity() {
         if (overlayView == null) {
             overlayView = FrameLayout(this).apply {
                 setBackgroundColor(android.graphics.Color.BLACK)
+                layoutParams = FrameLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                )
                 isClickable = true
                 isFocusable = true
+                visibility = android.view.View.GONE
             }
         }
-    }
-
-    override fun onUserLeaveHint() {
-        super.onUserLeaveHint()
-        // يُستدعى مبكراً عند الضغط على Home/Recent قبل لقطة التطبيقات المصغرة غالباً.
-        Log.d(TAG, "onUserLeaveHint: استدعاء hideContent")
-        hideContent()
-    }
-
-    override fun onPause() {
-        super.onPause()
-        Log.d(TAG, "onPause: استدعاء hideContent")
-        hideContent()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        Log.d(TAG, "onResume: استدعاء showContent")
-        showContent()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        // تنظيف الـ overlay عند إغلاق التطبيق
-        val overlay = overlayView
-        val parent = overlay?.parent
-        if (overlay != null && parent is ViewGroup) {
-            try {
-                parent.removeView(overlay)
-            } catch (e: Exception) {
-                Log.e(TAG, "خطأ في تنظيف overlay: ${e.message}", e)
-            }
-        }
-        overlayView = null
     }
 }
-

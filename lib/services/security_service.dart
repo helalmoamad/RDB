@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'dart:developer' as dev;
 
 class SecurityService {
-  static const platform = MethodChannel('com.example.rdb/security');
+  static const platform = MethodChannel('com.rdb.www/security');
   static SecurityService? _instance;
   late LifecycleObserver _observer;
 
