@@ -206,6 +206,7 @@ class _PinCodeVerifyPageState extends State<PinCodeVerifyPage>
     if (result['success'] == true) {
       // ج. حفظ حالة التفعيل محلياً بنجاح لعدم طلبها مجدداً
       await prefsRepository.setBiometricEnrolledKey(true);
+      widget.onSuccess();
 
       _showSnackBar("تم تفعيل قفل البصمة بالتطبيق بنجاح!");
     } else {
@@ -217,7 +218,9 @@ class _PinCodeVerifyPageState extends State<PinCodeVerifyPage>
   Future<void> _handleVerifyAndUnlock() async {
     setState(() => _isLoading = true);
 
-    final result = await _authService.verifyBiometric();
+    final result = await _authService.verifyBiometric(
+      prefsRepository.sessionToken ?? '',
+    );
 
     setState(() => _isLoading = false);
 
