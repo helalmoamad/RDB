@@ -5,6 +5,16 @@ import '../../../../common/constant/configuration/prefs_key.dart';
 import '../../domin/repositories/prefs_repository.dart';
 
 class PrefsRepositoryImpl extends PrefsRepository {
+  /// مسح جميع بيانات المستخدم من SharedPreferences و FlutterSecureStorage
+  Future<void> clearAll() async {
+    await _preferences.clear();
+    await _secureStorage.deleteAll();
+    _walletTokenCache = null;
+    _walletRefreshTokenCache = null;
+    _sessionTokenCache = null;
+    _passcodeCache = null;
+  }
+
   PrefsRepositoryImpl._(this._preferences, this._secureStorage);
 
   static Future<PrefsRepositoryImpl> create(
@@ -20,11 +30,21 @@ class PrefsRepositoryImpl extends PrefsRepository {
   final FlutterSecureStorage _secureStorage;
 
   String? _walletTokenCache;
+  String? _walletRefreshTokenCache;
+  String? _sessionTokenCache;
   String? _passcodeCache;
 
   Future<void> _initializeSensitiveValues() async {
     _walletTokenCache = await _readWithMigration(
       PrefsKey.walletToken,
+      _preferences.getString,
+    );
+    _walletRefreshTokenCache = await _readWithMigration(
+      PrefsKey.walletRefreshToken,
+      _preferences.getString,
+    );
+    _sessionTokenCache = await _readWithMigration(
+      PrefsKey.sessionToken,
       _preferences.getString,
     );
     _passcodeCache = await _readWithMigration(
@@ -55,6 +75,13 @@ class PrefsRepositoryImpl extends PrefsRepository {
       _preferences.setString(PrefsKey.currentCountry, countryIso!);
 
   @override
+  Future<bool> setstepToken(String token) =>
+      _preferences.setString(PrefsKey.stepToken, token);
+
+  @override
+  String? get stepToken => _preferences.getString(PrefsKey.stepToken);
+
+  @override
   String? get userChoosedCountryIso =>
       _preferences.getString(PrefsKey.currentCountry);
 
@@ -67,6 +94,13 @@ class PrefsRepositoryImpl extends PrefsRepository {
   @override
   Future<bool> setMemberSince(String? memberSince) =>
       _preferences.setString(PrefsKey.memberSince, memberSince!);
+
+  @override
+  Future<bool> setBiometricEnrolledKey(bool value) =>
+      _preferences.setBool(PrefsKey.biometricEnrolled, value);
+  @override
+  bool? get isBiometricEnrolled =>
+      _preferences.getBool(PrefsKey.biometricEnrolled);
 
   @override
   Future<bool> setWalletToken(String token) async {
@@ -85,7 +119,48 @@ class PrefsRepositoryImpl extends PrefsRepository {
   }
 
   @override
+  Future<bool> setWalletRefreshToken(String token) async {
+    try {
+      if (token.isEmpty) {
+        await _secureStorage.delete(key: PrefsKey.walletRefreshToken);
+      } else {
+        await _secureStorage.write(
+          key: PrefsKey.walletRefreshToken,
+          value: token,
+        );
+      }
+      await _preferences.remove(PrefsKey.walletRefreshToken);
+      _walletRefreshTokenCache = token.isEmpty ? null : token;
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  @override
+  Future<bool> setSessionToken(String token) async {
+    try {
+      if (token.isEmpty) {
+        await _secureStorage.delete(key: PrefsKey.sessionToken);
+      } else {
+        await _secureStorage.write(key: PrefsKey.sessionToken, value: token);
+      }
+      await _preferences.remove(PrefsKey.sessionToken);
+      _sessionTokenCache = token.isEmpty ? null : token;
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  @override
   String? get walletToken => _walletTokenCache;
+
+  @override
+  String? get walletRefreshToken => _walletRefreshTokenCache;
+
+  @override
+  String? get sessionToken => _sessionTokenCache;
 
   @override
   Future<bool> setTheme(ThemeMode themeMode) =>

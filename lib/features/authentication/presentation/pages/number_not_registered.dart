@@ -1,6 +1,5 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get_it/get_it.dart';
@@ -27,19 +26,6 @@ class NumberNotRegistered extends StatefulWidget {
 }
 
 class _NumberNotRegisteredState extends ThemeState<NumberNotRegistered> {
-  @override
-  void didChangeDependencies() async {
-    SystemChrome.setSystemUIOverlayStyle(
-      const SystemUiOverlayStyle(
-        statusBarColor: Color(0xffFFF9F0),
-        statusBarBrightness: Brightness.light,
-        statusBarIconBrightness: Brightness.dark,
-      ),
-    );
-
-    super.didChangeDependencies();
-  }
-
   final ValueNotifier<int> pageContent = ValueNotifier(0);
   final PageController pageController = PageController();
   PrefsRepository prefsRepository = GetIt.I<PrefsRepository>();

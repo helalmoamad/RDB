@@ -19,7 +19,9 @@ void resetPinGlobalState() {
   currentToType = 0;
   checkingOtp = false;
   WidgetsBinding.instance.addPostFrameCallback((_) {
-    focusNodes[0].requestFocus();
+    if (focusNodes[0].context != null) {
+      focusNodes[0].requestFocus();
+    }
   });
 }
 
@@ -82,10 +84,15 @@ class _PinItemState extends State<PinItem> with TickerProviderStateMixin {
     // إضافة مستمع لتغيير التركيز لضمان أن التركيز دائماً في المربع الصحيح
     focusNodes[widget.index].addListener(_handleFocusChange);
 
-    Future.delayed(
-      const Duration(seconds: 1),
-      () => focusNodes[0].requestFocus(),
-    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && focusNodes[0].context != null) {
+        Future.delayed(const Duration(seconds: 1), () {
+          if (mounted && focusNodes[0].context != null) {
+            focusNodes[0].requestFocus();
+          }
+        });
+      }
+    });
     widget.controller.value = zwspEditingValue;
     currentToType = 0;
     super.initState();
@@ -96,7 +103,11 @@ class _PinItemState extends State<PinItem> with TickerProviderStateMixin {
       // إذا حصل هذا المربع على التركيز ولكنه ليس المربع الذي يجب الكتابة فيه حالياً
       if (widget.index != currentToType && !checkingOtp) {
         // إعادة توجيه التركيز للمربع الصحيح
-        focusNodes[currentToType].requestFocus();
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted && focusNodes[currentToType].context != null) {
+            focusNodes[currentToType].requestFocus();
+          }
+        });
       }
     }
   }
@@ -110,7 +121,11 @@ class _PinItemState extends State<PinItem> with TickerProviderStateMixin {
   }
 
   void resetPins() {
-    focusNodes[0].requestFocus();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && focusNodes[0].context != null) {
+        focusNodes[0].requestFocus();
+      }
+    });
     currentToType = 0;
     checkingOtp = false;
     withBorder = true;
@@ -141,11 +156,13 @@ class _PinItemState extends State<PinItem> with TickerProviderStateMixin {
     return BlocConsumer<AuthBloc, AuthState>(
       buildWhen: (p, c) =>
           p.verifyOtpSignInStatus != c.verifyOtpSignInStatus ||
-          p.verifyOtpFromGuestStatus != c.verifyOtpFromGuestStatus,
+          p.verifyOtpFromGuestStatus != c.verifyOtpFromGuestStatus ||
+          p.verifyPasscodeStatus != c.verifyPasscodeStatus,
       listener: (context, state) {
         if (state.verifyOtpSignInStatus == VerifyOtpSignInStatus.loading ||
             state.verifyOtpFromGuestStatus ==
-                VerifyOtpFromGuestStatus.loading) {
+                VerifyOtpFromGuestStatus.loading ||
+            state.verifyPasscodeStatus == VerifyPasscodeStatus.loading) {
           fadingController.repeat(reverse: true);
         } else {
           fadingController.reset();
@@ -156,14 +173,17 @@ class _PinItemState extends State<PinItem> with TickerProviderStateMixin {
             state.verifyOtpSignInStatus == VerifyOtpSignInStatus.loading ||
             state.verifyOtpFromGuestStatus ==
                 VerifyOtpFromGuestStatus.loading ||
+            state.verifyPasscodeStatus == VerifyPasscodeStatus.loading ||
             state.verifyOtpSignInStatus == VerifyOtpSignInStatus.failure ||
             state.verifyOtpFromGuestStatus ==
                 VerifyOtpFromGuestStatus.failure ||
+            state.verifyPasscodeStatus == VerifyPasscodeStatus.failure ||
             widget.isExpired;
         final isInputEnabled =
             state.verifyOtpSignInStatus != VerifyOtpSignInStatus.loading &&
             state.verifyOtpFromGuestStatus !=
                 VerifyOtpFromGuestStatus.loading &&
+            state.verifyPasscodeStatus != VerifyPasscodeStatus.loading &&
             !widget.isExpired;
 
         if (!isInputEnabled && focusNodes[widget.index].hasFocus) {
@@ -213,7 +233,16 @@ class _PinItemState extends State<PinItem> with TickerProviderStateMixin {
                                 onTap: () {
                                   if (!isInputEnabled) return;
                                   if (widget.index != currentToType) {
-                                    focusNodes[currentToType].requestFocus();
+                                    WidgetsBinding.instance
+                                        .addPostFrameCallback((_) {
+                                          if (mounted &&
+                                              focusNodes[currentToType]
+                                                      .context !=
+                                                  null) {
+                                            focusNodes[currentToType]
+                                                .requestFocus();
+                                          }
+                                        });
                                   }
                                 },
                                 onChanged: (String? text) {
@@ -234,8 +263,22 @@ class _PinItemState extends State<PinItem> with TickerProviderStateMixin {
                                   setState(() {
                                     if ((text?.length ?? 0) == 1) {
                                       widget.onChange.call();
-                                      focusNodes[min(5, widget.index + 1)]
-                                          .requestFocus();
+                                      WidgetsBinding.instance
+                                          .addPostFrameCallback((_) {
+                                            if (mounted &&
+                                                focusNodes[min(
+                                                          5,
+                                                          widget.index + 1,
+                                                        )]
+                                                        .context !=
+                                                    null) {
+                                              focusNodes[min(
+                                                    5,
+                                                    widget.index + 1,
+                                                  )]
+                                                  .requestFocus();
+                                            }
+                                          });
                                       currentToType = min(5, widget.index + 1);
                                       withBorder = widget.index == 5;
                                       if (widget.index == 5) {
@@ -247,8 +290,22 @@ class _PinItemState extends State<PinItem> with TickerProviderStateMixin {
                                       checkingOtp = false;
                                       widget.controller.value =
                                           zwspEditingValue;
-                                      focusNodes[max(0, widget.index - 1)]
-                                          .requestFocus();
+                                      WidgetsBinding.instance
+                                          .addPostFrameCallback((_) {
+                                            if (mounted &&
+                                                focusNodes[max(
+                                                          0,
+                                                          widget.index - 1,
+                                                        )]
+                                                        .context !=
+                                                    null) {
+                                              focusNodes[max(
+                                                    0,
+                                                    widget.index - 1,
+                                                  )]
+                                                  .requestFocus();
+                                            }
+                                          });
                                       currentToType = max(0, widget.index - 1);
                                       withBorder = true;
                                     }

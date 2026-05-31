@@ -42,6 +42,7 @@ class MainActivity : FlutterFragmentActivity() {
     }
 
     private fun hideContent() {
+        Log.d(TAG, "[DEBUG] تم استدعاء hideContent من Flutter");
         try {
             // تفعيل FLAG_SECURE لمنع التقاط الشاشة والـ screenshots
             window.setFlags(
@@ -51,32 +52,39 @@ class MainActivity : FlutterFragmentActivity() {
             Log.d(TAG, "تم تفعيل FLAG_SECURE")
 
             // إضافة overlay أسود داخل محتوى الـ Activity نفسه
-            ensureOverlayViewCreated()
-            val root = findViewById<ViewGroup>(android.R.id.content)
-            val overlay = overlayView
-            if (overlay != null && overlay.parent == null) {
-                val params = FrameLayout.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                )
-                root.addView(overlay, params)
-                overlay.bringToFront()
+            runOnUiThread {
+                Log.d(TAG, "[DEBUG] runOnUiThread: إضافة overlayView");
+                ensureOverlayViewCreated()
+                val root = findViewById<ViewGroup>(android.R.id.content)
+                val overlay = overlayView
+                if (overlay != null && overlay.parent == null) {
+                    val params = FrameLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                    )
+                    root.addView(overlay, params)
+                    overlay.bringToFront()
+                }
+                overlay?.visibility = android.view.View.VISIBLE
+                Log.d(TAG, "تم إخفاء المحتوى بإضافة Overlay (runOnUiThread)")
             }
-            overlay?.visibility = android.view.View.VISIBLE
-            Log.d(TAG, "تم إخفاء المحتوى بإضافة Overlay")
         } catch (e: Exception) {
             Log.e(TAG, "خطأ أثناء إخفاء المحتوى", e)
         }
     }
 
     private fun showContent() {
+        Log.d(TAG, "[DEBUG] تم استدعاء showContent من Flutter");
         try {
             // إزالة FLAG_SECURE للسماح بعرض المحتوى طبيعياً
             window.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
             Log.d(TAG, "تم إزالة FLAG_SECURE")
 
-            overlayView?.visibility = android.view.View.GONE
-            Log.d(TAG, "تم إظهار المحتوى وإخفاء Overlay")
+            runOnUiThread {
+                Log.d(TAG, "[DEBUG] runOnUiThread: إزالة overlayView");
+                overlayView?.visibility = android.view.View.GONE
+                Log.d(TAG, "تم إظهار المحتوى وإخفاء Overlay (runOnUiThread)")
+            }
         } catch (e: Exception) {
             Log.e(TAG, "خطأ أثناء إظهار المحتوى", e)
         }
@@ -85,13 +93,13 @@ class MainActivity : FlutterFragmentActivity() {
     private fun ensureOverlayViewCreated() {
         if (overlayView == null) {
             overlayView = FrameLayout(this).apply {
-                setBackgroundColor(android.graphics.Color.BLACK)
+                setBackgroundColor(android.graphics.Color.TRANSPARENT)
                 layoutParams = FrameLayout.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.MATCH_PARENT,
                 )
-                isClickable = true
-                isFocusable = true
+                isClickable = false
+                isFocusable = false
                 visibility = android.view.View.GONE
             }
         }

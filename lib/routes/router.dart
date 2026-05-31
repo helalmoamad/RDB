@@ -10,7 +10,9 @@ import 'package:rdb/features/authentication/presentation/pages/first_registerati
 import 'package:rdb/features/authentication/presentation/pages/login_successfully.dart';
 import 'package:rdb/features/authentication/presentation/pages/passcode_welcome_page.dart';
 // 'package:rdb/features/authentication/presentation/pages/register_completed.dart';
-import 'package:rdb/features/authentication/presentation/pages/pin_code_page.dart';
+import 'package:rdb/features/authentication/presentation/pages/pin_code_setup_page.dart';
+import 'package:rdb/features/authentication/presentation/pages/pin_code_verify_page_from_login.dart';
+
 import 'package:rdb/splash_page.dart';
 
 import '../base_page.dart';
@@ -32,43 +34,7 @@ class GRouter {
     initialLocation: _config.kRootRoute,
     overridePlatformDefaultLocation: true,
     navigatorKey: navigatorKey,
-    redirect: (BuildContext context, GoRouterState state) {
-      // Security guard: if PIN lock is active, keep user on PIN flow.
-      if (!GetIt.I.isRegistered<PrefsRepository>()) {
-        return null;
-      }
 
-      final prefs = GetIt.I<PrefsRepository>();
-      final shouldShowPin = prefs.shouldShowPin ?? false;
-      if (!shouldShowPin) {
-        return null;
-      }
-
-      final isLoggedIn =
-          prefs.walletToken != null &&
-          ((prefs.isVerifiedPhone ?? false) ||
-              (prefs.isVerifiedPhonePeforeExpiredToken ?? false));
-      if (!isLoggedIn) {
-        return null;
-      }
-
-      final rootPath = _config.kRootRoute;
-      final pinPath = _config.applicationRoutes.kPinCodePage;
-      final passcodeWelcomePath =
-          _config.applicationRoutes.kPasscodeWelcomePage;
-      final currentPath = state.matchedLocation;
-
-      // Let splash route run initial app bootstrap logic.
-      if (currentPath == rootPath) {
-        return null;
-      }
-
-      if (currentPath == pinPath || currentPath == passcodeWelcomePath) {
-        return null;
-      }
-
-      return pinPath;
-    },
     routes: <RouteBase>[
       GoRoute(
         path: _config.kRootRoute,
@@ -103,9 +69,18 @@ class GRouter {
         },
       ),
       GoRoute(
-        path: _config.applicationRoutes.kPinCodePage,
+        path: _config.applicationRoutes.kPinCodeSetupPage,
         pageBuilder: (BuildContext context, GoRouterState state) {
-          return _builderPage(child: const PinCodePage(), state: state);
+          return _builderPage(child: const PinCodeSetupPage(), state: state);
+        },
+      ),
+      GoRoute(
+        path: _config.applicationRoutes.kPinCodeVerifyFromLoginPage,
+        pageBuilder: (BuildContext context, GoRouterState state) {
+          return _builderPage(
+            child: const PinCodeVerifyFromLoginPage(),
+            state: state,
+          );
         },
       ),
       GoRoute(
@@ -244,9 +219,8 @@ class GRouter {
     final prefs = GetIt.I.isRegistered<PrefsRepository>()
         ? GetIt.I<PrefsRepository>()
         : null;
-    final isPinRoute =
-        state.matchedLocation == _config.applicationRoutes.kPinCodePage;
-    final lockActive = (prefs?.shouldShowPin ?? false) && isPinRoute;
+
+    final lockActive = (prefs?.shouldShowPin ?? false);
 
     // استخدم CupertinoPageRoute على iOS عند القفل لمنع swipe gesture
     if (Platform.isIOS && lockActive) {

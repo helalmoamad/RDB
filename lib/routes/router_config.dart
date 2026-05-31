@@ -9,7 +9,8 @@ class _ApplicationRoutes {
   final String test = '/test';
   final String kBasePage = '/BasePage';
   final String kEnterNamePage = '/EnterNamePage';
-  final String kPinCodePage = '/PinCodePage';
+  final String kPinCodeSetupPage = '/PinCodeSetupPage';
+  final String kPinCodeVerifyFromLoginPage = '/PinCodeVerifyFromLoginPage';
   final String kPasscodeWelcomePage = '/PasscodeWelcomePage';
   final String kWebView = '/WebView';
 

@@ -3,6 +3,8 @@ import 'package:injectable/injectable.dart';
 import 'package:rdb/common/constant/configuration/wallet_url_routes.dart';
 import 'package:rdb/core/api/methods/detect_server.dart';
 import 'package:rdb/features/authentication/data/models/login_to_wallet_model.dart';
+import 'package:rdb/features/authentication/data/models/passcode_verify_model.dart';
+import 'package:rdb/features/authentication/data/models/user_profile_model.dart';
 import '../../../../core/api/client_config.dart';
 import '../../../../core/api/methods/get.dart';
 import '../../../../core/api/methods/patch.dart';
@@ -15,6 +17,19 @@ import '../models/verify_otp_sign_up_and_in_response_model.dart';
 
 @injectable
 class AuthRemoteDatasource {
+  Future<UserProfileModel> getUserProfile() {
+    GetClient<UserProfileModel> getUserProfile = GetClient<UserProfileModel>(
+      serverName: ServerName.wallet,
+      requestPrams: RequestConfig<UserProfileModel>(
+        endpoint: WalletEndPoints.updateProfileEP,
+        response: ResponseValue<UserProfileModel>(
+          fromJson: (response) => UserProfileModel.fromJson(response),
+        ),
+      ),
+    );
+    return getUserProfile();
+  }
+
   Future<bool> updateUserProfile(Map<String, dynamic> params) {
     PatchClient<bool> updateUserProfile = PatchClient<bool>(
       serverName: ServerName.wallet,
@@ -129,5 +144,79 @@ class AuthRemoteDatasource {
       ),
     );
     return createWallet();
+  }
+
+  Future<VerifyOtpSignUpAndInResponseModel> completeSession(
+    Map<String, dynamic> params,
+  ) {
+    PostClient<VerifyOtpSignUpAndInResponseModel> completeSession =
+        PostClient<VerifyOtpSignUpAndInResponseModel>(
+          serverName: ServerName.wallet,
+          requestPrams: RequestConfig<VerifyOtpSignUpAndInResponseModel>(
+            endpoint: WalletEndPoints.completeSession,
+            data: params,
+            response: ResponseValue<VerifyOtpSignUpAndInResponseModel>(
+              fromJson: (response) =>
+                  VerifyOtpSignUpAndInResponseModel.fromJson(response),
+            ),
+          ),
+        );
+    return completeSession();
+  }
+
+  Future<PasscodeVerifyModel> sessionsStepPasscodeVerify(
+    Map<String, dynamic> params,
+  ) {
+    PostClient<PasscodeVerifyModel> sessionsStepPasscodeVerify =
+        PostClient<PasscodeVerifyModel>(
+          serverName: ServerName.passcode,
+          requestPrams: RequestConfig<PasscodeVerifyModel>(
+            endpoint: WalletEndPoints.sessionsStepPasscodeVerifyEP,
+            data: params,
+            response: ResponseValue<PasscodeVerifyModel>(
+              fromJson: (response) => PasscodeVerifyModel.fromJson(response),
+            ),
+          ),
+        );
+    return sessionsStepPasscodeVerify();
+  }
+
+  Future<bool> setPasscode(String passcode) async {
+    PostClient<bool> setPasscode = PostClient<bool>(
+      serverName: ServerName.wallet,
+      requestPrams: RequestConfig<bool>(
+        endpoint: WalletEndPoints.setPasscodeEP,
+        data: {"passcode": passcode},
+        response: ResponseValue<bool>(returnValueOnSuccess: true),
+      ),
+    );
+    return setPasscode();
+  }
+
+  Future<bool> sessionsPasscodeVerify(String passcode) async {
+    PostClient<bool> sessionsPasscodeVerify = PostClient<bool>(
+      serverName: ServerName.wallet,
+      requestPrams: RequestConfig<bool>(
+        endpoint: WalletEndPoints.sessionsPasscodeVerifyEP,
+        data: {"passcode": passcode},
+        response: ResponseValue<bool>(returnValueOnSuccess: true),
+      ),
+    );
+    return sessionsPasscodeVerify();
+  }
+
+  Future<bool> changePasscode(
+    String currentPasscode,
+    String newPasscode,
+  ) async {
+    PostClient<bool> changePasscode = PostClient<bool>(
+      serverName: ServerName.wallet,
+      requestPrams: RequestConfig<bool>(
+        endpoint: WalletEndPoints.changePasscodeEP,
+        data: {"currentPasscode": currentPasscode, "newPasscode": newPasscode},
+        response: ResponseValue<bool>(returnValueOnSuccess: true),
+      ),
+    );
+    return changePasscode();
   }
 }

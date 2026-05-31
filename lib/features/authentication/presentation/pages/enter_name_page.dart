@@ -2,7 +2,6 @@ import 'package:dotted_border/dotted_border.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get_it/get_it.dart';
@@ -44,24 +43,6 @@ class _EnterNamePageState extends State<EnterNamePage> {
     _authBloc = context.read<AuthBloc>();
     LastPagesTracker.push('EnterNamePage');
     _nameController.addListener(_handleNameChanged);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final storedName = (_prefsRepository.userName ?? '').trim();
-      if (storedName.isNotEmpty && mounted) {
-        context.go(GRouter.config.applicationRoutes.kPinCodePage);
-      }
-    });
-  }
-
-  @override
-  void didChangeDependencies() {
-    SystemChrome.setSystemUIOverlayStyle(
-      const SystemUiOverlayStyle(
-        statusBarColor: Color(0xffE0FFEE),
-        statusBarBrightness: Brightness.light,
-        statusBarIconBrightness: Brightness.light,
-      ),
-    );
-    super.didChangeDependencies();
   }
 
   @override
@@ -103,7 +84,12 @@ class _EnterNamePageState extends State<EnterNamePage> {
           previous.updateUserProfileStatus != current.updateUserProfileStatus,
       listener: (context, state) {
         if (state.updateUserProfileStatus == UpdateUserProfileStatus.success) {
-          context.go(GRouter.config.applicationRoutes.kPinCodePage);
+          final passcode = _prefsRepository.passcode;
+          if (passcode == null || passcode.isEmpty) {
+            context.go(GRouter.config.applicationRoutes.kPinCodeSetupPage);
+          } else {
+            context.go(GRouter.config.applicationRoutes.kBasePage);
+          }
         } else if (state.updateUserProfileStatus ==
             UpdateUserProfileStatus.failure) {
           showMessage(

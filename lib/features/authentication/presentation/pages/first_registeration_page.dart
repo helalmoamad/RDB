@@ -71,6 +71,7 @@ class _RegistrationPageState extends State<RegistrationPage>
 
   @override
   void dispose() {
+    focusNode.dispose(); // التخلص من FocusNode بشكل صحيح
     prefsRepository.setTimerForOtpRunning(false);
     super.dispose();
   }
@@ -155,7 +156,7 @@ class _RegistrationPageState extends State<RegistrationPage>
         builder: (ctx, index, child) {
           if (index < 2) {
             FocusScope.of(context).unfocus();
-          } else if (index != 6) {
+          } else if (index < 4) {
             Future.delayed(const Duration(seconds: 1), () {
               focusNode.requestFocus();
             });

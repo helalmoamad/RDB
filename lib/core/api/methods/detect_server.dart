@@ -3,12 +3,14 @@ import 'package:rdb/common/constant/configuration/cloudinary_url_routes.dart';
 import 'package:rdb/common/constant/configuration/wallet_url_routes.dart';
 import 'package:rdb/core/domin/repositories/prefs_repository.dart';
 
-enum ServerName { location, cloudinary, wallet }
+enum ServerName { location, cloudinary, wallet, passcode }
 
 //todo make the return value dynamic to return the cloudinary as String
 Uri getBaseUriForSpecificServer(ServerName serverName) {
   switch (serverName) {
     case ServerName.wallet:
+      return WalletUrls.baseUri;
+    case ServerName.passcode:
       return WalletUrls.baseUri;
     case ServerName.location:
       return Uri.parse('https://ipwho.is/');
@@ -26,5 +28,7 @@ String? getServerToken(ServerName serverName) {
       return null;
     case ServerName.cloudinary:
       return null;
+    case ServerName.passcode:
+      return prefsRepository.stepToken;
   }
 }

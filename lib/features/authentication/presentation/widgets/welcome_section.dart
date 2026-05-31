@@ -27,16 +27,6 @@ class WelcomeSection extends StatefulWidget {
 }
 
 class _WelcomeSectionState extends State<WelcomeSection> {
-  bool _eventLogged = false;
-  @override
-  void didChangeDependencies() async {
-    if (!_eventLogged) {
-      _eventLogged = true;
-    }
-
-    super.didChangeDependencies();
-  }
-
   final ValueNotifier<int> clickButton = ValueNotifier(-1);
 
   final PrefsRepository prefsRepository = GetIt.I<PrefsRepository>();

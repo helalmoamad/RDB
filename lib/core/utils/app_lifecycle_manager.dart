@@ -36,7 +36,7 @@ class AppLifecycleManager {
         _handlePaused();
         break;
       case AppLifecycleState.inactive:
-        _handleInactive();
+        // لا تنفذ أي منطق حماية أو إخفاء محتوى هنا (يتم ذلك فقط في SecurityService)
         break;
       case AppLifecycleState.detached:
         _handleDetached();
@@ -81,6 +81,7 @@ class AppLifecycleManager {
 
   /// 🔒 التحقق من ضرورة طلب رمز PIN
   void _requestPinIfNecessary() {
+    GetIt.I<PrefsRepository>().setShouldShowPin(true);
     try {
       final prefs = GetIt.I<PrefsRepository>();
       final isLoggedIn =
@@ -96,7 +97,7 @@ class AppLifecycleManager {
             .currentConfiguration
             .last
             .matchedLocation;
-        final targetRoute = GRouter.config.applicationRoutes.kPinCodePage;
+        final targetRoute = GRouter.config.applicationRoutes.kBasePage;
         if (currentRoute != targetRoute) {
           debugPrint('🔒 Security: Requesting secure auth step on app resume');
           // Use replacement-style navigation so no previous sensitive page
@@ -119,11 +120,6 @@ class AppLifecycleManager {
 
     // حفظ الحالة في التخزين الدائم لضمان طلب الرموز حتى لو تم إغلاق التطبيق من قبل النظام
     GetIt.I<PrefsRepository>().setShouldShowPin(true);
-  }
-
-  /// 🔄 معالجة حالة غير نشط
-  void _handleInactive() {
-    debugPrint('🔄 App Inactive');
   }
 
   /// 🔌 معالجة انفصال التطبيق

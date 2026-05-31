@@ -15,13 +15,19 @@ String verifyOtpSignUpAndInResponseModelToJson(
 class VerifyOtpSignUpAndInResponseModel {
   final User? user;
   final String? status;
+  final String? stepToken;
   final Token? accessToken;
   final Token? refreshToken;
+  final String? sessionId;
+  final String? sessionToken;
 
   VerifyOtpSignUpAndInResponseModel({
     this.user,
     this.accessToken,
+    this.stepToken,
     this.refreshToken,
+    this.sessionToken,
+    this.sessionId,
     this.status,
   });
 
@@ -30,10 +36,16 @@ class VerifyOtpSignUpAndInResponseModel {
     Token? accessToken,
     Token? refreshToken,
     String? status,
+    String? stepToken,
+    String? sessionId,
+    String? sessionToken,
   }) => VerifyOtpSignUpAndInResponseModel(
     user: user ?? this.user,
     accessToken: accessToken ?? this.accessToken,
     refreshToken: refreshToken ?? this.refreshToken,
+    sessionId: sessionId ?? this.sessionId,
+    sessionToken: sessionToken ?? this.sessionToken,
+    stepToken: stepToken ?? this.stepToken,
     status: status ?? this.status,
   );
 
@@ -48,12 +60,18 @@ class VerifyOtpSignUpAndInResponseModel {
     refreshToken: json["refreshToken"] == null
         ? null
         : Token.fromJson(json["refreshToken"]),
+    sessionId: json["sessionId"],
+    sessionToken: json["sessionToken"],
+    stepToken: json["stepToken"],
   );
 
   Map<String, dynamic> toJson() => {
     "user": user?.toJson(),
     "status": status,
+    "stepToken": stepToken,
     "accessToken": accessToken?.toJson(),
+    "sessionId": sessionId,
+    "sessionToken": sessionToken,
     "refreshToken": refreshToken?.toJson(),
   };
 }

@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 
 abstract class PrefsRepository {
   String? get walletToken;
+  String? get walletRefreshToken;
+  String? get sessionToken;
 
   String? get countryIso;
   String? get userChoosedCountryIso;
   String? get fcmTokenId;
+  String? get stepToken;
   String? get email;
   String? get photo;
   String? get memberSince;
@@ -23,6 +26,7 @@ abstract class PrefsRepository {
   bool? get isRequestNotificationPermission;
 
   bool? get isCreateWallet;
+  bool? get isBiometricEnrolled;
   String? get userName;
 
   String? get myPhoneNumber;
@@ -59,7 +63,9 @@ abstract class PrefsRepository {
   Future<bool> setUserCountryIsAvailable(int userCountryAvailable);
 
   Future<bool> setWalletToken(String token);
-
+  Future<bool> setWalletRefreshToken(String token);
+  Future<bool> setstepToken(String token);
+  Future<bool> setSessionToken(String token);
   Future<bool> setPhoneNumber(String phoneNumber);
 
   Future<void> setFcmTokenId(String fcmTokenId);
@@ -85,6 +91,7 @@ abstract class PrefsRepository {
 
   Future<bool> clearVerificationId();
   Future<bool> setPasscode(String passcode);
+  Future<bool> setBiometricEnrolledKey(bool value);
   bool? get shouldShowPin;
   Future<bool> setShouldShowPin(bool value);
   bool? get isFaceLoginEnabled;

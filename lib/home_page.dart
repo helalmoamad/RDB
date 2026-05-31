@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
@@ -8,6 +9,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:rdb/common/constant/design/assets_provider.dart';
 import 'package:rdb/common/helper/show_message.dart';
+import 'package:rdb/features/authentication/presentation/pages/pin_code_verify_page.dart';
 import 'package:rdb/features/authentication/presentation/widgets/insert_phone_tab.dart';
 import 'package:rdb/features/authentication/presentation/widgets/verification_methods.dart';
 import 'package:rdb/features/authentication/presentation/widgets/verify_otp.dart';
@@ -19,6 +21,7 @@ import 'package:get_it/get_it.dart';
 import 'package:rdb/core/domin/repositories/prefs_repository.dart';
 import 'package:rdb/core/utils/responsive_padding.dart';
 import 'package:rdb/features/authentication/presentation/manager/auth_bloc.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:trydos_wallet/trydos_wallet.dart';
 
 class HomePage extends StatefulWidget {
@@ -32,7 +35,7 @@ late StreamSubscription walletEvents;
 late StreamSubscription languageChangeEvent;
 late StreamSubscription logoutEvent;
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   // 🛡️ حماية حالة الصفحة الرئيسية
 
   late AuthBloc authBloc;
@@ -42,11 +45,14 @@ class _HomePageState extends State<HomePage> {
   String phoneNumber = '';
   int isVisWhatsApp = 0;
   final ValueNotifier<bool> isVerified = ValueNotifier(true);
+  final ValueNotifier<bool> isPasscodeVerified = ValueNotifier(true);
   @override
   void initState() {
+    WidgetsBinding.instance.addObserver(this);
     if (kDebugMode) {
       print("walletToken: ${GetIt.I<PrefsRepository>().walletToken}###");
     }
+
     authBloc = BlocProvider.of<AuthBloc>(context);
     final memberSince = DateTime.tryParse(
       GetIt.I<PrefsRepository>().memberSince ?? '',
@@ -86,16 +92,30 @@ class _HomePageState extends State<HomePage> {
     );
 
     // الاستماع لأحداث تسجيل الخروج
-    logoutEvent = logoutEvents.listen((event) {
+    logoutEvent = logoutEvents.listen((event) async {
       if (kDebugMode) {
         print('User logged out from wallet. Clearing verification status.');
       }
-      GetIt.I<PrefsRepository>().setPasscode("");
-      GetIt.I<PrefsRepository>().setVerifiedPhone(false);
-      GetIt.I<PrefsRepository>().setVerifiedPhonePeforeExpiredToken(false);
-      GetIt.I<PrefsRepository>().setIsAccountActive(false);
-      GetIt.I<PrefsRepository>().setIsTwoFactorEnabled(false);
-      GetIt.I<PrefsRepository>().setUserName("");
+      await GetIt.I<PrefsRepository>().setPasscode("");
+      await GetIt.I<PrefsRepository>().setVerifiedPhone(false);
+      await GetIt.I<PrefsRepository>().setWalletToken("");
+      await GetIt.I<PrefsRepository>().setVerifiedPhonePeforeExpiredToken(
+        false,
+      );
+      await GetIt.I<PrefsRepository>().setIsAccountActive(false);
+      await GetIt.I<PrefsRepository>().setIsTwoFactorEnabled(false);
+      await GetIt.I<PrefsRepository>().setUserName("");
+
+      // إلغاء الاشتراك مباشرة بعد تسجيل الخروج
+
+      await walletEvents.cancel();
+      await languageChangeEvent.cancel();
+      await logoutEvent.cancel();
+      TrydosWallet.logout();
+      authBloc.add(ResetAllData()); // إعادة تعيين كل البيانات في AuthBloc
+
+      // تنظيف باقي الموارد
+
       GRouter.router.go(GRouter.config.kRootRoute);
     });
 
@@ -113,6 +133,9 @@ class _HomePageState extends State<HomePage> {
     });
 
     walletEvents = authEvents.listen((evt) async {
+      if ((GetIt.I<PrefsRepository>().passcode ?? "").isEmpty) {
+        return;
+      }
       if (kDebugMode) {
         print('User logged out from wallet. Clearing verification status.');
       }
@@ -124,16 +147,17 @@ class _HomePageState extends State<HomePage> {
         // استخدم SchedulerBinding لتأخير العملية بعد انتهاء البناء
 
         await Future.delayed(const Duration(seconds: 1));
-        isVerified.value = false;
-
-        authBloc.add(
-          SendOtpEvent(
-            phone: GetIt.I<PrefsRepository>().myPhoneNumber!,
-            isViaWhatsApp: 1,
-            isSignUp: false,
-            isResend: false,
-          ),
-        );
+        if (mounted) {
+          isVerified.value = false;
+          authBloc.add(
+            SendOtpEvent(
+              phone: GetIt.I<PrefsRepository>().myPhoneNumber!,
+              isViaWhatsApp: 1,
+              isSignUp: false,
+              isResend: false,
+            ),
+          );
+        }
       }
     });
     super.initState();
@@ -145,25 +169,38 @@ class _HomePageState extends State<HomePage> {
     languageChangeEvent.cancel();
     logoutEvent.cancel();
 
-    // تنظيف موارد الم
-
     // تنظيف باقي الموارد
     pageController.dispose();
     focusNode.dispose();
     isVerified.dispose();
+    WidgetsBinding.instance.removeObserver(this);
 
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.resumed) {
+      // تحديث حالة التحقق من رمز المرور عند العودة من الخلفية
+      isPasscodeVerified.value =
+          !(GetIt.I<PrefsRepository>().shouldShowPin ?? false);
+    }
   }
 
   /// جلب البيانات عند السحب للتحديث (خارج build لتحسين الأداء)
 
   @override
   Widget build(BuildContext context) {
+    isPasscodeVerified.value =
+        !(GetIt.I<PrefsRepository>().shouldShowPin ?? false);
     return Scaffold(
       backgroundColor: Colors.white,
+      resizeToAvoidBottomInset: isPasscodeVerified.value != true ? false : true,
       body: Padding(
         padding: HWEdgeInsets.symmetric(horizontal: 0.w),
         child: Stack(
+          alignment: Alignment.center,
           children: [
             ScrollConfiguration(
               behavior: const MaterialScrollBehavior().copyWith(
@@ -189,6 +226,67 @@ class _HomePageState extends State<HomePage> {
                 valueListenable: isVerified,
                 builder: (context, isverified, _) {
                   return isverified ? const SizedBox.shrink() : _veryfiedOtp();
+                },
+              ),
+            ),
+            (GetIt.I<PrefsRepository>().photo ?? '') == ''
+                ? SizedBox.fromSize()
+                : Positioned(
+                    top: 120.h,
+                    child: ValueListenableBuilder<bool>(
+                      valueListenable: isPasscodeVerified,
+                      builder: (context, passcodeVerified, _) {
+                        if (passcodeVerified) return const SizedBox.shrink();
+                        return Container(
+                          width: 200.w,
+                          height: 200.h,
+                          decoration: BoxDecoration(
+                            color: Color(0xff1D1D1D),
+                            borderRadius: BorderRadius.circular(15.r),
+                          ),
+                          child: Image.network(
+                            GetIt.I<PrefsRepository>().photo ??
+                                '', // صورة افتراضية إذا لم تكن موجودة
+                            width: 200.w,
+                            loadingBuilder: (context, child, loadingProgress) =>
+                                loadingProgress == null
+                                ? child
+                                : Shimmer.fromColors(
+                                    baseColor: Colors.grey[300]!,
+                                    highlightColor: Colors.grey[100]!,
+                                    child: Container(
+                                      width: 200.w,
+                                      height: 200.h,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                            height: 200.h,
+                            fit: BoxFit.cover,
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+            // شاشة القفل PinCodeVerifyPage فوق كل شيء مع ضبابية
+            Positioned.fill(
+              child: ValueListenableBuilder<bool>(
+                valueListenable: isPasscodeVerified,
+                builder: (context, passcodeVerified, _) {
+                  if (passcodeVerified) return const SizedBox.shrink();
+                  return BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 8.0, sigmaY: 8.0),
+                    // ignore: deprecated_member_use
+                    child: SizedBox(
+                      width: 1.sw,
+                      height: 1.sh,
+                      child: PinCodeVerifyPage(
+                        onSuccess: () {
+                          GetIt.I<PrefsRepository>().setShouldShowPin(false);
+                          isPasscodeVerified.value = true;
+                        },
+                      ),
+                    ), // تقليل العتامة
+                  );
                 },
               ),
             ),

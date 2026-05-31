@@ -1,6 +1,5 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
@@ -26,27 +25,15 @@ class _PasscodeWelcomePageState extends State<PasscodeWelcomePage> {
     super.initState();
     LastPagesTracker.push('PasscodeWelcomePage');
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      _prefsRepository.setShouldShowPin(false);
       Future.delayed(const Duration(seconds: 3), () {
         if (!mounted) {
           return;
         }
 
-        _prefsRepository.setShouldShowPin(false);
         context.go(GRouter.config.applicationRoutes.kBasePage);
       });
     });
-  }
-
-  @override
-  void didChangeDependencies() {
-    SystemChrome.setSystemUIOverlayStyle(
-      const SystemUiOverlayStyle(
-        statusBarColor: Color(0xffE0FFEE),
-        statusBarBrightness: Brightness.light,
-        statusBarIconBrightness: Brightness.light,
-      ),
-    );
-    super.didChangeDependencies();
   }
 
   @override

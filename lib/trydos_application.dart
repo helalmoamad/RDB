@@ -79,15 +79,12 @@ class _TrydosApplicationState extends State<TrydosApplication>
     super.didChangeMetrics();
   }
 
-  /// 🔄 معالجة حالة التطبيق لمنع الشاشة السوداء عند العودة من الخلفية
+  /// 🔄 معالجة حالة التطبيق
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
-
-    // استخدام AppLifecycleManager لمعالجة الحالة
+    // لا تنفذ أي منطق حماية أو إخفاء محتوى عند الحالة inactive (يتم ذلك فقط في SecurityService)
     AppLifecycleManager().handleLifecycleChange(state);
-
-    // معالجة إضافية خاصة بالتطبيق
     if (state == AppLifecycleState.resumed) {
       _handleAppResumed();
     }

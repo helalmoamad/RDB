@@ -936,6 +936,7 @@ abstract class LocaleKeys {
   static const choose_verification_method = 'choose_verification_method';
   static const enter_verification_code_whatsapp =
       'enter_verification_code_whatsapp';
+  static const enter_your_passcode = 'enter_your_passcode';
   static const change_number = 'change_number';
   static const method = 'method';
   static const enter_your_phone_number_hint = 'enter_your_phone_number_hint';

@@ -12,11 +12,17 @@ extension ScopeApi on String {
 abstract class WalletEndPoints {
   static final loginWithIdTokenEP = 'login-with-id-token'.authScope();
   static const createWalletEP = "wallets";
+  static const setPasscodeEP = "sessions/passcode/set";
+  static const changePasscodeEP = "sessions/passcode/change";
   static const currenciesEP = "currencies";
   static const updateProfileEP = 'users/me';
   static final sendOtpEP = "send-otp".authScope();
   static final reSendOtpEP = "resend-otp".authScope();
   static final verifyEP = "verify".authScope();
+  static final completeSession = "auth/session/complete";
+  static final sessionsStepPasscodeVerifyEP = "sessions/step/passcode/verify";
+  static final sessionsPasscodeVerifyEP = "sessions/passcode/verify";
+
   //static final registerEP = "users/phone/register";
   static String walletBalanceEP(String assetId) =>
       "wallets/my/balances/$assetId";

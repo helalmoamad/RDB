@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rdb/core/utils/extensions/build_context.dart';
+import 'package:rdb/features/authentication/presentation/manager/auth_bloc.dart';
 import 'package:rdb/routes/router.dart';
 import 'package:rdb/splash_widget.dart';
 import 'core/domin/repositories/prefs_repository.dart';
@@ -18,6 +19,8 @@ class _SplashPageState extends State<SplashPage> {
 
   @override
   void initState() {
+    GetIt.I<PrefsRepository>().setShouldShowPin(true);
+    GetIt.I<AuthBloc>().add(GetUserProfileEvent());
     Future.delayed(const Duration(milliseconds: 6300), () {
       final hasToken = prefsRepository.walletToken != null;
       final isVerified =
@@ -28,7 +31,7 @@ class _SplashPageState extends State<SplashPage> {
       context.go(
         !hasToken || !isVerified
             ? GRouter.config.applicationRoutes.kRegistrationPage
-            : GRouter.config.applicationRoutes.kPinCodePage,
+            : GRouter.config.applicationRoutes.kBasePage,
       );
     });
 

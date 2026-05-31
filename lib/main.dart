@@ -27,7 +27,7 @@ bool notificationClicked = false;
 List<String> isFailedTheFirstTime = [];
 List<String> apisMustNotToRequest = [];
 ////////////////////////////////////////
-int applicationVersion = 20;
+int applicationVersion = 1;
 request() async {
   final Stopwatch stopWatch = Stopwatch();
   stopWatch.start();

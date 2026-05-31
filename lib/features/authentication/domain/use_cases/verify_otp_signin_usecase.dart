@@ -26,17 +26,38 @@ class VerifyOtpSignInParams {
   String otp;
   String action;
   String phone;
+  int? msegatId;
+  String? provider;
+  String? platform;
+  String? deviceId;
+  Map<String, dynamic>? deviceInfo;
 
   VerifyOtpSignInParams({
     required this.sessionInfo,
     required this.otp,
     required this.phone,
     required this.action,
+    this.msegatId,
+    this.provider,
+    this.platform,
+    this.deviceId,
+    this.deviceInfo,
   });
-  Map<String, dynamic> get map => {
-    "otpCode": otp,
-    "phoneNumber": "+$phone",
-    "sessionInfo": sessionInfo,
-    "action": action,
-  };
+
+  Map<String, dynamic> get map {
+    final data = <String, dynamic>{
+      "otpCode": otp,
+      "phoneNumber": "+$phone",
+      "action": action,
+      "platform": platform,
+      "deviceId": deviceId,
+      "deviceInfo": deviceInfo,
+    };
+    if (provider == "msegat") {
+      data["msegatId"] = msegatId;
+    } else {
+      data["sessionInfo"] = sessionInfo;
+    }
+    return data;
+  }
 }

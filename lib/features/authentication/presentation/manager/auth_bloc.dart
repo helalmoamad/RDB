@@ -7,6 +7,13 @@ import 'package:get_it/get_it.dart';
 import 'package:injectable/injectable.dart';
 import 'package:logger/logger.dart';
 import 'package:rdb/features/authentication/data/models/get_user_country_response_model.dart';
+import 'package:rdb/features/authentication/domain/entities/verify_otp_session_status.dart';
+import 'package:rdb/features/authentication/domain/use_cases/complete_session_usecase.dart';
+import 'package:rdb/features/authentication/domain/use_cases/get_user_profile_usecase.dart';
+import 'package:rdb/features/authentication/domain/use_cases/verify_session_passcode_usecase.dart';
+import 'package:rdb/features/authentication/domain/use_cases/verify_step_passcode_usecase.dart';
+import '../../domain/use_cases/set_passcode_usecase.dart';
+import '../../domain/use_cases/change_passcode_usecase.dart';
 // ignore: depend_on_referenced_packages
 import 'package:stream_transform/stream_transform.dart';
 import 'package:rdb/core/error/error_manager.dart';
@@ -41,7 +48,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     this.sendOtpUseCase,
     this.verifyOtpSignInUseCase,
     this.updateUserProfileUseCase,
+    this.verifyStepPasscodeUseCase,
+    this.verifySessionPasscodeUseCase,
     this.getUserCountryUseCase,
+    this.getUserProfileUseCase,
+    this.completeSessionUsecase,
+    this.setPasscodeUseCase,
+    this.changePasscodeUseCase,
     // this.verifyOtpSignUpUseCase,
   ) : super(const AuthState()) {
     on<AuthEvent>((event, emit) {});
@@ -58,7 +71,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<SaveErrorSigneInVerify>(_onSaveErrorSigneInVerify);
     on<ResetAllData>(_onResetAllData);
     on<VerifyOtpSignInEvent>(_onVerifyOtpSignInEvent);
+
     on<UpdateUserProfileEvent>(_onUpdateUserProfileEvent);
+    on<GetUserProfileEvent>(_onGetUserProfileEvent);
+    on<VerifyStepPasscodeEvent>(_onVerifyStepPasscodeEvent);
+    on<VerifySessionPasscodeEvent>(_onVerifySessionPasscodeEvent);
+    on<SetPasscodeEvent>(_onSetPasscodeEvent);
+    on<ChangePasscodeEvent>(_onChangePasscodeEvent);
 
     // on<VerifyOtpSignUpEvent>(_onVerifyOtpSignUpEvent);
 
@@ -71,11 +90,17 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   final SendOtpUseCase sendOtpUseCase;
   final VerifyOtpSignInUseCase verifyOtpSignInUseCase;
+  final CompleteSessionUsecase completeSessionUsecase;
+  final VerifyStepasscodeUseCase verifyStepPasscodeUseCase;
+  final GetUserProfileUseCase getUserProfileUseCase;
   final UpdateUserProfileUseCase updateUserProfileUseCase;
   //final VerifyOtpSignUpUseCase verifyOtpSignUpUseCase;
   //final CreateWalletUseCase createWalletUseCase;
   // final LoginToWalletUseCase loginToWalletUseCase;
   final GetUserCountryUseCase getUserCountryUseCase;
+  final VerifySessionPasscodeUseCase verifySessionPasscodeUseCase;
+  final SetPasscodeUseCase setPasscodeUseCase;
+  final ChangePasscodeUseCase changePasscodeUseCase;
   final PrefsRepository _prefsRepository = GetIt.I<PrefsRepository>();
 
   FutureOr<void> _onUpdateUserProfileEvent(
@@ -127,6 +152,28 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     );
   }
 
+  FutureOr<void> _onGetUserProfileEvent(
+    GetUserProfileEvent event,
+    Emitter<AuthState> emit,
+  ) async {
+    if (_prefsRepository.walletToken == null) {
+      return;
+    }
+    final response = await getUserProfileUseCase(NoParams());
+    response.fold((failure) {}, (userProfile) {
+      _prefsRepository.setUserName(
+        "${userProfile.firstName} ${userProfile.lastName}",
+      );
+      _prefsRepository.setEmail(userProfile.email);
+      _prefsRepository.setPhoneNumber(userProfile.phoneNumber);
+      _prefsRepository.setPhoto(userProfile.profilePictureURL ?? '');
+      _prefsRepository.setMemberSince(userProfile.createdAt);
+      _prefsRepository.setVerifiedPhone(userProfile.isPhoneVerified);
+      _prefsRepository.setIsAccountActive(!userProfile.isBlocked);
+      _prefsRepository.setIsTwoFactorEnabled(userProfile.isTwoFactorEnabled);
+    });
+  }
+
   FutureOr<void> _onSendOtpEvent(
     SendOtpEvent event,
     Emitter<AuthState> emit,
@@ -169,7 +216,95 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
             sendOtpStatus: SendOtpStatus.success,
             verifyOtpFromGuestStatus: VerifyOtpFromGuestStatus.init,
             verifyOtpSignInStatus: VerifyOtpSignInStatus.init,
+            otpMsegatId: r.msegatId,
+            otpProvider: r.provider,
           ),
+        );
+      },
+    );
+  }
+
+  FutureOr<void> _onVerifyStepPasscodeEvent(
+    VerifyStepPasscodeEvent event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(state.copyWith(verifyPasscodeStatus: VerifyPasscodeStatus.loading));
+    final response = await verifyStepPasscodeUseCase(
+      VerifyPasscodeParams(passcode: event.passcode),
+    );
+    await response.fold(
+      (failure) {
+        emit(
+          state.copyWith(verifyPasscodeStatus: VerifyPasscodeStatus.failure),
+        );
+      },
+      (isVerified) async {
+        _prefsRepository.setSessionToken(isVerified.sessionToken);
+        final response = await completeSessionUsecase(
+          CompleteSessionParams(sessionToken: isVerified.sessionToken),
+        );
+        response.fold((l) {}, (r) {
+          try {
+            _prefsRepository.setUserId(r.user!.id.toString());
+
+            _prefsRepository.setUserName(
+              "${r.user?.firstName ?? ''} ${r.user?.lastName ?? ''}",
+            );
+
+            _prefsRepository.setEmail(r.user?.email ?? "");
+            _prefsRepository.setPhoto(r.user?.profilePictureUrl ?? "");
+            _prefsRepository.setMemberSince(
+              (r.user?.createdAt ?? '').toString(),
+            );
+            _prefsRepository.setWalletToken(r.accessToken!.token!);
+            _prefsRepository.setWalletRefreshToken(r.refreshToken?.token ?? "");
+            _prefsRepository.setSessionToken(r.sessionToken ?? "");
+
+            _prefsRepository.setTokenExpired(false);
+            _prefsRepository.setUserId(r.user!.id.toString());
+
+            // ignore: unrelated_type_equality_checks
+            _prefsRepository.setVerifiedPhone(r.user?.isPhoneVerified ?? false);
+            _prefsRepository.setPhoneNumber((r.user?.phoneNumber).toString());
+            _prefsRepository.setIsAccountActive(!(r.user?.isBlocked ?? false));
+            _prefsRepository.setIsTwoFactorEnabled(
+              r.user?.isTwoFactorEnabled ?? false,
+            );
+            _prefsRepository.setVerifiedPhonePeforeExpiredToken(false);
+
+            ////////////////////////
+          } catch (error) {
+            showMessage(error.toString(), hasError: true);
+          }
+
+          emit(
+            state.copyWith(
+              verifyOtpSignInStatus: VerifyOtpSignInStatus.success,
+              walletUser: r.user,
+              signInErrorMessage: r.status,
+              verifyPasscodeStatus: VerifyPasscodeStatus.success,
+            ),
+          );
+        });
+      },
+    );
+  }
+
+  FutureOr<void> _onVerifySessionPasscodeEvent(
+    VerifySessionPasscodeEvent event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(state.copyWith(verifyPasscodeStatus: VerifyPasscodeStatus.loading));
+    final response = await verifySessionPasscodeUseCase(event.passcode);
+    response.fold(
+      (failure) {
+        emit(
+          state.copyWith(verifyPasscodeStatus: VerifyPasscodeStatus.failure),
+        );
+      },
+      (isVerified) async {
+        emit(
+          state.copyWith(verifyPasscodeStatus: VerifyPasscodeStatus.success),
         );
       },
     );
@@ -251,9 +386,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         otp: event.otp,
         action: event.action,
         phone: event.phone,
+        msegatId: event.msegatId,
+        provider: event.provider,
+        platform: event.platform,
+        deviceId: event.deviceId,
+        deviceInfo: event.deviceInfo,
       ),
     );
-    response.fold(
+    await response.fold(
       (l) {
         if (ErrorManager.shouldRetry('VerifyOtpSignInEvent', l.statusCode)) {
           add(
@@ -270,43 +410,101 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           state.copyWith(verifyOtpSignInStatus: VerifyOtpSignInStatus.failure),
         );
       },
-      (r) {
-        ErrorManager.resetRetry('VerifyOtpSignInEvent');
-        try {
-          _prefsRepository.setUserId(r.user!.id.toString());
-
-          _prefsRepository.setUserName(
-            "${r.user?.firstName ?? ''} ${r.user?.lastName ?? ''}",
+      (r) async {
+        if ((r.status ?? "") != VerifyOtpSessionStatus.requiresPasscode.value) {
+          final response = await completeSessionUsecase(
+            CompleteSessionParams(sessionToken: r.sessionToken ?? ""),
           );
+          response.fold((l) {}, (r) {
+            try {
+              _prefsRepository.setUserId(r.user!.id.toString());
 
-          _prefsRepository.setEmail(r.user?.email ?? "");
-          _prefsRepository.setPhoto(r.user?.profilePictureUrl ?? "");
-          _prefsRepository.setMemberSince((r.user?.createdAt ?? '').toString());
-          _prefsRepository.setWalletToken(r.accessToken!.token!);
-          _prefsRepository.setTokenExpired(false);
-          _prefsRepository.setUserId(r.user!.id.toString());
+              _prefsRepository.setUserName(
+                "${r.user?.firstName ?? ''} ${r.user?.lastName ?? ''}",
+              );
 
-          // ignore: unrelated_type_equality_checks
-          _prefsRepository.setVerifiedPhone(r.user?.isPhoneVerified ?? false);
-          _prefsRepository.setPhoneNumber((r.user?.phoneNumber).toString());
-          _prefsRepository.setIsAccountActive(!(r.user?.isBlocked ?? false));
-          _prefsRepository.setIsTwoFactorEnabled(
-            r.user?.isTwoFactorEnabled ?? false,
+              _prefsRepository.setEmail(r.user?.email ?? "");
+              _prefsRepository.setPhoto(r.user?.profilePictureUrl ?? "");
+              _prefsRepository.setMemberSince(
+                (r.user?.createdAt ?? '').toString(),
+              );
+              _prefsRepository.setWalletToken(r.accessToken!.token!);
+              _prefsRepository.setWalletRefreshToken(
+                r.refreshToken?.token ?? "",
+              );
+              _prefsRepository.setSessionToken(r.sessionToken ?? "");
+
+              _prefsRepository.setTokenExpired(false);
+              _prefsRepository.setUserId(r.user!.id.toString());
+
+              // ignore: unrelated_type_equality_checks
+              _prefsRepository.setVerifiedPhone(
+                r.user?.isPhoneVerified ?? false,
+              );
+              _prefsRepository.setPhoneNumber((r.user?.phoneNumber).toString());
+              _prefsRepository.setIsAccountActive(
+                !(r.user?.isBlocked ?? false),
+              );
+              _prefsRepository.setIsTwoFactorEnabled(
+                r.user?.isTwoFactorEnabled ?? false,
+              );
+              _prefsRepository.setVerifiedPhonePeforeExpiredToken(false);
+
+              ////////////////////////
+              // ignore: empty_catches
+            } catch (error) {}
+
+            emit(
+              state.copyWith(
+                verifyOtpSignInStatus: VerifyOtpSignInStatus.success,
+                walletUser: r.user,
+                signInErrorMessage: r.status,
+              ),
+            );
+          });
+        } else {
+          ErrorManager.resetRetry('VerifyOtpSignInEvent');
+          try {
+            _prefsRepository.setUserId(r.user!.id.toString());
+
+            _prefsRepository.setUserName(
+              "${r.user?.firstName ?? ''} ${r.user?.lastName ?? ''}",
+            );
+
+            _prefsRepository.setEmail(r.user?.email ?? "");
+            _prefsRepository.setPhoto(r.user?.profilePictureUrl ?? "");
+            _prefsRepository.setMemberSince(
+              (r.user?.createdAt ?? '').toString(),
+            );
+            _prefsRepository.setWalletToken(r.accessToken?.token ?? "");
+            _prefsRepository.setWalletRefreshToken(r.refreshToken?.token ?? "");
+            _prefsRepository.setSessionToken(r.sessionToken ?? "");
+
+            _prefsRepository.setTokenExpired(false);
+            _prefsRepository.setUserId(r.user!.id.toString());
+
+            // ignore: unrelated_type_equality_checks
+            _prefsRepository.setVerifiedPhone(r.user?.isPhoneVerified ?? false);
+            _prefsRepository.setPhoneNumber((r.user?.phoneNumber).toString());
+            _prefsRepository.setIsAccountActive(!(r.user?.isBlocked ?? false));
+            _prefsRepository.setIsTwoFactorEnabled(
+              r.user?.isTwoFactorEnabled ?? false,
+            );
+            _prefsRepository.setVerifiedPhonePeforeExpiredToken(false);
+
+            ////////////////////////
+            // ignore: empty_catches
+          } catch (error) {}
+          _prefsRepository.setstepToken(r.stepToken ?? "");
+          await Future.delayed(const Duration(seconds: 1), () {});
+          emit(
+            state.copyWith(
+              verifyOtpSignInStatus: VerifyOtpSignInStatus.success,
+              walletUser: r.user,
+              signInErrorMessage: r.status,
+            ),
           );
-          _prefsRepository.setVerifiedPhonePeforeExpiredToken(false);
-
-          ////////////////////////
-        } catch (error) {
-          showMessage(error.toString(), hasError: true);
         }
-
-        emit(
-          state.copyWith(
-            verifyOtpSignInStatus: VerifyOtpSignInStatus.success,
-            walletUser: r.user,
-            signInErrorMessage: r.status,
-          ),
-        );
       },
     );
   }
@@ -432,5 +630,47 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     GetIt.I<PrefsRepository>().setVerifiedPhonePeforeExpiredToken(false);
     GetIt.I<PrefsRepository>().setIsAccountActive(false);
     GetIt.I<PrefsRepository>().setIsTwoFactorEnabled(false);
+  }
+
+  FutureOr<void> _onSetPasscodeEvent(
+    SetPasscodeEvent event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(state.copyWith(setPasscodeStatus: SetPasscodeStatus.loading));
+    final result = await setPasscodeUseCase(event.passcode);
+    await result.fold(
+      (failure) {
+        emit(state.copyWith(setPasscodeStatus: SetPasscodeStatus.failure));
+      },
+      (isSet) async {
+        _prefsRepository.setPasscode("true");
+        emit(state.copyWith(setPasscodeStatus: SetPasscodeStatus.success));
+      },
+    );
+    // يمكن إضافة معالجة الحالة هنا لاحقاً
+  }
+
+  FutureOr<void> _onChangePasscodeEvent(
+    ChangePasscodeEvent event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(state.copyWith(changePasscodeStatus: ChangePasscodeStatus.loading));
+    final result = await changePasscodeUseCase(
+      event.currentPasscode,
+      event.newPasscode,
+    );
+    result.fold(
+      (failure) {
+        emit(
+          state.copyWith(changePasscodeStatus: ChangePasscodeStatus.failure),
+        );
+      },
+      (isChanged) {
+        emit(
+          state.copyWith(changePasscodeStatus: ChangePasscodeStatus.success),
+        );
+      },
+    );
+    // يمكن إضافة معالجة الحالة هنا لاحقاً
   }
 }

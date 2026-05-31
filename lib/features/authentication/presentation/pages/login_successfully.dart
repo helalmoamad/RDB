@@ -1,6 +1,5 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
@@ -29,34 +28,25 @@ class _LoginSuccessfullyState extends ThemeState<LoginSuccessfully> {
   final PrefsRepository _prefsRepository = GetIt.I<PrefsRepository>();
 
   @override
-  void didChangeDependencies() async {
-    SystemChrome.setSystemUIOverlayStyle(
-      const SystemUiOverlayStyle(
-        statusBarColor: Color(0xffE0FFEE),
-        statusBarBrightness: Brightness.light,
-        statusBarIconBrightness: Brightness.light,
-      ),
-    );
+  void initState() {
+    super.initState();
 
     Future.delayed(const Duration(seconds: 3), () {
-      if (!mounted) {
-        return;
-      }
-
+      // إزالة التركيز عن أي عنصر قابل للتحرير قبل الانتقال
+      FocusManager.instance.primaryFocus?.unfocus();
       final hasStoredName = (_prefsRepository.userName ?? '').trim().isNotEmpty;
+
+      // ignore: use_build_context_synchronously
       context.go(
-        hasStoredName
-            ? GRouter.config.applicationRoutes.kPinCodePage
+        widget.fromLogin
+            ? GRouter.config.applicationRoutes.kPinCodeVerifyFromLoginPage
+            : hasStoredName
+            ? GRouter.config.applicationRoutes.kPinCodeSetupPage
             : GRouter.config.applicationRoutes.kEnterNamePage,
       );
     });
-    super.didChangeDependencies();
-  }
 
-  @override
-  void initState() {
     LastPagesTracker.push('LoginSuccessfully');
-    super.initState();
   }
 
   @override
@@ -73,37 +63,42 @@ class _LoginSuccessfullyState extends ThemeState<LoginSuccessfully> {
             onWillPop: () async {
               return false;
             },
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 40.w),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  SizedBox(height: 300.h),
-                  Text(
-                    (widget.fromLogin
-                            ? LocaleKeys.sign_in_successfully_exclamation
-                            : LocaleKeys.sign_up_successfully_exclamation)
-                        .tr(),
-                    textAlign: TextAlign.start,
-                    style: context.textTheme.titleMedium?.mq.copyWith(
-                      color: const Color(0xff1D1D1D),
-                      height: 1.25,
-                      fontSize: 30.sp,
+            child: SizedBox(
+              width: 1.sw,
+              height: 1.sh,
+
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 40.w),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    SizedBox(height: 300.h),
+                    Text(
+                      (widget.fromLogin
+                              ? LocaleKeys.sign_in_successfully_exclamation
+                              : LocaleKeys.sign_up_successfully_exclamation)
+                          .tr(),
+                      textAlign: TextAlign.start,
+                      style: context.textTheme.titleMedium?.mq.copyWith(
+                        color: const Color(0xff1D1D1D),
+                        height: 1.25,
+                        fontSize: 30.sp,
+                      ),
                     ),
-                  ),
-                  10.verticalSpace,
-                  Text(
-                    LocaleKeys.enjoy_with_services.tr(),
-                    textAlign: TextAlign.start,
-                    style: context.textTheme.titleMedium?.mq.copyWith(
-                      color: const Color(0xff1D1D1D),
-                      height: 1.25,
-                      fontSize: 16.sp,
+                    10.verticalSpace,
+                    Text(
+                      LocaleKeys.enjoy_with_services.tr(),
+                      textAlign: TextAlign.start,
+                      style: context.textTheme.titleMedium?.mq.copyWith(
+                        color: const Color(0xff1D1D1D),
+                        height: 1.25,
+                        fontSize: 16.sp,
+                      ),
                     ),
-                  ),
-                  const Spacer(),
-                ],
+                    const Spacer(),
+                  ],
+                ),
               ),
             ),
           ),

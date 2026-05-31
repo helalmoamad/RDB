@@ -24,15 +24,43 @@ class VerifyOtpSignInEvent extends AuthEvent {
   final String otp;
   final String phone;
   final String action;
+  final int? msegatId;
+  final String? provider;
+  final String? platform;
+  final String? deviceId;
+  final Map<String, dynamic>? deviceInfo;
 
   const VerifyOtpSignInEvent({
     required this.sessionInfo,
     required this.otp,
     required this.phone,
     required this.action,
+    this.msegatId,
+    this.provider,
+    this.platform,
+    this.deviceId,
+    this.deviceInfo,
   });
   @override
-  List<Object?> get props => [otp, sessionInfo, phone];
+  List<Object?> get props => [
+    otp,
+    sessionInfo,
+    phone,
+    action,
+    msegatId,
+    provider,
+    platform,
+    deviceId,
+    deviceInfo,
+  ];
+}
+
+class VerifyStepPasscodeEvent extends AuthEvent {
+  final String passcode;
+
+  const VerifyStepPasscodeEvent({required this.passcode});
+  @override
+  List<Object?> get props => [passcode];
 }
 
 class ResetAllData extends AuthEvent {
@@ -47,6 +75,13 @@ class SaveErrorSigneInVerify extends AuthEvent {
   const SaveErrorSigneInVerify({required this.error});
   @override
   List<Object?> get props => [error];
+}
+
+class GetUserProfileEvent extends AuthEvent {
+  const GetUserProfileEvent();
+
+  @override
+  List<Object?> get props => [];
 }
 
 class UpdateUserProfileEvent extends AuthEvent {
@@ -92,4 +127,26 @@ class CreateWalletEvent extends AuthEvent {
   const CreateWalletEvent();
   @override
   List<Object?> get props => [];
+}
+
+class VerifySessionPasscodeEvent extends AuthEvent {
+  final String passcode;
+  const VerifySessionPasscodeEvent(this.passcode);
+  @override
+  List<Object?> get props => [passcode];
+}
+
+class SetPasscodeEvent extends AuthEvent {
+  final String passcode;
+  const SetPasscodeEvent(this.passcode);
+  @override
+  List<Object?> get props => [passcode];
+}
+
+class ChangePasscodeEvent extends AuthEvent {
+  final String currentPasscode;
+  final String newPasscode;
+  const ChangePasscodeEvent(this.currentPasscode, this.newPasscode);
+  @override
+  List<Object?> get props => [currentPasscode, newPasscode];
 }

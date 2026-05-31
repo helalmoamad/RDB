@@ -3,16 +3,20 @@ abstract class PrefsKey {
 
   static const verifiedPhonePeforeExpiredToken =
       r'__$__verifiedPhonePeforeExpiredToken__$__';
+  static const stepToken = "stepToken";
   static const currentCountry = r'__$__currentCountry__$__';
   static const onMessageRun = r'__$__onMessageRun__$__';
   static const walletToken = r'__$__walletToken__$__';
   static const fcmMarketTokenId = r'__$fcmMarketTokenId$__';
   static const email = r'__$__email__$__';
   static const photo = r'__$__photo__$__';
+  static const biometricEnrolled = r'__$__biometricEnrolled__$__';
   static const memberSince = r'__$__memberSince__$__';
   static const requestNotificationPermission =
       r'__$__requestNotificationPermission__$__';
   static const tokenExpired = r'__$__tokenexpired__$__';
+  static const walletRefreshToken = r'__$__walletRefreshToken__$__';
+  static const sessionToken = r'__$__sessionToken__$__';
 
   static const sessionId = r'__$__sessionId__$__';
 

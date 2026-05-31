@@ -1,23 +1,24 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
+import 'package:rdb/common/constant/design/assets_provider.dart';
 import 'package:rdb/core/domin/repositories/prefs_repository.dart';
 import 'package:rdb/core/utils/extensions/build_context.dart';
 import 'package:rdb/core/utils/form_state_mixin.dart';
 import 'package:rdb/core/utils/form_utils.dart';
+import 'package:rdb/features/authentication/presentation/manager/auth_bloc.dart';
 import 'package:rdb/features/authentication/presentation/widgets/pin_item.dart';
 import 'package:rdb/routes/router.dart';
 import 'package:rdb/theme/typography.dart';
 import 'package:rdb/generated/locale_keys.g.dart';
-import 'package:local_auth/local_auth.dart';
-import 'package:local_auth/error_codes.dart' as auth_error;
+//import 'package:local_auth/local_auth.dart';
+//import 'package:local_auth/error_codes.dart' as auth_error;
 import 'dart:async';
 import 'dart:ui' as ui;
-
-enum PinCodeState { set, confirm, verify, done }
 
 /// Progressive lockout durations (index = lockout level).
 /// Level 0: 5 wrong attempts → 30 s
@@ -39,23 +40,23 @@ const List<Duration> _kLockoutDurations = [
 
 const int _kMaxAttemptsBeforeFirstLock = 5;
 
-class PinCodePage extends StatefulWidget {
-  const PinCodePage({super.key});
+class PinCodeVerifyFromLoginPage extends StatefulWidget {
+  const PinCodeVerifyFromLoginPage({super.key});
 
   @override
-  State<PinCodePage> createState() => _PinCodePageState();
+  State<PinCodeVerifyFromLoginPage> createState() =>
+      _PinCodeVerifyFromLoginPageState();
 }
 
-class _PinCodePageState extends State<PinCodePage> with FormStateMinxin {
+class _PinCodeVerifyFromLoginPageState extends State<PinCodeVerifyFromLoginPage>
+    with FormStateMinxin {
   final PrefsRepository prefsRepository = GetIt.I<PrefsRepository>();
-  final LocalAuthentication _localAuth = LocalAuthentication();
-  late PinCodeState _state;
-  String _firstPin = '';
+  // final LocalAuthentication _localAuth = LocalAuthentication();
   int codeStatus = 0; // 0: idle, 1: success, 2: error
   late final ValueNotifier<int> checkOtp;
   bool isExpired = false;
-  bool _supportsFingerprint = false;
-  bool _isAuthenticating = false;
+  //bool _supportsFingerprint = false;
+  //bool _isAuthenticating = false;
 
   // ── Lockout state ──
   bool _isLockedOut = false;
@@ -66,13 +67,7 @@ class _PinCodePageState extends State<PinCodePage> with FormStateMinxin {
   void initState() {
     super.initState();
     checkOtp = ValueNotifier<int>(0);
-    final storedPin = prefsRepository.passcode;
-    if (storedPin == null || storedPin.isEmpty) {
-      _state = PinCodeState.set;
-    } else {
-      _state = PinCodeState.verify;
-    }
-    _checkBiometricAvailability();
+    //_checkBiometricAvailability();
     _resumeLockoutIfActive();
   }
 
@@ -178,17 +173,17 @@ class _PinCodePageState extends State<PinCodePage> with FormStateMinxin {
   }
 
   /// Resets all lockout state on successful authentication.
-  Future<void> _resetLockoutState() async {
+  /*Future<void> _resetLockoutState() async {
     _lockoutTimer?.cancel();
     await prefsRepository.setPinFailedAttempts(0);
     await prefsRepository.setPinLockoutLevel(0);
     await prefsRepository.setPinLockoutUntilMs(0);
     if (mounted) setState(() => _isLockedOut = false);
-  }
+  }*/
 
   // ── Biometric helpers ──
 
-  Future<void> _checkBiometricAvailability() async {
+  /*Future<void> _checkBiometricAvailability() async {
     try {
       final bool canCheck = await _localAuth.canCheckBiometrics;
       final bool isDeviceSupported = await _localAuth.isDeviceSupported();
@@ -197,17 +192,16 @@ class _PinCodePageState extends State<PinCodePage> with FormStateMinxin {
       final bool hasAnyAvailableBiometric = availableBiometrics.isNotEmpty;
       if (!mounted) return;
       setState(() {
-        final bool canUseBiometric =
-            _state == PinCodeState.verify && canCheck && isDeviceSupported;
+        final bool canUseBiometric = canCheck && isDeviceSupported;
         _supportsFingerprint = canUseBiometric && hasAnyAvailableBiometric;
       });
     } catch (_) {
       if (!mounted) return;
       setState(() => _supportsFingerprint = false);
     }
-  }
+  }*/
 
-  Future<void> _authenticateWithBiometric({required bool isFace}) async {
+  /* Future<void> _authenticateWithBiometric({required bool isFace}) async {
     if (_isAuthenticating) return;
     if (!isFace && !_supportsFingerprint) return;
 
@@ -223,7 +217,7 @@ class _PinCodePageState extends State<PinCodePage> with FormStateMinxin {
       if (!mounted) return;
       if (didAuthenticate) {
         await _resetLockoutState();
-        prefsRepository.setShouldShowPin(false);
+        await prefsRepository.setShouldShowPin(false);
         // ignore: use_build_context_synchronously
         context.go(GRouter.config.applicationRoutes.kBasePage);
       }
@@ -241,7 +235,7 @@ class _PinCodePageState extends State<PinCodePage> with FormStateMinxin {
       if (!mounted) return;
       setState(() => _isAuthenticating = false);
     }
-  }
+  }*/
 
   // ── PIN helpers ──
 
@@ -261,216 +255,173 @@ class _PinCodePageState extends State<PinCodePage> with FormStateMinxin {
     if (_isLockedOut) return;
     final inputPin = _getEnteredPin();
     if (inputPin.length < numberOfFields) return;
-
-    switch (_state) {
-      case PinCodeState.set:
-        setState(() {
-          _firstPin = inputPin;
-          _state = PinCodeState.confirm;
-          codeStatus = 0;
-          _clearRotation();
-        });
-        break;
-
-      case PinCodeState.confirm:
-        if (inputPin == _firstPin) {
-          await prefsRepository.setPasscode(inputPin);
-          Future.delayed(const Duration(seconds: 1), () {
-            if (!mounted) return;
-            context.go(GRouter.config.applicationRoutes.kPasscodeWelcomePage);
-          });
-        } else {
-          setState(() => codeStatus = 2);
-          Future.delayed(const Duration(seconds: 2), () {
-            if (mounted) {
-              setState(() {
-                _state = PinCodeState.set;
-                _firstPin = '';
-                codeStatus = 0;
-                _clearRotation();
-              });
-            }
-          });
-        }
-        break;
-
-      case PinCodeState.verify:
-        if (inputPin == prefsRepository.passcode) {
-          await _resetLockoutState();
-          setState(() => codeStatus = 1);
-          Future.delayed(const Duration(seconds: 2), () {
-            if (mounted) {
-              prefsRepository.setShouldShowPin(false);
-              context.go(GRouter.config.applicationRoutes.kBasePage);
-            }
-          });
-        } else {
-          setState(() => codeStatus = 2);
-          await _recordWrongAttempt();
-          if (!_isLockedOut) {
-            Future.delayed(const Duration(seconds: 2), () {
-              if (mounted) {
-                setState(() {
-                  codeStatus = 0;
-                  _clearRotation();
-                });
-              }
-            });
-          } else {
-            // Clear error state immediately when transitioning to lockout screen.
-            Future.delayed(const Duration(milliseconds: 400), () {
-              if (mounted) setState(() => codeStatus = 0);
-            });
-          }
-        }
-        break;
-
-      case PinCodeState.done:
-        break;
+    if ((prefsRepository.passcode ?? "") == "") {
+      GetIt.I<AuthBloc>().add(
+        VerifyStepPasscodeEvent(passcode: inputPin),
+      ); // Replace SomeEvent with the appropriate event
+      return;
+    } else {
+      GetIt.I<AuthBloc>().add(VerifyStepPasscodeEvent(passcode: inputPin));
+      return;
     }
-  }
-
-  // ── Build ──
-
-  @override
-  Widget build(BuildContext context) {
-    if (_isLockedOut) return _buildLockoutScreen(context);
-
-    final keyboardInset = MediaQuery.of(context).viewInsets.bottom;
-    final isKeyboardOpen = keyboardInset > 0;
-    final topSpace =
-        isKeyboardOpen && _state == PinCodeState.verify && _supportsFingerprint
-        ? 230.h
-        : 288.h;
-    final pinSectionSpace =
-        isKeyboardOpen && _state == PinCodeState.verify && _supportsFingerprint
-        ? 75.h
-        : 130.h;
-
-    String title = '';
-    String subtitle = _state == PinCodeState.verify
-        ? LocaleKeys.verify_passcode_to_login.tr()
-        : LocaleKeys.last_step.tr();
-    String label = '';
-
-    switch (_state) {
-      case PinCodeState.set:
-        title = LocaleKeys.set_passcode.tr();
-        label = LocaleKeys.set_passcode.tr();
-        break;
-      case PinCodeState.confirm:
-        title = LocaleKeys.set_passcode.tr();
-        label = codeStatus == 2
-            ? LocaleKeys.passcode_mismatch_restart.tr()
-            : LocaleKeys.reenter_passcode.tr();
-        break;
-      case PinCodeState.verify:
-        title = LocaleKeys.enter_passcode.tr();
-        label = LocaleKeys.enter_passcode.tr();
-        break;
-      case PinCodeState.done:
-        title = LocaleKeys.set_passcode_done.tr();
-        label = LocaleKeys.set_passcode.tr();
-        break;
-    }
-
-    return Scaffold(
-      resizeToAvoidBottomInset: true,
-      backgroundColor: const Color(0xffF4FFF4),
-      body: PopScope(
-        canPop: _state == PinCodeState.set,
-        onPopInvokedWithResult: (didPop, result) {
-          if (didPop) return;
-          if (_state == PinCodeState.confirm) {
+    /* if (inputPin == prefesRepository.passcode) {
+      await _resetLockoutState();
+      setState(() => codeStatus = 1);
+      Future.delayed(const Duration(seconds: 2), () {
+        if (mounted) {
+          prefsRepository.setShouldShowPin(false);
+          widget.onSuccess();
+        }
+      });
+    } else {
+      setState(() => codeStatus = 2);
+      await _recordWrongAttempt();
+      if (!_isLockedOut) {
+        Future.delayed(const Duration(seconds: 2), () {
+          if (mounted) {
             setState(() {
-              _state = PinCodeState.set;
-              _firstPin = '';
               codeStatus = 0;
               _clearRotation();
             });
           }
-        },
+        });
+      } else {
+        // Clear error state immediately when transitioning to lockout screen.
+        Future.delayed(const Duration(milliseconds: 400), () {
+          if (mounted) setState(() => codeStatus = 0);
+        });
+      }
+    }*/
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_isLockedOut) return _buildLockoutScreen(context);
+    String title = GetIt.I<PrefsRepository>().userName ?? "";
+    String subtitle = LocaleKeys.enter_your_passcode.tr();
+    String label = LocaleKeys.enter_passcode.tr();
+
+    // واجهة شفافة مع الحقول ثابتة عند فتح لوحة المفاتيح
+    return Scaffold(
+      resizeToAvoidBottomInset: false,
+      backgroundColor: const Color(0xffF4FFF4),
+      body: PopScope(
+        canPop: false,
         child: GestureDetector(
-          // منع swipe gesture من الحافة (back gesture)
-          onHorizontalDragStart: (_state != PinCodeState.set) ? (_) {} : null,
-          child: SingleChildScrollView(
-            physics: const ClampingScrollPhysics(),
-            child: Padding(
-              padding: EdgeInsets.only(
-                left: 20.h,
-                right: 20.h,
-                bottom: keyboardInset + 20.h,
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(height: topSpace),
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 20.h),
-                    child: Text(
-                      title,
-                      style: context.textTheme.titleLarge?.bq.copyWith(
-                        color: const Color(0xff1D1D1D),
-                        height: 1.42,
-                        fontSize: 30.sp,
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 10.h),
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 20.h),
-                    child: Text(
-                      subtitle,
-                      style: context.textTheme.titleLarge?.mq.copyWith(
-                        color: const Color(0xff1D1D1D),
-                        height: 1.42,
-                        fontSize: 16.sp,
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: pinSectionSpace),
-                  _buildPinSlot(),
-                  SizedBox(height: 10.h),
-                  Center(
-                    child: Text(
-                      label,
-                      style: context.textTheme.titleLarge?.bq.copyWith(
-                        fontSize: 14.sp,
-                        color: Colors.black45,
-                      ),
-                    ),
-                  ),
-                  10.verticalSpace,
-                  if (_supportsFingerprint)
-                    Center(
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          IconButton(
-                            onPressed: _isAuthenticating
-                                ? null
-                                : () =>
-                                      _authenticateWithBiometric(isFace: false),
-                            tooltip: LocaleKeys.fingerprint_login_tooltip.tr(),
-                            iconSize: 40.sp,
-                            color: const Color(0xff4D84FF),
-                            icon: const Icon(Icons.fingerprint_rounded),
-                          ),
-                        ],
-                      ),
-                    ),
-                  if (_isAuthenticating)
-                    Center(
-                      child: SizedBox(
-                        width: 22.w,
-                        height: 22.w,
-                        child: const CircularProgressIndicator(
-                          strokeWidth: 2.0,
+          onHorizontalDragStart: (_) {},
+          child: Align(
+            alignment: Alignment.center,
+            child: BlocListener<AuthBloc, AuthState>(
+              listenWhen: (previous, current) =>
+                  previous.verifyPasscodeStatus != current.verifyPasscodeStatus,
+              listener: (context, state) async {
+                if (state.verifyPasscodeStatus ==
+                    VerifyPasscodeStatus.success) {
+                  setState(() => codeStatus = 1);
+                  Future.delayed(const Duration(seconds: 1), () {
+                    if (mounted) {
+                      prefsRepository.setShouldShowPin(false);
+                      // ignore: use_build_context_synchronously
+                      context.go(
+                        GRouter.config.applicationRoutes.kPasscodeWelcomePage,
+                      );
+                    }
+                  });
+                } else if (state.verifyPasscodeStatus ==
+                    VerifyPasscodeStatus.failure) {
+                  setState(() => codeStatus = 2);
+                  await _recordWrongAttempt();
+                  if (!_isLockedOut) {
+                    Future.delayed(const Duration(seconds: 2), () {
+                      if (mounted) {
+                        setState(() {
+                          codeStatus = 0;
+                          _clearRotation();
+                        });
+                      }
+                    });
+                  } else {
+                    // Clear error state immediately when transitioning to lockout screen.
+                    Future.delayed(const Duration(milliseconds: 400), () {
+                      if (mounted) setState(() => codeStatus = 0);
+                    });
+                  }
+                }
+              },
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20.h),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: 420.w),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        SvgPicture.asset(
+                          AppAssets.verifiedNumberSvg,
+                          width: 23,
+                          height: 23,
                         ),
-                      ),
+                        SizedBox(height: 10.h),
+                        Text(
+                          title,
+                          style: context.textTheme.titleLarge?.rq.copyWith(
+                            color: const Color(0xff1D1D1D),
+                            height: 1.42,
+                            fontSize: 18.sp,
+                          ),
+                        ),
+                        SizedBox(height: 20.h),
+                        Text(
+                          subtitle,
+                          style: context.textTheme.titleLarge?.bq.copyWith(
+                            color: const Color(0xff1D1D1D),
+                            height: 1.42,
+                            fontSize: 12.sp,
+                          ),
+                        ),
+                        SizedBox(height: 20.h),
+                        _buildPinSlot(),
+                        SizedBox(height: 10.h),
+                        Text(
+                          label,
+                          style: context.textTheme.titleLarge?.bq.copyWith(
+                            fontSize: 14.sp,
+                            color: Colors.black45,
+                          ),
+                        ),
+                        10.verticalSpace,
+                        /*  if (_supportsFingerprint)
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              IconButton(
+                                onPressed: _isAuthenticating
+                                    ? null
+                                    : () => _authenticateWithBiometric(
+                                        isFace: false,
+                                      ),
+                                tooltip: LocaleKeys.fingerprint_login_tooltip
+                                    .tr(),
+                                iconSize: 40.sp,
+                                color: const Color(0xff4D84FF),
+                                icon: const Icon(Icons.fingerprint_rounded),
+                              ),
+                            ],
+                          ),
+                        if (_isAuthenticating)
+                          SizedBox(
+                            width: 22.w,
+                            height: 22.w,
+                            child: const CircularProgressIndicator(
+                              strokeWidth: 2.0,
+                            ),
+                          ),*/
+                      ],
                     ),
-                ],
+                  ),
+                ),
               ),
             ),
           ),
@@ -479,15 +430,14 @@ class _PinCodePageState extends State<PinCodePage> with FormStateMinxin {
     );
   }
 
-  /// Lockout screen — shown instead of the normal PIN UI while locked out.
   Widget _buildLockoutScreen(BuildContext context) {
     final remaining = _formatRemaining(_lockoutRemainingSeconds);
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       backgroundColor: const Color(0xffF4FFF4),
       body: PopScope(
         canPop: false,
         child: GestureDetector(
-          // منع swipe gesture من الحافة أثناء القفل
           onHorizontalDragStart: (_) {},
           child: Center(
             child: Padding(

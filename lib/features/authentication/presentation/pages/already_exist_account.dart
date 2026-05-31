@@ -1,6 +1,5 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get_it/get_it.dart';
@@ -27,19 +26,6 @@ class AlreadyExistAccount extends StatefulWidget {
 
 class _AlreadyExistAccountState extends ThemeState<AlreadyExistAccount> {
   PrefsRepository prefsRepository = GetIt.I<PrefsRepository>();
-
-  @override
-  void didChangeDependencies() {
-    SystemChrome.setSystemUIOverlayStyle(
-      const SystemUiOverlayStyle(
-        statusBarColor: Color(0xffF4F8FF),
-        statusBarBrightness: Brightness.light,
-        statusBarIconBrightness: Brightness.dark,
-      ),
-    );
-
-    super.didChangeDependencies();
-  }
 
   @override
   void initState() {

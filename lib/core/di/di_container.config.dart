@@ -21,18 +21,30 @@ import '../../features/authentication/data/repositories/auth_repository_impl.dar
     as _i317;
 import '../../features/authentication/domain/repositories/auth_repository.dart'
     as _i742;
+import '../../features/authentication/domain/use_cases/change_passcode_usecase.dart'
+    as _i884;
+import '../../features/authentication/domain/use_cases/complete_session_usecase.dart'
+    as _i892;
 import '../../features/authentication/domain/use_cases/create_wallet_usecase.dart'
     as _i650;
 import '../../features/authentication/domain/use_cases/get_user_country_usecase.dart'
     as _i644;
+import '../../features/authentication/domain/use_cases/get_user_profile_usecase.dart'
+    as _i356;
 import '../../features/authentication/domain/use_cases/login_to_wallet_usecase.dart'
     as _i304;
 import '../../features/authentication/domain/use_cases/send_otp_usecase.dart'
     as _i952;
+import '../../features/authentication/domain/use_cases/set_passcode_usecase.dart'
+    as _i566;
 import '../../features/authentication/domain/use_cases/update_user_profile_usecase.dart'
-    as _i492;
+    as _i215;
 import '../../features/authentication/domain/use_cases/verify_otp_signin_usecase.dart'
     as _i574;
+import '../../features/authentication/domain/use_cases/verify_session_passcode_usecase.dart'
+    as _i385;
+import '../../features/authentication/domain/use_cases/verify_step_passcode_usecase.dart'
+    as _i47;
 import '../../features/authentication/presentation/manager/auth_bloc.dart'
     as _i561;
 import '../data/data_source/common_use_repo_data_source.dart' as _i672;
@@ -76,11 +88,20 @@ Future<_i174.GetIt> $initGetIt(
   gh.factory<_i1043.UploadFileCloudinaryUseCase>(
     () => _i1043.UploadFileCloudinaryUseCase(gh<_i702.CommonUseRepository>()),
   );
+  gh.factory<_i884.ChangePasscodeUseCase>(
+    () => _i884.ChangePasscodeUseCase(gh<_i742.AuthRepository>()),
+  );
+  gh.factory<_i892.CompleteSessionUsecase>(
+    () => _i892.CompleteSessionUsecase(gh<_i742.AuthRepository>()),
+  );
   gh.factory<_i650.CreateWalletUseCase>(
     () => _i650.CreateWalletUseCase(gh<_i742.AuthRepository>()),
   );
   gh.factory<_i644.GetUserCountryUseCase>(
     () => _i644.GetUserCountryUseCase(gh<_i742.AuthRepository>()),
+  );
+  gh.factory<_i356.GetUserProfileUseCase>(
+    () => _i356.GetUserProfileUseCase(gh<_i742.AuthRepository>()),
   );
   gh.factory<_i304.LoginToWalletUseCase>(
     () => _i304.LoginToWalletUseCase(gh<_i742.AuthRepository>()),
@@ -88,18 +109,33 @@ Future<_i174.GetIt> $initGetIt(
   gh.factory<_i952.SendOtpUseCase>(
     () => _i952.SendOtpUseCase(gh<_i742.AuthRepository>()),
   );
-  gh.factory<_i492.UpdateUserProfileUseCase>(
-    () => _i492.UpdateUserProfileUseCase(gh<_i742.AuthRepository>()),
+  gh.factory<_i566.SetPasscodeUseCase>(
+    () => _i566.SetPasscodeUseCase(gh<_i742.AuthRepository>()),
+  );
+  gh.factory<_i215.UpdateUserProfileUseCase>(
+    () => _i215.UpdateUserProfileUseCase(gh<_i742.AuthRepository>()),
   );
   gh.factory<_i574.VerifyOtpSignInUseCase>(
     () => _i574.VerifyOtpSignInUseCase(gh<_i742.AuthRepository>()),
+  );
+  gh.factory<_i385.VerifySessionPasscodeUseCase>(
+    () => _i385.VerifySessionPasscodeUseCase(gh<_i742.AuthRepository>()),
+  );
+  gh.factory<_i47.VerifyStepasscodeUseCase>(
+    () => _i47.VerifyStepasscodeUseCase(gh<_i742.AuthRepository>()),
   );
   gh.lazySingleton<_i561.AuthBloc>(
     () => _i561.AuthBloc(
       gh<_i952.SendOtpUseCase>(),
       gh<_i574.VerifyOtpSignInUseCase>(),
-      gh<_i492.UpdateUserProfileUseCase>(),
+      gh<_i215.UpdateUserProfileUseCase>(),
+      gh<_i47.VerifyStepasscodeUseCase>(),
+      gh<_i385.VerifySessionPasscodeUseCase>(),
       gh<_i644.GetUserCountryUseCase>(),
+      gh<_i356.GetUserProfileUseCase>(),
+      gh<_i892.CompleteSessionUsecase>(),
+      gh<_i566.SetPasscodeUseCase>(),
+      gh<_i884.ChangePasscodeUseCase>(),
     ),
   );
   return getIt;
