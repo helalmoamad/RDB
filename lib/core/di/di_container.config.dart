@@ -27,6 +27,8 @@ import '../../features/authentication/domain/use_cases/complete_session_usecase.
     as _i892;
 import '../../features/authentication/domain/use_cases/create_wallet_usecase.dart'
     as _i650;
+import '../../features/authentication/domain/use_cases/get_passkey_list_usecase.dart'
+    as _i173;
 import '../../features/authentication/domain/use_cases/get_user_country_usecase.dart'
     as _i644;
 import '../../features/authentication/domain/use_cases/get_user_profile_usecase.dart'
@@ -97,6 +99,9 @@ Future<_i174.GetIt> $initGetIt(
   gh.factory<_i650.CreateWalletUseCase>(
     () => _i650.CreateWalletUseCase(gh<_i742.AuthRepository>()),
   );
+  gh.factory<_i173.GetPasskeyListUseCase>(
+    () => _i173.GetPasskeyListUseCase(gh<_i742.AuthRepository>()),
+  );
   gh.factory<_i644.GetUserCountryUseCase>(
     () => _i644.GetUserCountryUseCase(gh<_i742.AuthRepository>()),
   );
@@ -132,6 +137,7 @@ Future<_i174.GetIt> $initGetIt(
       gh<_i47.VerifyStepasscodeUseCase>(),
       gh<_i385.VerifySessionPasscodeUseCase>(),
       gh<_i644.GetUserCountryUseCase>(),
+      gh<_i173.GetPasskeyListUseCase>(),
       gh<_i356.GetUserProfileUseCase>(),
       gh<_i892.CompleteSessionUsecase>(),
       gh<_i566.SetPasscodeUseCase>(),

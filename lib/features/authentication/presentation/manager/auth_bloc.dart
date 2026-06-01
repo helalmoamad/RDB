@@ -9,6 +9,8 @@ import 'package:logger/logger.dart';
 import 'package:rdb/features/authentication/data/models/get_user_country_response_model.dart';
 import 'package:rdb/features/authentication/domain/entities/verify_otp_session_status.dart';
 import 'package:rdb/features/authentication/domain/use_cases/complete_session_usecase.dart';
+import 'package:rdb/features/authentication/data/models/passkey_model.dart';
+import 'package:rdb/features/authentication/domain/use_cases/get_passkey_list_usecase.dart';
 import 'package:rdb/features/authentication/domain/use_cases/get_user_profile_usecase.dart';
 import 'package:rdb/features/authentication/domain/use_cases/verify_session_passcode_usecase.dart';
 import 'package:rdb/features/authentication/domain/use_cases/verify_step_passcode_usecase.dart';
@@ -51,6 +53,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     this.verifyStepPasscodeUseCase,
     this.verifySessionPasscodeUseCase,
     this.getUserCountryUseCase,
+    this.getPasskeyListUseCase,
     this.getUserProfileUseCase,
     this.completeSessionUsecase,
     this.setPasscodeUseCase,
@@ -85,6 +88,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       _onGetUserCountryEvent,
       //transformer: throttleDroppable(throttleDuration)
     );
+    on<GetPasskeyListEvent>(_onGetPasskeyListEvent);
     // on<CreateWalletEvent>(_onCreateWalletEvent);
   }
 
@@ -98,6 +102,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   //final CreateWalletUseCase createWalletUseCase;
   // final LoginToWalletUseCase loginToWalletUseCase;
   final GetUserCountryUseCase getUserCountryUseCase;
+  final GetPasskeyListUseCase getPasskeyListUseCase;
   final VerifySessionPasscodeUseCase verifySessionPasscodeUseCase;
   final SetPasscodeUseCase setPasscodeUseCase;
   final ChangePasscodeUseCase changePasscodeUseCase;
@@ -172,6 +177,46 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       _prefsRepository.setIsAccountActive(!userProfile.isBlocked);
       _prefsRepository.setIsTwoFactorEnabled(userProfile.isTwoFactorEnabled);
     });
+  }
+
+  FutureOr<void> _onGetPasskeyListEvent(
+    GetPasskeyListEvent event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(
+      state.copyWith(
+        passkeyListStatus: GetPasskeyListStatus.loading,
+        passkeyListError: '',
+      ),
+    );
+
+    final response = await getPasskeyListUseCase(NoParams());
+    response.fold(
+      (failure) {
+        emit(
+          state.copyWith(
+            passkeyListStatus: GetPasskeyListStatus.failure,
+            passkeyListError: failure.message.isEmpty
+                ? 'Failed to load passkeys'
+                : failure.message,
+          ),
+        );
+      },
+      (passkeys) {
+        if (passkeys.isEmpty) {
+          _prefsRepository.setBiometricEnrolledKey(false);
+        } else {
+          _prefsRepository.setBiometricEnrolledKey(true);
+        }
+        emit(
+          state.copyWith(
+            passkeyListStatus: GetPasskeyListStatus.success,
+            passkeys: passkeys,
+            passkeyListError: '',
+          ),
+        );
+      },
+    );
   }
 
   FutureOr<void> _onSendOtpEvent(
@@ -285,6 +330,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
               verifyPasscodeStatus: VerifyPasscodeStatus.success,
             ),
           );
+          Future.delayed(const Duration(seconds: 1), () {
+            add(GetPasskeyListEvent());
+          });
         });
       },
     );

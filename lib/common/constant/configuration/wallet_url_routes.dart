@@ -22,6 +22,7 @@ abstract class WalletEndPoints {
   static final completeSession = "auth/session/complete";
   static final sessionsStepPasscodeVerifyEP = "sessions/step/passcode/verify";
   static final sessionsPasscodeVerifyEP = "sessions/passcode/verify";
+  static const passkeyListEP = "sessions/passkey/list";
 
   //static final registerEP = "users/phone/register";
   static String walletBalanceEP(String assetId) =>

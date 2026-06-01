@@ -14,6 +14,8 @@ enum VerifyOtpFromGuestStatus { init, loading, success, failure }
 
 enum GetCustomerCountryStatus { loading, success, failure }
 
+enum GetPasskeyListStatus { init, loading, success, failure }
+
 enum VerifyPasscodeStatus { init, loading, success, failure }
 
 enum SetPasscodeStatus { init, loading, success, failure }
@@ -31,6 +33,9 @@ class AuthState {
     this.sendOtpError,
     this.signUpErrorMessage,
     this.verifyPasscodeStatus = VerifyPasscodeStatus.init,
+    this.passkeyListStatus = GetPasskeyListStatus.init,
+    this.passkeys,
+    this.passkeyListError,
     this.updateUserProfileError,
     this.getUserCountryResponseModel,
     this.otpMsegatId,
@@ -50,6 +55,7 @@ class AuthState {
   final ChangePasscodeStatus changePasscodeStatus;
   final UpdateUserProfileStatus updateUserProfileStatus;
   final VerifyOtpFromGuestStatus verifyOtpFromGuestStatus;
+  final GetPasskeyListStatus passkeyListStatus;
   final VerifyPasscodeStatus verifyPasscodeStatus;
 
   final GetCustomerCountryStatus getCustomerCountryStatus;
@@ -59,6 +65,8 @@ class AuthState {
   final String? signInErrorMessage;
   final String? signUpErrorMessage;
   final String? updateUserProfileError;
+  final String? passkeyListError;
+  final List<PasskeyModel>? passkeys;
 
   final String? sendOtpError;
   final String? countryName;
@@ -71,6 +79,9 @@ class AuthState {
     final String? signInErrorMessage,
     final String? countryName,
     final GetCustomerCountryStatus? getCustomerCountryStatus,
+    final GetPasskeyListStatus? passkeyListStatus,
+    final String? passkeyListError,
+    final List<PasskeyModel>? passkeys,
     final VerifyPasscodeStatus? verifyPasscodeStatus,
     final SetPasscodeStatus? setPasscodeStatus,
     final ChangePasscodeStatus? changePasscodeStatus,
@@ -94,6 +105,9 @@ class AuthState {
       changePasscodeStatus: changePasscodeStatus ?? this.changePasscodeStatus,
 
       sendOtpStatus: sendOtpStatus ?? this.sendOtpStatus,
+      passkeyListStatus: passkeyListStatus ?? this.passkeyListStatus,
+      passkeyListError: passkeyListError ?? this.passkeyListError,
+      passkeys: passkeys ?? this.passkeys,
       getUserCountryResponseModel:
           getUserCountryResponseModel ?? this.getUserCountryResponseModel,
       signUpErrorMessage: signUpErrorMessage ?? this.signUpErrorMessage,

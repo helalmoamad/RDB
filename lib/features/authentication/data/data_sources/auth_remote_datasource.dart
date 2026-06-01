@@ -4,6 +4,7 @@ import 'package:rdb/common/constant/configuration/wallet_url_routes.dart';
 import 'package:rdb/core/api/methods/detect_server.dart';
 import 'package:rdb/features/authentication/data/models/login_to_wallet_model.dart';
 import 'package:rdb/features/authentication/data/models/passcode_verify_model.dart';
+import 'package:rdb/features/authentication/data/models/passkey_model.dart';
 import 'package:rdb/features/authentication/data/models/user_profile_model.dart';
 import '../../../../core/api/client_config.dart';
 import '../../../../core/api/methods/get.dart';
@@ -79,6 +80,21 @@ class AuthRemoteDatasource {
     return verifyOtpSignUp();
   }
 */
+  Future<List<PasskeyModel>> getPasskeyList() {
+    GetClient<List<PasskeyModel>> getPasskeyList = GetClient<List<PasskeyModel>>(
+      serverName: ServerName.wallet,
+      requestPrams: RequestConfig<List<PasskeyModel>>(
+        endpoint: WalletEndPoints.passkeyListEP,
+        response: ResponseValue<List<PasskeyModel>>(
+          fromJson: (response) => (response as List<dynamic>)
+              .map((item) => PasskeyModel.fromJson(item))
+              .toList(),
+        ),
+      ),
+    );
+    return getPasskeyList();
+  }
+
   Future<GetUserCountryResponseModel> getUserCountry() {
     ///// for test /////
 

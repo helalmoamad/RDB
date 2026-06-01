@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:rdb/features/authentication/data/models/login_to_wallet_model.dart';
 import 'package:rdb/features/authentication/data/models/passcode_verify_model.dart';
+import 'package:rdb/features/authentication/data/models/passkey_model.dart';
 import 'package:rdb/features/authentication/data/models/user_profile_model.dart';
 
 import '../../../../core/error/failures.dart';
@@ -32,6 +33,7 @@ abstract class AuthRepository {
   Future<Either<Failure, VerifyOtpSignUpAndInResponseModel>> completeSession(
     Map<String, dynamic> params,
   );
+  Future<Either<Failure, List<PasskeyModel>>> getPasskeyList();
   Future<Either<Failure, PasscodeVerifyModel>> verifyStepPasscode(
     Map<String, dynamic> params,
   );

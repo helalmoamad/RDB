@@ -123,6 +123,13 @@ class GetUserCountryEvent extends AuthEvent {
   List<Object?> get props => [];
 }
 
+class GetPasskeyListEvent extends AuthEvent {
+  const GetPasskeyListEvent();
+
+  @override
+  List<Object?> get props => [];
+}
+
 class CreateWalletEvent extends AuthEvent {
   const CreateWalletEvent();
   @override
