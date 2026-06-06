@@ -926,6 +926,10 @@ abstract class LocaleKeys {
   static const passcode_mismatch_restart = 'passcode_mismatch_restart';
   static const pin_lockout_too_many_attempts = 'pin_lockout_too_many_attempts';
   static const pin_lockout_try_again_in = 'pin_lockout_try_again_in';
+  static const biometric_register_success = 'biometric_register_success';
+  static const biometric_register_failure = 'biometric_register_failure';
+  static const biometric_verify_success = 'biometric_verify_success';
+  static const biometric_verify_failure = 'biometric_verify_failure';
   static const biometric_reason_face = 'biometric_reason_face';
   static const biometric_reason_fingerprint = 'biometric_reason_fingerprint';
   static const face_login_move_closer_message =

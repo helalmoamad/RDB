@@ -1,8 +1,8 @@
 import 'package:country_flags/country_flags.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart' as tran;
 import 'package:flutter_svg/svg.dart';
 import 'package:rdb/common/test_utils/test_var.dart';
 import 'package:rdb/core/utils/extensions/build_context.dart';
@@ -164,233 +164,241 @@ class _InsertPhoneTabState extends State<InsertPhoneTab> with FormStateMinxin {
         ),
         SizedBox(height: 80.h),
         SizedBox(
-          height: 70.h,
-          child: Stack(
-            alignment: Alignment.bottomCenter,
-            children: [
-              ValueListenableBuilder<Country>(
-                valueListenable: countryChanged,
-                builder: (context, country, _) {
-                  return Padding(
-                    padding: HWEdgeInsets.symmetric(horizontal: 20.w),
-                    child: ValueListenableBuilder<bool>(
-                      valueListenable: displaySubmit,
-                      builder: (context, display, _) {
-                        return PhoneFormField(
-                          onFieldSubmitted: (val) {
-                            if (display) {
-                              Future.delayed(
-                                const Duration(milliseconds: 300),
-                                () {
-                                  if (mounted) {
-                                    // ignore: use_build_context_synchronously
-                                    FocusScope.of(context).unfocus();
-                                  }
-                                },
-                              );
-                              showLoadingSubmit.value = true;
-                              //////////////////////////
-                            }
-                          },
-                          key: TestVariables.kTestMode
-                              ? const Key(WidgetsKeys.loginPhoneFormFieldKey)
-                              : null,
-                          autoFocus: true,
-                          onChange: (String? text) {
-                            if ((text?.length ?? 0) > 3 &&
-                                countryChanged.value.code == "") {
-                              if (text!.startsWith("00")) {
-                                form.controllers[0].text = text.replaceAll(
-                                  "00",
-                                  '',
-                                );
-                              } else {
-                                form.controllers[0].text = text.replaceFirst(
-                                  RegExp(r'0'),
-                                  '',
-                                );
-                              }
-                            }
-                            Country newCountry = countries.firstWhere(
-                              (element) =>
-                                  '+${form.controllers[0].text.toLowerCase()}'
-                                      .startsWith(
-                                        element.dialCode.toLowerCase(),
-                                      ),
-                              orElse: () => const Country(
-                                name: '',
-                                flag: '',
-                                code: '',
-                                dialCode: '',
-                                minLength: 0,
-                                maxLength: 0,
-                              ),
-                            );
-                            if ((form.controllers[0].text.isNotEmpty) &&
-                                newCountry.code != "") {
-                              displaySubmit.value =
-                                  (form.controllers[0].text
-                                          .replaceAll(' ', '')
-                                          .length) >=
-                                      (newCountry.minLength +
-                                          newCountry.dialCode.length -
-                                          3) &&
-                                  (form.controllers[0].text
-                                          .replaceAll(' ', '')
-                                          .length) <=
-                                      (newCountry.maxLength +
-                                          newCountry.dialCode.length +
-                                          3);
-                            } else {
-                              displaySubmit.value = false;
-                            }
-                            countryChanged.value = newCountry;
-                            debugPrint(
-                              'form.controllers[0].text${form.controllers[0].text}',
-                            );
-                            return form.controllers[0].text.isNotEmpty
-                                ? form.controllers[0].text[form
-                                              .controllers[0]
-                                              .text
-                                              .length -
-                                          1] ==
-                                      ' '
-                                : false;
-                          },
-                          maxLength: maxLength - 1,
-                          prefixIcon: Padding(
-                            padding: HWEdgeInsets.only(left: 10.0.w, top: 7.h),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                SvgPicture.asset(
-                                  AppAssets.phoneCallSvg,
-                                  // ignore: deprecated_member_use
-                                  color: country.code != ''
-                                      ? const Color(0xff1D1D1D)
-                                      : null,
-                                ),
-
-                                12.horizontalSpace,
-                                SizedBox(
-                                  height: 15.h,
-                                  child: MyTextWidget(
-                                    '+ ',
-                                    style: context.textTheme.bodyMedium?.mq
-                                        .copyWith(
-                                          height: 1.1,
-                                          fontSize: 16.sp,
-                                          color: country.code != ''
-                                              ? const Color(0xff1D1D1D)
-                                              : const Color(0xff8E8E8E),
-                                        ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          ready: country.code != '',
-                          suffixIcon: Padding(
-                            padding: HWEdgeInsets.only(right: 20.0.w, top: 0.h),
-                            child: !display
-                                ? SizedBox(width: 22.w, height: 15.h)
-                                : InkWell(
-                                    key: TestVariables.kTestMode
-                                        ? const Key(
-                                            WidgetsKeys
-                                                .loginConfirmPhoneButtonKey,
-                                          )
-                                        : null,
-                                    onTap: () {
-                                      Future.delayed(
-                                        const Duration(seconds: 1),
-                                        () {
-                                          if (mounted) {
-                                            // ignore: use_build_context_synchronously
-                                            FocusScope.of(context).unfocus();
-                                          }
-                                        },
-                                      );
-                                      showLoadingSubmit.value = true;
-                                      //////////////////////////
-                                    },
-                                    child: ValueListenableBuilder<bool>(
-                                      valueListenable: showLoadingSubmit,
-                                      builder: (context, showLoading, _) {
-                                        if (showLoading) {
-                                          Future.delayed(
-                                            Duration(seconds: 2),
-                                            () {
-                                              showLoadingSubmit.value = false;
-                                              widget.moveToNextStep.call(
-                                                form.controllers[0].text,
-                                              );
-                                            },
-                                          );
-                                        }
-                                        return Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.end,
-                                          children: [
-                                            showLoading
-                                                ? SizedBox(
-                                                    width: 30.w,
-                                                    height: 30.h,
-                                                    child: RDBLoader(
-                                                      size: 24.h,
-                                                      color: const Color(
-                                                        0xff1D1D1D,
-                                                      ),
-                                                    ),
-                                                  )
-                                                : SvgPicture.asset(
-                                                    AppAssets.submitArrowSvg,
-                                                    width: 10.w,
-                                                    height: 20.h,
-                                                  ),
-                                          ],
-                                        );
-                                      },
-                                    ),
-                                  ),
-                          ),
-                          hintText: LocaleKeys.enter_your_phone_number_hint
-                              .tr(),
-                          controller: form.controllers[0],
-                        );
-                      },
-                    ),
-                  );
-                },
-              ),
-              PositionedDirectional(
-                start: 40.w,
-                top: 2.h,
-                child: ValueListenableBuilder<Country>(
+          height: 68.h,
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Stack(
+              alignment: Alignment.bottomCenter,
+              children: [
+                ValueListenableBuilder<Country>(
                   valueListenable: countryChanged,
                   builder: (context, country, _) {
-                    if (country.code == '') {
-                      return SizedBox.shrink();
-                    } else {
-                      return country.code.toUpperCase() == "SY"
-                          ? SvgPicture.asset(
-                              AppAssets.syriaFlagSvg,
-                              width: 20.w,
-                              height: 15.h,
-                            )
-                          : CountryFlag.fromCountryCode(
-                              country.code,
-                              height: 15.h,
-                              width: 20.w,
-                              borderRadius: 4.r,
-                            );
-                    }
+                    return Padding(
+                      padding: HWEdgeInsets.symmetric(horizontal: 20.w),
+                      child: ValueListenableBuilder<bool>(
+                        valueListenable: displaySubmit,
+                        builder: (context, display, _) {
+                          return PhoneFormField(
+                            onFieldSubmitted: (val) {
+                              if (display) {
+                                Future.delayed(
+                                  const Duration(milliseconds: 300),
+                                  () {
+                                    if (mounted) {
+                                      // ignore: use_build_context_synchronously
+                                      FocusScope.of(context).unfocus();
+                                    }
+                                  },
+                                );
+                                showLoadingSubmit.value = true;
+                                //////////////////////////
+                              }
+                            },
+                            key: TestVariables.kTestMode
+                                ? const Key(WidgetsKeys.loginPhoneFormFieldKey)
+                                : null,
+                            autoFocus: true,
+                            onChange: (String? text) {
+                              if ((text?.length ?? 0) > 3 &&
+                                  countryChanged.value.code == "") {
+                                if (text!.startsWith("00")) {
+                                  form.controllers[0].text = text.replaceAll(
+                                    "00",
+                                    '',
+                                  );
+                                } else {
+                                  form.controllers[0].text = text.replaceFirst(
+                                    RegExp(r'0'),
+                                    '',
+                                  );
+                                }
+                              }
+                              Country newCountry = countries.firstWhere(
+                                (element) =>
+                                    '+${form.controllers[0].text.toLowerCase()}'
+                                        .startsWith(
+                                          element.dialCode.toLowerCase(),
+                                        ),
+                                orElse: () => const Country(
+                                  name: '',
+                                  flag: '',
+                                  code: '',
+                                  dialCode: '',
+                                  minLength: 0,
+                                  maxLength: 0,
+                                ),
+                              );
+                              if ((form.controllers[0].text.isNotEmpty) &&
+                                  newCountry.code != "") {
+                                displaySubmit.value =
+                                    (form.controllers[0].text
+                                            .replaceAll(' ', '')
+                                            .length) >=
+                                        (newCountry.minLength +
+                                            newCountry.dialCode.length -
+                                            3) &&
+                                    (form.controllers[0].text
+                                            .replaceAll(' ', '')
+                                            .length) <=
+                                        (newCountry.maxLength +
+                                            newCountry.dialCode.length +
+                                            3);
+                              } else {
+                                displaySubmit.value = false;
+                              }
+                              countryChanged.value = newCountry;
+                              debugPrint(
+                                'form.controllers[0].text${form.controllers[0].text}',
+                              );
+                              return form.controllers[0].text.isNotEmpty
+                                  ? form.controllers[0].text[form
+                                                .controllers[0]
+                                                .text
+                                                .length -
+                                            1] ==
+                                        ' '
+                                  : false;
+                            },
+                            maxLength: maxLength - 1,
+                            prefixIcon: Padding(
+                              padding: HWEdgeInsets.only(left: 10.0.w, top: 0),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  SvgPicture.asset(
+                                    AppAssets.phoneCallSvg,
+                                    // ignore: deprecated_member_use
+                                    color: country.code != ''
+                                        ? const Color(0xff1D1D1D)
+                                        : null,
+                                  ),
+
+                                  12.horizontalSpace,
+                                  SizedBox(
+                                    height: 15.h,
+                                    child: MyTextWidget(
+                                      '+ ',
+                                      style: context.textTheme.bodyMedium?.mq
+                                          .copyWith(
+                                            height: 1.1,
+                                            fontSize: 16.sp,
+                                            color: country.code != ''
+                                                ? const Color(0xff1D1D1D)
+                                                : const Color(0xff8E8E8E),
+                                          ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            ready: country.code != '',
+                            suffixIcon: Padding(
+                              padding: HWEdgeInsets.only(
+                                right: 20.0.w,
+                                top: 0.h,
+                              ),
+                              child: !display
+                                  ? SizedBox(width: 22.w, height: 15.h)
+                                  : InkWell(
+                                      key: TestVariables.kTestMode
+                                          ? const Key(
+                                              WidgetsKeys
+                                                  .loginConfirmPhoneButtonKey,
+                                            )
+                                          : null,
+                                      onTap: () {
+                                        Future.delayed(
+                                          const Duration(seconds: 1),
+                                          () {
+                                            if (mounted) {
+                                              // ignore: use_build_context_synchronously
+                                              FocusScope.of(context).unfocus();
+                                            }
+                                          },
+                                        );
+                                        showLoadingSubmit.value = true;
+                                        //////////////////////////
+                                      },
+                                      child: ValueListenableBuilder<bool>(
+                                        valueListenable: showLoadingSubmit,
+                                        builder: (context, showLoading, _) {
+                                          if (showLoading) {
+                                            Future.delayed(
+                                              Duration(seconds: 2),
+                                              () {
+                                                showLoadingSubmit.value = false;
+                                                widget.moveToNextStep.call(
+                                                  form.controllers[0].text,
+                                                );
+                                              },
+                                            );
+                                          }
+                                          return Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.end,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.center,
+                                            children: [
+                                              showLoading
+                                                  ? SizedBox(
+                                                      width: 30.w,
+                                                      height: 30.h,
+                                                      child: RDBLoader(
+                                                        size: 24.h,
+                                                        color: const Color(
+                                                          0xff1D1D1D,
+                                                        ),
+                                                      ),
+                                                    )
+                                                  : SvgPicture.asset(
+                                                      AppAssets.submitArrowSvg,
+                                                      width: 10.w,
+                                                      height: 20.h,
+                                                    ),
+                                            ],
+                                          );
+                                        },
+                                      ),
+                                    ),
+                            ),
+                            hintText: LocaleKeys.enter_your_phone_number_hint
+                                .tr(),
+                            controller: form.controllers[0],
+                          );
+                        },
+                      ),
+                    );
                   },
                 ),
-              ),
-            ],
+                PositionedDirectional(
+                  start: 40.w,
+                  top: 0.h,
+                  child: ValueListenableBuilder<Country>(
+                    valueListenable: countryChanged,
+                    builder: (context, country, _) {
+                      if (country.code == '') {
+                        return SizedBox.shrink();
+                      } else {
+                        return country.code.toUpperCase() == "SY"
+                            ? SvgPicture.asset(
+                                AppAssets.syriaFlagSvg,
+                                width: 20.w,
+                                height: 15.h,
+                              )
+                            : CountryFlag.fromCountryCode(
+                                country.code,
+                                height: 15.h,
+                                width: 20.w,
+                                borderRadius: 4.r,
+                              );
+                      }
+                    },
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
         SizedBox(height: 10.h),

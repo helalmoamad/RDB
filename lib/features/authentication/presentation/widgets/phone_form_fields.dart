@@ -160,9 +160,9 @@ class PhoneFormField extends StatelessWidget {
                             text: controller!.text,
                             style: context.textTheme.headlineSmall?.mq.copyWith(
                               color: const Color(0xff1D1D1D),
-                              height: 0.6.h,
+                              height: 1.1,
                               decoration: TextDecoration.none,
-                              fontSize: 16.sp,
+                              fontSize: 15,
                             ),
                           ),
                           textDirection: TextDirection.ltr,
@@ -210,13 +210,13 @@ class PhoneFormField extends StatelessWidget {
                     ],
                     style: context.textTheme.headlineSmall?.mq.copyWith(
                       color: const Color(0xff1D1D1D),
-                      height: 0.6.h,
+                      height: 1.1,
                       decoration: TextDecoration.none,
                       fontSize: 16.sp,
                     ),
                     decoration: InputDecoration(
                       border: InputBorder.none,
-                      contentPadding: EdgeInsets.only(top: 10.h),
+                      contentPadding: EdgeInsets.only(top: 12.h),
                       focusedBorder: InputBorder.none,
 
                       prefix: prefixIcon,
@@ -242,7 +242,7 @@ class PhoneFormField extends StatelessWidget {
                             return Container(
                               margin: HWEdgeInsets.only(
                                 left: 75 + offset,
-                                bottom: 18.h,
+                                bottom: 18,
                               ),
                               width: 10.w,
                               height: 1,

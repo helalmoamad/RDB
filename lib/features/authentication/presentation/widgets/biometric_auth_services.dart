@@ -231,7 +231,7 @@ class BiometricAuthService {
       final authenticateRequest = AuthenticateRequestType.fromJson(optionsJson);
       if (kDebugMode) {
         print(
-          '🟢 [verifyBiometric] تم بناء كائن AuthenticateRequestType بنجاح',
+          '🟢 [verifyBiometric] تم بناء كائن AuthenticateRequestType بنجاح   authenticateRequest :$authenticateRequest',
         );
       }
 
@@ -270,7 +270,11 @@ class BiometricAuthService {
             '🔴 [verifyBiometric] التوقيع البيومتري غير صحيح أو فشل التحقق',
           );
         }
-        return {'success': false, 'error': 'INVALID_BIOMETRIC_SIGNATURE'};
+        return {
+          'success': false,
+          'error':
+              '${verifyRes.statusCode}: ${verifyRes.body}   authenticationResponse: ${authenticateResponse.toJson()}',
+        };
       }
 
       if (kDebugMode) {

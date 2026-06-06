@@ -191,6 +191,10 @@ class _PinCodeVerifyPageState extends State<PinCodeVerifyPage>
 
   /// === الخطوة 1: فحص أمان الجهاز وتفعيل البصمة لأول مرة ===
   Future<void> _handleRegisterBiometric() async {
+    _checkStatusAndAutoUnlock();
+    if (prefsRepository.isBiometricEnrolled ?? false) {
+      return;
+    }
     // أ. الفحص الاستباقي: هل يوجد قفل للجهاز وبصمة مجهزة بالنظام؟
 
     setState(() => _isLoading = true);
@@ -208,9 +212,14 @@ class _PinCodeVerifyPageState extends State<PinCodeVerifyPage>
       await prefsRepository.setBiometricEnrolledKey(true);
       widget.onSuccess();
 
-      _showSnackBar("تم تفعيل قفل البصمة بالتطبيق بنجاح!");
+      //  _showSnackBar(LocaleKeys.biometric_register_success.tr());
     } else {
-      _showSnackBar("فشلت عملية التفعيل: ${result['error']}");
+      // _showSnackBar(
+      //   LocaleKeys.biometric_register_failure.tr().replaceAll(
+      //   '{error}',
+      //     result['error'] ?? 'Unknown error',
+      // ),
+      //);
     }
   }
 
@@ -225,21 +234,40 @@ class _PinCodeVerifyPageState extends State<PinCodeVerifyPage>
     setState(() => _isLoading = false);
 
     if (result['success'] == true) {
-      _showSnackBar("تم فك القفل بنجاح!");
+      // _showSnackBar(LocaleKeys.biometric_verify_success.tr());
       // توجيه المستخدم للشاشة الرئيسية للتطبيق وهدم شاشة القفل
       widget.onSuccess();
     } else {
-      _showSnackBar("فشل التحقق من البصمة أو تم إلغاؤها.");
+      // _showSnackBar(
+      //   result['error'] ?? LocaleKeys.biometric_verify_failure.tr(),
+      //  );
+      // _showSnackBar(LocaleKeys.biometric_verify_failure.tr());
     }
   }
 
   // مساعدات الواجهة (UI Helpers)
 
-  void _showSnackBar(String message) {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(message)));
-  }
+  /*void _showSnackBar(String message) {
+    final messenger = ScaffoldMessenger.of(context);
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(message),
+        duration: const Duration(seconds: 2),
+        action: SnackBarAction(
+          label: 'نسخ',
+          onPressed: () {
+            Clipboard.setData(ClipboardData(text: message));
+            messenger.showSnackBar(
+              const SnackBar(
+                content: Text('تم النسخ'),
+                duration: Duration(seconds: 1),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }*/
 
   // ── PIN helpers ──
 

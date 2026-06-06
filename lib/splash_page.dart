@@ -26,11 +26,17 @@ class _SplashPageState extends State<SplashPage> {
       final isVerified =
           (prefsRepository.isVerifiedPhone ?? false) ||
           (prefsRepository.isVerifiedPhonePeforeExpiredToken ?? false);
+      final isNameEntered = (prefsRepository.userName?.length ?? 0) > 2;
+      final isPinSet = (prefsRepository.passcode?.length ?? 0) > 3;
 
       // ignore: use_build_context_synchronously
       context.go(
         !hasToken || !isVerified
             ? GRouter.config.applicationRoutes.kRegistrationPage
+            : !isNameEntered
+            ? GRouter.config.applicationRoutes.kEnterNamePage
+            : !isPinSet
+            ? GRouter.config.applicationRoutes.kPinCodeSetupPage
             : GRouter.config.applicationRoutes.kBasePage,
       );
     });

@@ -34,6 +34,7 @@ class HomePage extends StatefulWidget {
 late StreamSubscription walletEvents;
 late StreamSubscription languageChangeEvent;
 late StreamSubscription logoutEvent;
+late StreamSubscription lockEvent;
 
 class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   // 🛡️ حماية حالة الصفحة الرئيسية
@@ -111,6 +112,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       await walletEvents.cancel();
       await languageChangeEvent.cancel();
       await logoutEvent.cancel();
+      await lockEvent.cancel();
       TrydosWallet.logout();
       authBloc.add(ResetAllData()); // إعادة تعيين كل البيانات في AuthBloc
 
@@ -118,7 +120,10 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
       GRouter.router.go(GRouter.config.kRootRoute);
     });
-
+    lockEvent = lockEvents.listen((event) async {
+      GetIt.I<PrefsRepository>().setShouldShowPin(true);
+      isPasscodeVerified.value = false;
+    });
     // الاستماع لأحداث تغيير اللغة
     languageChangeEvent = languageChangeEvents.listen((event) async {
       final languageCode = event.languageCode.trim().toLowerCase();
@@ -168,6 +173,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     walletEvents.cancel();
     languageChangeEvent.cancel();
     logoutEvent.cancel();
+    lockEvent.cancel();
 
     // تنظيف باقي الموارد
     pageController.dispose();

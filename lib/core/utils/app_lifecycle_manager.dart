@@ -97,7 +97,16 @@ class AppLifecycleManager {
             .currentConfiguration
             .last
             .matchedLocation;
-        final targetRoute = GRouter.config.applicationRoutes.kBasePage;
+        final isNameEntered =
+            (GetIt.I<PrefsRepository>().userName?.length ?? 0) > 2;
+        final isPinSet = (GetIt.I<PrefsRepository>().passcode?.length ?? 0) > 3;
+        String targetRoute = GRouter.config.applicationRoutes.kBasePage;
+
+        if (!isNameEntered) {
+          targetRoute = GRouter.config.applicationRoutes.kEnterNamePage;
+        } else if (!isPinSet) {
+          targetRoute = GRouter.config.applicationRoutes.kPinCodeSetupPage;
+        }
         if (currentRoute != targetRoute) {
           debugPrint('🔒 Security: Requesting secure auth step on app resume');
           // Use replacement-style navigation so no previous sensitive page
