@@ -21,6 +21,8 @@ class _SplashPageState extends State<SplashPage> {
   void initState() {
     GetIt.I<PrefsRepository>().setShouldShowPin(true);
     GetIt.I<AuthBloc>().add(GetUserProfileEvent());
+    // تحديث استباقي للتوكن مبكرًا لكسب الوقت قبل الوصول للصفحة الرئيسية
+    GetIt.I<AuthBloc>().add(const EnsureWalletTokenValidEvent());
     Future.delayed(const Duration(milliseconds: 6300), () {
       final hasToken = prefsRepository.walletToken != null;
       final isVerified =

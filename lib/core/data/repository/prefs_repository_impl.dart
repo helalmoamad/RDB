@@ -160,6 +160,37 @@ class PrefsRepositoryImpl extends PrefsRepository {
   String? get walletRefreshToken => _walletRefreshTokenCache;
 
   @override
+  DateTime? get walletTokenExpiresAt {
+    final raw = _preferences.getString(PrefsKey.walletTokenExpiresAt);
+    if (raw == null || raw.isEmpty) {
+      return null;
+    }
+    return DateTime.tryParse(raw);
+  }
+
+  @override
+  Future<bool> setWalletTokenExpiresAt(DateTime? expiresAt) {
+    if (expiresAt == null) {
+      return _preferences.remove(PrefsKey.walletTokenExpiresAt);
+    }
+    return _preferences.setString(
+      PrefsKey.walletTokenExpiresAt,
+      expiresAt.toIso8601String(),
+    );
+  }
+
+  @override
+  int? get switchShownAtMs => _preferences.getInt(PrefsKey.switchShownAt);
+
+  @override
+  Future<bool> setSwitchShownAtMs(int? millisSinceEpoch) {
+    if (millisSinceEpoch == null) {
+      return _preferences.remove(PrefsKey.switchShownAt);
+    }
+    return _preferences.setInt(PrefsKey.switchShownAt, millisSinceEpoch);
+  }
+
+  @override
   String? get sessionToken => _sessionTokenCache;
 
   @override
@@ -387,4 +418,11 @@ class PrefsRepositoryImpl extends PrefsRepository {
   @override
   Future<bool> setPinLockoutUntilMs(int timestampMs) =>
       _preferences.setInt(PrefsKey.pinLockoutUntil, timestampMs);
+
+  @override
+  bool? get shouldShowSwitch => _preferences.getBool(PrefsKey.shouldShowSwitch);
+
+  @override
+  Future<bool> setShouldShowSwitch(bool value) =>
+      _preferences.setBool(PrefsKey.shouldShowSwitch, value);
 }

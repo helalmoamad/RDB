@@ -180,6 +180,33 @@ class AuthRemoteDatasource {
     return completeSession();
   }
 
+  Future<bool> switchToApp() {
+    PostClient<bool> switchToApp = PostClient<bool>(
+      serverName: ServerName.wallet,
+      requestPrams: RequestConfig<bool>(
+        endpoint: WalletEndPoints.switchToAppEP,
+        response: ResponseValue<bool>(returnValueOnSuccess: true),
+      ),
+    );
+    return switchToApp();
+  }
+
+  Future<VerifyOtpSignUpAndInResponseModel> refreshToken(String refreshToken) {
+    PostClient<VerifyOtpSignUpAndInResponseModel> refresh =
+        PostClient<VerifyOtpSignUpAndInResponseModel>(
+          serverName: ServerName.wallet,
+          requestPrams: RequestConfig<VerifyOtpSignUpAndInResponseModel>(
+            endpoint: WalletEndPoints.refreshTokenEP,
+            data: {"refreshToken": refreshToken},
+            response: ResponseValue<VerifyOtpSignUpAndInResponseModel>(
+              fromJson: (response) =>
+                  VerifyOtpSignUpAndInResponseModel.fromJson(response),
+            ),
+          ),
+        );
+    return refresh();
+  }
+
   Future<PasscodeVerifyModel> sessionsStepPasscodeVerify(
     Map<String, dynamic> params,
   ) {

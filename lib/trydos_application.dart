@@ -4,10 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:rdb/common/constant/design/constant_design.dart';
+import 'package:rdb/common/helper/show_message.dart';
 import 'package:rdb/core/utils/app_lifecycle_manager.dart';
 import 'package:rdb/core/utils/extensions/state_ext.dart';
 import 'package:rdb/features/security/presentation/root_security_issue_page.dart';
+import 'package:rdb/generated/locale_keys.g.dart';
 import 'package:rdb/routes/router.dart';
+import 'package:rdb/service/connectivity_service.dart';
 import 'package:rdb/service/ku_fallback_localizations.dart';
 import 'package:rdb/service/app_deep_link_service.dart';
 import 'package:rdb/service/language_service.dart';
@@ -55,6 +58,12 @@ class _TrydosApplicationState extends State<TrydosApplication>
   @override
   void initState() {
     WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+
+      ConnectivityService.instance.initialize().then((_) {});
+      ConnectivityService.instance.isOnline.addListener(_onConnectivityChanged);
+    });
     /////////////////////
     // FirebaseAnalyticsService.startAnalyticsSession();
     /////////////////////
@@ -69,6 +78,9 @@ class _TrydosApplicationState extends State<TrydosApplication>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _deepLinkService.dispose();
+    ConnectivityService.instance.isOnline.removeListener(
+      _onConnectivityChanged,
+    );
 
     super.dispose();
   }
@@ -87,6 +99,15 @@ class _TrydosApplicationState extends State<TrydosApplication>
     AppLifecycleManager().handleLifecycleChange(state);
     if (state == AppLifecycleState.resumed) {
       _handleAppResumed();
+    }
+  }
+
+  void _onConnectivityChanged() {
+    final online = ConnectivityService.instance.isOnline.value;
+    if (!mounted) return;
+
+    if (!online) {
+      showMessage(LocaleKeys.no_internet_connected.tr(), hasError: true);
     }
   }
 

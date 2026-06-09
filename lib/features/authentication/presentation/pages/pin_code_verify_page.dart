@@ -154,6 +154,22 @@ class _PinCodeVerifyPageState extends State<PinCodeVerifyPage>
     });
   }
 
+  /// Resets all lockout state on a successful verification: cancels the timer
+  /// and clears level, failed attempts, and the stored lockout timestamp so the
+  /// user starts fresh next time.
+  Future<void> _resetLockoutState() async {
+    _lockoutTimer?.cancel();
+    await prefsRepository.setPinFailedAttempts(0);
+    await prefsRepository.setPinLockoutLevel(0);
+    await prefsRepository.setPinLockoutUntilMs(0);
+    if (mounted) {
+      setState(() {
+        _isLockedOut = false;
+        _lockoutRemainingSeconds = 0;
+      });
+    }
+  }
+
   /// Records a wrong attempt and applies lockout escalation when needed.
   Future<void> _recordWrongAttempt() async {
     final level = prefsRepository.pinLockoutLevel;
@@ -210,6 +226,7 @@ class _PinCodeVerifyPageState extends State<PinCodeVerifyPage>
     if (result['success'] == true) {
       // ج. حفظ حالة التفعيل محلياً بنجاح لعدم طلبها مجدداً
       await prefsRepository.setBiometricEnrolledKey(true);
+      await _resetLockoutState();
       widget.onSuccess();
 
       //  _showSnackBar(LocaleKeys.biometric_register_success.tr());
@@ -235,6 +252,7 @@ class _PinCodeVerifyPageState extends State<PinCodeVerifyPage>
 
     if (result['success'] == true) {
       // _showSnackBar(LocaleKeys.biometric_verify_success.tr());
+      await _resetLockoutState();
       // توجيه المستخدم للشاشة الرئيسية للتطبيق وهدم شاشة القفل
       widget.onSuccess();
     } else {
@@ -340,6 +358,8 @@ class _PinCodeVerifyPageState extends State<PinCodeVerifyPage>
                 previous.verifyPasscodeStatus != current.verifyPasscodeStatus,
             listener: (context, state) async {
               if (state.verifyPasscodeStatus == VerifyPasscodeStatus.success) {
+                // أول إدخال صحيح يُصفّر القفل (المستوى/المحاولات/المؤقّت)
+                await _resetLockoutState();
                 setState(() => codeStatus = 1);
                 Future.delayed(const Duration(seconds: 1), () {
                   if (mounted) {
@@ -538,7 +558,9 @@ class _PinCodeVerifyPageState extends State<PinCodeVerifyPage>
               index: 0,
               pasteOtpCode: pasteOtpCode,
               onChange: _onPinChanged,
-              autoFocus: true,
+              // لا تفتح لوحة المفاتيح تلقائيًا إذا كان biometric مفعّلًا
+              // (تظهر مطالبة البصمة بدلًا منها)
+              autoFocus: !(prefsRepository.isBiometricEnrolled ?? false),
             ),
             PinItem(
               key: const Key('otp_item_2'),

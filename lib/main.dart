@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:dio/dio.dart';
 import 'package:flutter/services.dart';
 import 'dart:developer' as dev;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -28,20 +27,6 @@ List<String> isFailedTheFirstTime = [];
 List<String> apisMustNotToRequest = [];
 ////////////////////////////////////////
 int applicationVersion = 1;
-request() async {
-  final Stopwatch stopWatch = Stopwatch();
-  stopWatch.start();
-  //await http.get(Uri.parse('http://market_under_dev_backend.trydos.dev/api/new_v1/mobile/home/mainCategories'));///
-
-  await Dio().getUri(Uri.parse('http://ip-api.com/json')).onError((e, st) {
-    //
-    dev.log(e.toString());
-    return Response(requestOptions: RequestOptions());
-  });
-
-  stopWatch.stop();
-  dev.log('request time ::::: ${stopWatch.elapsed.toString()}');
-}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

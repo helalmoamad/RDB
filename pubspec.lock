@@ -1622,10 +1622,10 @@ packages:
     dependency: transitive
     description:
       name: socket_io_client
-      sha256: ef6c989e5eee8d04baf18482ec3d7699b91bc41e279794a99d8e3bef897b074a
+      sha256: "740d3895e220e976570da7dbb2f084cd60dd0c46d174c4a830f9849faec23ef9"
       url: "https://pub.dev"
     source: hosted
-    version: "3.1.4"
+    version: "3.1.5"
   socket_io_common:
     dependency: transitive
     description:
@@ -1735,7 +1735,7 @@ packages:
     description:
       path: "."
       ref: main
-      resolved-ref: "63f592c2f619e5adeb09a827b0741db8ef82bbb3"
+      resolved-ref: c6942878914523bd032402a9edf03829ff97304f
       url: "https://github.com/helalmoamad/trydos_wallet.git"
     source: git
     version: "0.0.1"

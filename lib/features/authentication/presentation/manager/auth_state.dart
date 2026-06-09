@@ -22,6 +22,8 @@ enum SetPasscodeStatus { init, loading, success, failure }
 
 enum ChangePasscodeStatus { init, loading, success, failure }
 
+enum SwitchToAppStatus { init, loading, success, failure }
+
 class AuthState {
   const AuthState({
     this.sendOtpStatus = SendOtpStatus.init,
@@ -30,6 +32,7 @@ class AuthState {
     this.signInErrorMessage,
     this.setPasscodeStatus = SetPasscodeStatus.init,
     this.changePasscodeStatus = ChangePasscodeStatus.init,
+    this.switchToAppStatus = SwitchToAppStatus.init,
     this.sendOtpError,
     this.signUpErrorMessage,
     this.verifyPasscodeStatus = VerifyPasscodeStatus.init,
@@ -53,6 +56,7 @@ class AuthState {
   final VerifyOtpSignInStatus verifyOtpSignInStatus;
   final SetPasscodeStatus setPasscodeStatus;
   final ChangePasscodeStatus changePasscodeStatus;
+  final SwitchToAppStatus switchToAppStatus;
   final UpdateUserProfileStatus updateUserProfileStatus;
   final VerifyOtpFromGuestStatus verifyOtpFromGuestStatus;
   final GetPasskeyListStatus passkeyListStatus;
@@ -85,6 +89,7 @@ class AuthState {
     final VerifyPasscodeStatus? verifyPasscodeStatus,
     final SetPasscodeStatus? setPasscodeStatus,
     final ChangePasscodeStatus? changePasscodeStatus,
+    final SwitchToAppStatus? switchToAppStatus,
     final String? signUpErrorMessage,
     final String? updateUserProfileError,
     final String? sendOtpError,
@@ -103,6 +108,7 @@ class AuthState {
       sendOtpError: sendOtpError ?? this.sendOtpError,
       setPasscodeStatus: setPasscodeStatus ?? this.setPasscodeStatus,
       changePasscodeStatus: changePasscodeStatus ?? this.changePasscodeStatus,
+      switchToAppStatus: switchToAppStatus ?? this.switchToAppStatus,
 
       sendOtpStatus: sendOtpStatus ?? this.sendOtpStatus,
       passkeyListStatus: passkeyListStatus ?? this.passkeyListStatus,

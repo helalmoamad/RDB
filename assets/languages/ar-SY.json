@@ -841,6 +841,13 @@
     "sign_in_successfully_exclamation": "تم تسجيل الدخول بنجاح !",
   "welcome_exclamation": "أهلا بك !",
   "enjoy_with_services": "استمتع بخدماتنا",
+  "you_have_logged_in_via_web": "لقد سجّلت الدخول عبر الويب",
+  "minute": "دقيقة",
+  "ago": "قبل",
+  "switch_to_here": "التبديل إلى هنا",
+  "web_session_lasted_and_ended": "\"استمرت جلسة الويب {minutes} دقيقة وقد انتهت.\"",
+  "switching_clearing_web_files": "جارٍ التبديل ومسح ملفات الويب…",
+  "web_session_closed_files_deleted": "تم إغلاق جلسة الويب وحذف جميع الملفات",
   "security_issues_found_title": "تم اكتشاف مشاكل أمنية",
   "security_issues_found_message": "لا يمكن فتح التطبيق لأن جهازك يبدو أنه مروّت أو غير آمن.",
   "security_issues_found_details": "لحمايتك ولحماية حسابك وعملياتك، يرجى إزالة صلاحيات الروت ثم إعادة المحاولة."

@@ -33,6 +33,10 @@ abstract class AuthRepository {
   Future<Either<Failure, VerifyOtpSignUpAndInResponseModel>> completeSession(
     Map<String, dynamic> params,
   );
+  Future<Either<Failure, VerifyOtpSignUpAndInResponseModel>> refreshToken(
+    String refreshToken,
+  );
+  Future<Either<Failure, bool>> switchToApp();
   Future<Either<Failure, List<PasskeyModel>>> getPasskeyList();
   Future<Either<Failure, PasscodeVerifyModel>> verifyStepPasscode(
     Map<String, dynamic> params,

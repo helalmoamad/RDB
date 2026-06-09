@@ -1,4 +1,3 @@
-import 'package:easy_localization/easy_localization.dart' as easy;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -10,8 +9,6 @@ import 'package:rdb/base_page.dart';
 import 'package:rdb/core/utils/extensions/build_context.dart';
 import 'package:rdb/core/utils/responsive_padding.dart';
 import 'package:rdb/features/authentication/presentation/widgets/create_account_section.dart';
-import 'package:rdb/generated/locale_keys.g.dart';
-import '../../../../common/helper/show_message.dart';
 import '../../../../core/domin/repositories/prefs_repository.dart';
 import '../../../../routes/router.dart';
 import '../manager/auth_bloc.dart';
@@ -331,7 +328,7 @@ class _RegistrationPageState extends State<RegistrationPage>
                                   curve: Curves.easeInOut,
                                 );
 
-                                if (prefsRepository.isTimerForOtpRunning ??
+                                /*  if (prefsRepository.isTimerForOtpRunning ??
                                     false) {
                                   showWarningMessage(
                                     context,
@@ -340,7 +337,7 @@ class _RegistrationPageState extends State<RegistrationPage>
                                         .tr(),
                                   );
                                   return;
-                                }
+                                }*/
                                 /*   authBloc.add(SendOtpEvent(
                                           phone: phoneNumber,
                                           isViaWhatsApp: 1));*/

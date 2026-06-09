@@ -27,6 +27,9 @@ abstract class AppAssets {
   /// region SVG Section
 
   static String get rdb => 'rdb'.svg;
+  static String get verifiedSvg => 'verified'.svg;
+  static String get switche => 'switch'.svg;
+  static String get switchOff => 'switch_off'.svg;
   static String get rammazDigitalBanking => 'rammaz_digital_banking'.svg;
   static String get rammaz => 'rammaz'.svg;
   static String get blueQuestion => 'blue_question'.svg;

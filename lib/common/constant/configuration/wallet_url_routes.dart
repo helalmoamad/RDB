@@ -20,6 +20,8 @@ abstract class WalletEndPoints {
   static final reSendOtpEP = "resend-otp".authScope();
   static final verifyEP = "verify".authScope();
   static final completeSession = "auth/session/complete";
+  static final refreshTokenEP = "auth/refresh";
+  static final switchToAppEP = "sessions/switch-to-app";
   static final sessionsStepPasscodeVerifyEP = "sessions/step/passcode/verify";
   static final sessionsPasscodeVerifyEP = "sessions/passcode/verify";
   static const passkeyListEP = "sessions/passkey/list";

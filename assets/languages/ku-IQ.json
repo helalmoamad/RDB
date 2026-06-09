@@ -851,6 +851,13 @@
     "sign_in_successfully_exclamation": "بە سەرکەوتوویی چووییە ژوورەوە !",
   "welcome_exclamation": "بەخێربێیت !",
   "enjoy_with_services": "چێژ لە خزمەتگوزارییەکانمان وەربگرە",
+  "you_have_logged_in_via_web": "تۆ لە ڕێگەی وێبەوە چوویتە ژوورەوە",
+  "minute": "خولەک",
+  "ago": "لەمەوبەر",
+  "switch_to_here": "بگۆڕە بۆ ئێرە",
+  "web_session_lasted_and_ended": "\"دانیشتنی وێب {minutes} خولەکی خایاند و کۆتایی هات.\"",
+  "switching_clearing_web_files": "گۆڕین و سڕینەوەی فایلەکانی وێب لە جێبەجێکردندایە…",
+  "web_session_closed_files_deleted": "دانیشتنی وێب داخرا و هەموو فایلەکان سڕانەوە",
   "security_issues_found_title": "کێشەی ئەمنی دۆزرایەوە",
   "security_issues_found_message": "ئەم ئەپە ناکرێت بکرێتەوە چونکە ئامێرەکەت روتکراو یان ناسەقامگیر دیارە.",
   "security_issues_found_details": "بۆ پاراستنی تۆ و هەژمار و مامەڵەکانت، تکایە دەسەڵاتی روت لاببە و دووبارە هەوڵبدە."

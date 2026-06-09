@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 abstract class PrefsRepository {
   String? get walletToken;
   String? get walletRefreshToken;
+  DateTime? get walletTokenExpiresAt;
+  int? get switchShownAtMs;
   String? get sessionToken;
 
   String? get countryIso;
@@ -64,6 +66,8 @@ abstract class PrefsRepository {
 
   Future<bool> setWalletToken(String token);
   Future<bool> setWalletRefreshToken(String token);
+  Future<bool> setWalletTokenExpiresAt(DateTime? expiresAt);
+  Future<bool> setSwitchShownAtMs(int? millisSinceEpoch);
   Future<bool> setstepToken(String token);
   Future<bool> setSessionToken(String token);
   Future<bool> setPhoneNumber(String phoneNumber);
@@ -94,6 +98,8 @@ abstract class PrefsRepository {
   Future<bool> setBiometricEnrolledKey(bool value);
   bool? get shouldShowPin;
   Future<bool> setShouldShowPin(bool value);
+  Future<bool> setShouldShowSwitch(bool value);
+  bool? get shouldShowSwitch;
   bool? get isFaceLoginEnabled;
   Future<bool> setFaceLoginEnabled(bool value);
   bool? get isAccountActive;

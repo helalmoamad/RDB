@@ -104,7 +104,8 @@ class LoggerInterceptor extends Interceptor with HandlingExceptionRequest {
       }
       if ((err.response?.statusCode == 400 ||
               err.response?.statusCode == 422) &&
-          (!(err.requestOptions.path.contains("phone/verify")))) {
+          (!(err.requestOptions.path.contains("phone/verify"))) &&
+          (!(err.requestOptions.path.contains("send-otp")))) {
         showMessage(
           jsonDecode(err.response.toString())["message"] is List
               ? jsonDecode(err.response.toString())["message"][0]

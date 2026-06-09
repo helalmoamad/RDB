@@ -824,6 +824,13 @@
     "sign_in_successfully_exclamation": "Başarıyla Giriş Yapıldı !",
   "welcome_exclamation": "Hoş Geldiniz !",
   "enjoy_with_services": "Hizmetlerimizin Tadını Çıkarın",
+  "you_have_logged_in_via_web": "Web Üzerinden Giriş Yaptınız",
+  "minute": "Dakika",
+  "ago": "Önce",
+  "switch_to_here": "Buraya Geç",
+  "web_session_lasted_and_ended": "\"Web Oturumu {minutes} Dakika Sürdü Ve Sona Erdi.\"",
+  "switching_clearing_web_files": "Geçiş Yapılıyor Ve Web Dosyaları Temizleniyor…",
+  "web_session_closed_files_deleted": "Web Oturumu Kapatıldı Ve Tüm Dosyalar Silindi",
   "security_issues_found_title": "Güvenlik Sorunları Bulundu",
   "security_issues_found_message": "Cihazınız rootlu veya güvenliği ihlal edilmiş göründüğü için bu uygulama açılamaz.",
   "security_issues_found_details": "Güvenliğiniz ve hesap işlemlerinizin korunması için lütfen root erişimini kaldırıp tekrar deneyin."

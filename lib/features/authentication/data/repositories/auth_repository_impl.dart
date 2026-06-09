@@ -70,6 +70,20 @@ class AuthRepositoryImpl extends AuthRepository with HandlingExceptionRequest {
   }
 
   @override
+  Future<Either<Failure, VerifyOtpSignUpAndInResponseModel>> refreshToken(
+    String refreshToken,
+  ) {
+    return handlingExceptionRequest(
+      tryCall: () => dataSource.refreshToken(refreshToken),
+    );
+  }
+
+  @override
+  Future<Either<Failure, bool>> switchToApp() {
+    return handlingExceptionRequest(tryCall: () => dataSource.switchToApp());
+  }
+
+  @override
   Future<Either<Failure, PasscodeVerifyModel>> verifyStepPasscode(
     Map<String, dynamic> params,
   ) {

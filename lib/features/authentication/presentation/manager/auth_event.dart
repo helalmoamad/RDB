@@ -136,6 +136,34 @@ class CreateWalletEvent extends AuthEvent {
   List<Object?> get props => [];
 }
 
+class RefreshTokenEvent extends AuthEvent {
+  const RefreshTokenEvent();
+  @override
+  List<Object?> get props => [];
+}
+
+/// يفحص صلاحية التوكن اعتمادًا على expiresAt، ويطلق RefreshTokenEvent
+/// فقط إذا كان التوكن منتهيًا أو قاربَ على الانتهاء.
+class EnsureWalletTokenValidEvent extends AuthEvent {
+  const EnsureWalletTokenValidEvent();
+  @override
+  List<Object?> get props => [];
+}
+
+/// الرجوع من جلسة الويب (LOCKED) إلى التطبيق عبر POST /sessions/switch-to-app.
+class SwitchToAppEvent extends AuthEvent {
+  const SwitchToAppEvent();
+  @override
+  List<Object?> get props => [];
+}
+
+/// إعادة تعيين حالة التبديل إلى init (تُستدعى عند ظهور طبقة التبديل).
+class ResetSwitchToAppEvent extends AuthEvent {
+  const ResetSwitchToAppEvent();
+  @override
+  List<Object?> get props => [];
+}
+
 class VerifySessionPasscodeEvent extends AuthEvent {
   final String passcode;
   const VerifySessionPasscodeEvent(this.passcode);

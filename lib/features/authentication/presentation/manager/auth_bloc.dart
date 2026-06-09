@@ -12,6 +12,9 @@ import 'package:rdb/features/authentication/domain/use_cases/complete_session_us
 import 'package:rdb/features/authentication/data/models/passkey_model.dart';
 import 'package:rdb/features/authentication/domain/use_cases/get_passkey_list_usecase.dart';
 import 'package:rdb/features/authentication/domain/use_cases/get_user_profile_usecase.dart';
+import 'package:rdb/features/authentication/domain/use_cases/refresh_token_usecase.dart';
+import 'package:rdb/features/authentication/domain/use_cases/switch_to_app_usecase.dart';
+import 'package:trydos_wallet/trydos_wallet.dart' show TrydosWallet;
 import 'package:rdb/features/authentication/domain/use_cases/verify_session_passcode_usecase.dart';
 import 'package:rdb/features/authentication/domain/use_cases/verify_step_passcode_usecase.dart';
 import '../../domain/use_cases/set_passcode_usecase.dart';
@@ -19,6 +22,8 @@ import '../../domain/use_cases/change_passcode_usecase.dart';
 // ignore: depend_on_referenced_packages
 import 'package:stream_transform/stream_transform.dart';
 import 'package:rdb/core/error/error_manager.dart';
+import 'package:rdb/enums/status_code_type.dart';
+import 'package:rdb/routes/router.dart';
 import 'package:rdb/core/use_case/use_case.dart';
 import 'package:rdb/features/authentication/domain/use_cases/get_user_country_usecase.dart';
 
@@ -58,6 +63,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     this.completeSessionUsecase,
     this.setPasscodeUseCase,
     this.changePasscodeUseCase,
+    this.refreshTokenUsecase,
+    this.switchToAppUsecase,
     // this.verifyOtpSignUpUseCase,
   ) : super(const AuthState()) {
     on<AuthEvent>((event, emit) {});
@@ -89,6 +96,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       //transformer: throttleDroppable(throttleDuration)
     );
     on<GetPasskeyListEvent>(_onGetPasskeyListEvent);
+    on<RefreshTokenEvent>(_onRefreshTokenEvent);
+    on<EnsureWalletTokenValidEvent>(_onEnsureWalletTokenValidEvent);
+    on<SwitchToAppEvent>(_onSwitchToAppEvent);
+    on<ResetSwitchToAppEvent>(_onResetSwitchToAppEvent);
     // on<CreateWalletEvent>(_onCreateWalletEvent);
   }
 
@@ -106,7 +117,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final VerifySessionPasscodeUseCase verifySessionPasscodeUseCase;
   final SetPasscodeUseCase setPasscodeUseCase;
   final ChangePasscodeUseCase changePasscodeUseCase;
+  final RefreshTokenUsecase refreshTokenUsecase;
+  final SwitchToAppUsecase switchToAppUsecase;
   final PrefsRepository _prefsRepository = GetIt.I<PrefsRepository>();
+
+  /// طلب الـ refresh الجاري حاليًا (إن وُجد) — يمنع إطلاق طلب refresh آخر
+  /// أثناء وجود واحد قيد التنفيذ.
+  Future<bool>? _refreshInFlight;
 
   FutureOr<void> _onUpdateUserProfileEvent(
     UpdateUserProfileEvent event,
@@ -161,7 +178,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     GetUserProfileEvent event,
     Emitter<AuthState> emit,
   ) async {
-    if (_prefsRepository.walletToken == null) {
+    if (_prefsRepository.walletToken == null ||
+        (_prefsRepository.shouldShowSwitch ?? false)) {
       return;
     }
     final response = await getUserProfileUseCase(NoParams());
@@ -302,6 +320,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
               (r.user?.createdAt ?? '').toString(),
             );
             _prefsRepository.setWalletToken(r.accessToken!.token!);
+            _prefsRepository.setWalletTokenExpiresAt(r.accessToken?.expiresAt);
             _prefsRepository.setWalletRefreshToken(r.refreshToken?.token ?? "");
             _prefsRepository.setSessionToken(r.sessionToken ?? "");
 
@@ -477,6 +496,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
                 (r.user?.createdAt ?? '').toString(),
               );
               _prefsRepository.setWalletToken(r.accessToken!.token!);
+              _prefsRepository.setWalletTokenExpiresAt(
+                r.accessToken?.expiresAt,
+              );
               _prefsRepository.setWalletRefreshToken(
                 r.refreshToken?.token ?? "",
               );
@@ -514,6 +536,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           ErrorManager.resetRetry('VerifyOtpSignInEvent');
           try {
             _prefsRepository.setUserId(r.user!.id.toString());
+            _prefsRepository.setPasscode('true');
 
             _prefsRepository.setUserName(
               "${r.user?.firstName ?? ''} ${r.user?.lastName ?? ''}",
@@ -525,6 +548,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
               (r.user?.createdAt ?? '').toString(),
             );
             _prefsRepository.setWalletToken(r.accessToken?.token ?? "");
+            _prefsRepository.setWalletTokenExpiresAt(r.accessToken?.expiresAt);
             _prefsRepository.setWalletRefreshToken(r.refreshToken?.token ?? "");
             _prefsRepository.setSessionToken(r.sessionToken ?? "");
 
@@ -617,6 +641,140 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       },
     );
   }*/
+
+  FutureOr<void> _onSwitchToAppEvent(
+    SwitchToAppEvent event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(state.copyWith(switchToAppStatus: SwitchToAppStatus.loading));
+    final response = await switchToAppUsecase(NoParams());
+    await response.fold((failure) async {
+      if (failure.statusCode != StatusCode.unauth.code) {
+        // فشل آخر (شبكة/خادم) — يمكن إعادة المحاولة
+        emit(state.copyWith(switchToAppStatus: SwitchToAppStatus.failure));
+        return;
+      }
+      // 401 أثناء التبديل: نبقى في صفحة التبديل، نجدّد التوكن ونحدّث المكتبة
+      // ثم نعيد محاولة switch مرة واحدة.
+      final refreshed = await _performTokenRefresh();
+      if (!refreshed) {
+        // تعذّر تجديد التوكن — نبقى في صفحة التبديل (يمكن إعادة المحاولة)
+        emit(state.copyWith(switchToAppStatus: SwitchToAppStatus.failure));
+        return;
+      }
+      // فاصل زمني قصير حتى يُطبَّق التوكن الجديد (التخزين المحلي + تحديث
+      // المكتبة) قبل إرسال طلب switch بالتوكن الجديد
+      await Future.delayed(const Duration(milliseconds: 1500));
+      final retry = await switchToAppUsecase(NoParams());
+      retry.fold(
+        (_) =>
+            emit(state.copyWith(switchToAppStatus: SwitchToAppStatus.failure)),
+        (_) => _emitSwitchSuccess(emit),
+      );
+    }, (_) async => _emitSwitchSuccess(emit));
+  }
+
+  /// عاد المستخدم للتطبيق بنجاح — الجلسة مستمرة، أخفِ طبقة التبديل وصفّر العدّاد.
+  void _emitSwitchSuccess(Emitter<AuthState> emit) {
+    _prefsRepository.setShouldShowSwitch(false);
+    _prefsRepository.setSwitchShownAtMs(null);
+    emit(state.copyWith(switchToAppStatus: SwitchToAppStatus.success));
+  }
+
+  FutureOr<void> _onResetSwitchToAppEvent(
+    ResetSwitchToAppEvent event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(state.copyWith(switchToAppStatus: SwitchToAppStatus.init));
+  }
+
+  FutureOr<void> _onEnsureWalletTokenValidEvent(
+    EnsureWalletTokenValidEvent event,
+    Emitter<AuthState> emit,
+  ) async {
+    final hasPasscode = (_prefsRepository.passcode ?? "").isNotEmpty;
+    final hasRefreshToken =
+        (_prefsRepository.walletRefreshToken ?? "").isNotEmpty;
+    final expiresAt = _prefsRepository.walletTokenExpiresAt;
+    if (!hasPasscode || !hasRefreshToken || expiresAt == null) {
+      return;
+    }
+    // حدّث إذا انتهى التوكن أو سينتهي خلال الدقيقة القادمة
+    final threshold = DateTime.now().add(const Duration(minutes: 1));
+    if (threshold.isAfter(expiresAt)) {
+      add(const RefreshTokenEvent());
+    }
+  }
+
+  FutureOr<void> _onRefreshTokenEvent(
+    RefreshTokenEvent event,
+    Emitter<AuthState> emit,
+  ) async {
+    await _performTokenRefresh();
+  }
+
+  /// يطلب توكنًا جديدًا بالـ refresh token المخزّن، وعند النجاح يحدّث التوكنات
+  /// المخزّنة ويُرسل الجديد للمكتبة. يُعيد true عند النجاح، false عند الفشل
+  /// (لا refresh token، أو فشل الطلب / 401 = الجلسة انتهت).
+  ///
+  /// إذا كان هناك طلب refresh جارٍ، تنتظر الاستدعاءات الأخرى نتيجته نفسها
+  /// بدل إطلاق طلب جديد.
+  Future<bool> _performTokenRefresh() {
+    return _refreshInFlight ??= _doTokenRefresh().whenComplete(() {
+      _refreshInFlight = null;
+    });
+  }
+
+  /// الجلسة انتهت (فشل الـ refresh بـ 401) — امسح التوكنات وتوجّه للصفحة الأولى
+  /// على مستوى التطبيق كله.
+  void _handleSessionExpired() {
+    _prefsRepository.setWalletToken("");
+    _prefsRepository.setWalletRefreshToken("");
+    _prefsRepository.setWalletTokenExpiresAt(null);
+    _prefsRepository.setShouldShowSwitch(false);
+    _prefsRepository.setSwitchShownAtMs(null);
+    GRouter.router.go(GRouter.config.kRootRoute);
+  }
+
+  Future<bool> _doTokenRefresh() async {
+    final currentRefreshToken = _prefsRepository.walletRefreshToken ?? "";
+    if (currentRefreshToken.isEmpty) {
+      return false;
+    }
+
+    final response = await refreshTokenUsecase(currentRefreshToken);
+    return response.fold(
+      (failure) async {
+        // انتهت صلاحية الـ refresh token (401) = الجلسة انتهت — على مستوى التطبيق
+        // كله: امسح التوكنات وتوجّه للصفحة الأولى.
+        if (failure.statusCode == StatusCode.unauth.code) {
+          _handleSessionExpired();
+        }
+        return false;
+      },
+      (r) async {
+        final newAccessToken = r.accessToken?.token ?? "";
+        if (newAccessToken.isEmpty) {
+          return false;
+        }
+
+        // تحديث التوكنات المخزّنة لدينا — ننتظر اكتمال الكتابة حتى لا تُقرأ
+        // القيمة القديمة في الطلب التالي (مثل switch)
+        await _prefsRepository.setWalletToken(newAccessToken);
+        await _prefsRepository.setWalletRefreshToken(
+          r.refreshToken?.token ?? currentRefreshToken,
+        );
+        await _prefsRepository.setWalletTokenExpiresAt(
+          r.accessToken?.expiresAt,
+        );
+        await _prefsRepository.setTokenExpired(false);
+
+        // إرسال التوكن الجديد للمكتبة لمتابعة العمل به
+        TrydosWallet.updateToken(newAccessToken);
+        return true;
+      },
+    );
+  }
 
   FutureOr<void> _onGetUserCountryEvent(
     GetUserCountryEvent event,

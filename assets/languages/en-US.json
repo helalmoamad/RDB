@@ -842,6 +842,13 @@
     "sign_in_successfully_exclamation": "Sign In Successfully !",
   "welcome_exclamation": "Welcome !",
   "enjoy_with_services": "Enjoy With Our Services",
+  "you_have_logged_in_via_web": "You Have Logged In Via The Web",
+  "minute": "Minute",
+  "ago": "Ago",
+  "switch_to_here": "Switch To Here",
+  "web_session_lasted_and_ended": "\"The Web Session Lasted {minutes} Minutes And Has Ended.\"",
+  "switching_clearing_web_files": "Switching And Clearing Web Files In Progress…",
+  "web_session_closed_files_deleted": "The Web Session Has Been Closed And All Files Deleted",
   "security_issues_found_title": "Security Issues Found",
   "security_issues_found_message": "This app cannot be opened because your device appears to be rooted or compromised.",
   "security_issues_found_details": "For your safety and to protect your account and transactions, please remove root access and try again."

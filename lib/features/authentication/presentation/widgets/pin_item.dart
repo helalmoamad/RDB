@@ -21,6 +21,7 @@ void resetPinGlobalState() {
   WidgetsBinding.instance.addPostFrameCallback((_) {
     if (focusNodes[0].context != null) {
       focusNodes[0].requestFocus();
+      SystemChannels.textInput.invokeMethod('TextInput.show');
     }
   });
 }
@@ -84,15 +85,17 @@ class _PinItemState extends State<PinItem> with TickerProviderStateMixin {
     // إضافة مستمع لتغيير التركيز لضمان أن التركيز دائماً في المربع الصحيح
     focusNodes[widget.index].addListener(_handleFocusChange);
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted && focusNodes[0].context != null) {
-        Future.delayed(const Duration(seconds: 1), () {
+    if (widget.index == 0 && widget.autoFocus) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Future.delayed(const Duration(milliseconds: 300), () {
           if (mounted && focusNodes[0].context != null) {
             focusNodes[0].requestFocus();
+            // رفع لوحة المفاتيح صراحةً — requestFocus وحده لا يكفي على بعض الأجهزة
+            SystemChannels.textInput.invokeMethod('TextInput.show');
           }
         });
-      }
-    });
+      });
+    }
     widget.controller.value = zwspEditingValue;
     currentToType = 0;
     super.initState();
@@ -124,6 +127,7 @@ class _PinItemState extends State<PinItem> with TickerProviderStateMixin {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted && focusNodes[0].context != null) {
         focusNodes[0].requestFocus();
+        SystemChannels.textInput.invokeMethod('TextInput.show');
       }
     });
     currentToType = 0;
@@ -242,7 +246,16 @@ class _PinItemState extends State<PinItem> with TickerProviderStateMixin {
                                             focusNodes[currentToType]
                                                 .requestFocus();
                                           }
+                                          // ضمان ظهور لوحة المفاتيح
+                                          SystemChannels.textInput.invokeMethod(
+                                            'TextInput.show',
+                                          );
                                         });
+                                  } else {
+                                    // الخانة مركّزة مسبقًا — أعد إظهار اللوحة
+                                    SystemChannels.textInput.invokeMethod(
+                                      'TextInput.show',
+                                    );
                                   }
                                 },
                                 onChanged: (String? text) {

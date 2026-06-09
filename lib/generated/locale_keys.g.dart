@@ -962,6 +962,14 @@ abstract class LocaleKeys {
       'sign_in_successfully_exclamation';
   static const welcome_exclamation = 'welcome_exclamation';
   static const enjoy_with_services = 'enjoy_with_services';
+  static const you_have_logged_in_via_web = 'you_have_logged_in_via_web';
+  static const minute = 'minute';
+  static const ago = 'ago';
+  static const switch_to_here = 'switch_to_here';
+  static const web_session_lasted_and_ended = 'web_session_lasted_and_ended';
+  static const switching_clearing_web_files = 'switching_clearing_web_files';
+  static const web_session_closed_files_deleted =
+      'web_session_closed_files_deleted';
   static const security_issues_found_title = 'security_issues_found_title';
   static const security_issues_found_message = 'security_issues_found_message';
   static const security_issues_found_details = 'security_issues_found_details';

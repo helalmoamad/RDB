@@ -16,6 +16,8 @@ abstract class PrefsKey {
       r'__$__requestNotificationPermission__$__';
   static const tokenExpired = r'__$__tokenexpired__$__';
   static const walletRefreshToken = r'__$__walletRefreshToken__$__';
+  static const walletTokenExpiresAt = r'__$__walletTokenExpiresAt__$__';
+  static const switchShownAt = r'__$__switchShownAt__$__';
   static const sessionToken = r'__$__sessionToken__$__';
 
   static const sessionId = r'__$__sessionId__$__';
@@ -44,6 +46,7 @@ abstract class PrefsKey {
   static const createWallet = r'__$__createWallet__$__';
   static const passcode = r'__$__passcode__$__';
   static const shouldShowPin = r'__$__shouldShowPin__$__';
+  static const shouldShowSwitch = r'__$__shouldShowSwitch__$__';
   static const faceLoginEnabled = r'__$__faceLoginEnabled__$__';
   static const pinFailedAttempts = r'__$__pinFailedAttempts__$__';
   static const pinLockoutUntil = r'__$__pinLockoutUntil__$__';
