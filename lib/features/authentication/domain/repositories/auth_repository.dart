@@ -10,6 +10,7 @@ import '../../data/models/get_user_country_response_model.dart';
 import '../../data/models/send_otp_response_model.dart';
 
 import '../../data/models/verify_otp_sign_up_and_in_response_model.dart';
+import '../../data/models/reset_passcode_models.dart';
 
 abstract class AuthRepository {
   Future<Either<Failure, UserProfileModel>> getUserProfile();
@@ -47,6 +48,28 @@ abstract class AuthRepository {
     String currentPasscode,
     String newPasscode,
   );
+
+  // ── إعادة تعيين رمز المرور ──
+  Future<Either<Failure, ResetInitResponse>> resetPasscodeInit({
+    required bool midLogin,
+  });
+  Future<Either<Failure, ResetSendOtpResponse>> resetPasscodeSendOtp(
+    Map<String, dynamic> params,
+  );
+  Future<Either<Failure, ResetVerifyOtpResponse>> resetPasscodeVerifyOtp(
+    Map<String, dynamic> params,
+  );
+  Future<Either<Failure, ResetQuestionsResponse>> resetPasscodeQuestions({
+    required bool midLogin,
+  });
+  Future<Either<Failure, ResetAnswersResponse>> resetPasscodeAnswers(
+    Map<String, dynamic> params, {
+    required bool midLogin,
+  });
+  Future<Either<Failure, ResetCompleteResponse>> resetPasscodeComplete(
+    Map<String, dynamic> params, {
+    required bool midLogin,
+  });
   /*Future<Either<Failure, VerifyOtpSignUpAndInResponseModel>> verifyOtpSignUp(
     Map<String, dynamic> params,
   );*/

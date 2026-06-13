@@ -99,6 +99,9 @@ class _VerifyOtpState extends State<VerifyOtp> with FormStateMinxin {
 
   @override
   void initState() {
+    // تنظيف أي تركيز/حالة عالقة من شاشة سابقة قبل بناء الخانات،
+    // حتى تبدأ الخانة الأولى باتصال إدخال جديد وتظهر اللوحة بشكل موثوق.
+    resetOtpFocusState();
     enabledResendNotifier = ValueNotifier<bool>(false);
     if (countdownTimerController == null) {
       countdownTimerController = CountdownTimerController(
@@ -131,10 +134,17 @@ class _VerifyOtpState extends State<VerifyOtp> with FormStateMinxin {
         listener: (context, state) {
           if (state.verifyOtpSignInStatus == VerifyOtpSignInStatus.failure) {
             if (state.signInErrorMessage == 'User not found') {
-              context.go(
-                '${GRouter.config.applicationRoutes.kNumberNotRegisteredPage}?phoneNumber=${widget.phoneNumber}',
-                extra: widget.onLoginFailed,
-              );
+              // قفل خانات الـ OTP قبل الانتقال إلى NumberNotRegistered حتى لا
+              // يعيد أي مربع إظهار لوحة المفاتيح ويُحدث ومضة على الصفحة التالية.
+              lockOtpKeyboard();
+              Future.delayed(Duration(seconds: 2), () {
+                FocusManager.instance.primaryFocus?.unfocus();
+                // ignore: use_build_context_synchronously
+                context.go(
+                  '${GRouter.config.applicationRoutes.kNumberNotRegisteredPage}?phoneNumber=${widget.phoneNumber}',
+                  extra: widget.onLoginFailed,
+                );
+              });
               GetIt.I<AuthBloc>().add(
                 SaveErrorSigneInVerify(error: "ServerException"),
               );
@@ -148,7 +158,13 @@ class _VerifyOtpState extends State<VerifyOtp> with FormStateMinxin {
               VerifyOtpSignInStatus.success) {
             checkOtp.value = 1;
 
+            // قفل خانات الـ OTP عند النجاح قبل الانتقال (LoginSuccessfully /
+            // AlreadyExistAccount) حتى لا تعيد أي خانة إظهار اللوحة.
+            lockOtpKeyboard();
+
             Future.delayed(const Duration(seconds: 1), () {
+              // ضمان إضافي لحظة الانتقال الفعلي.
+              lockOtpKeyboard();
               if (state.signInErrorMessage ==
                   VerifyOtpSessionStatus.requiresPasscode.value) {
                 if (!widget.fromLogin) {
@@ -495,20 +511,16 @@ class _VerifyOtpState extends State<VerifyOtp> with FormStateMinxin {
                                 p.sendOtpStatus != c.sendOtpStatus,
                             builder: (context, state) {
                               if (state.sendOtpStatus ==
-                                  SendOtpStatus.loading) {
-                                return Center(
-                                  child: SizedBox(
-                                    width: 20.w,
-                                    height: 20.h,
-                                    child: RDBLoader(size: 16.h),
-                                  ),
-                                );
-                              } else if (state.sendOtpStatus ==
                                   SendOtpStatus.failure) {
                                 return const _FailureWithTimerAndTryAgain();
-                              } else {
-                                // success أو الحالة الافتراضية: الحقول كما هي الآن
-                                return Directionality(
+                              }
+                              // نُبقي خانات الـ OTP مُركّبة دائماً (حتى أثناء
+                              // التحميل) حتى لا ينهار اتصال الإدخال فتنزل لوحة
+                              // المفاتيح ثم تُعاد (وميض). مؤشّر التحميل طبقة فوقها.
+                              return Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  Directionality(
                                   textDirection: ui.TextDirection.ltr,
                                   child: SizedBox(
                                     height: 60.w,
@@ -539,7 +551,10 @@ class _VerifyOtpState extends State<VerifyOtp> with FormStateMinxin {
                                           onChange: () {
                                             checkOtp.value = 0;
                                           },
-                                          autoFocus: true,
+                                          // الإظهار يتم عبر requestOtpKeyboard()
+                                          // عند استقرار صفحة الـ OTP في الـ PageView،
+                                          // لا في initState (يقع أثناء الأنيميشن فيُهمَل).
+                                          autoFocus: false,
                                         ),
                                         PinItem(
                                           key: const Key('otp_item_2'),
@@ -722,8 +737,23 @@ class _VerifyOtpState extends State<VerifyOtp> with FormStateMinxin {
                                       ],
                                     ),
                                   ),
-                                );
-                              }
+                                  ),
+                                  if (state.sendOtpStatus ==
+                                      SendOtpStatus.loading)
+                                    Positioned.fill(
+                                      child: ColoredBox(
+                                        color: const Color(0xCCFFFFFF),
+                                        child: Center(
+                                          child: SizedBox(
+                                            width: 20.w,
+                                            height: 20.h,
+                                            child: RDBLoader(size: 16.h),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              );
                             },
                           );
                         },

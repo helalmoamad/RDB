@@ -15,6 +15,7 @@ import '../manager/auth_bloc.dart';
 import '../widgets/welcome_section.dart';
 import 'package:rdb/features/authentication/presentation/widgets/insert_phone_tab.dart';
 import 'package:rdb/features/authentication/presentation/widgets/verify_otp.dart';
+import 'package:rdb/features/authentication/presentation/widgets/pin_item.dart';
 import '../../../../common/constant/design/assets_provider.dart';
 import '../widgets/verification_methods.dart';
 import 'package:rdb/core/utils/last_pages_tracker.dart';
@@ -151,11 +152,18 @@ class _RegistrationPageState extends State<RegistrationPage>
         ),
         valueListenable: pageContent,
         builder: (ctx, index, child) {
-          if (index < 2) {
-            FocusScope.of(context).unfocus();
-          } else if (index < 4) {
+          // إظهار لوحة حقل الهاتف عند استقرار صفحته (pageContent==2) فقط، مع
+          // حارس يمنع إطلاق الطلب بعد مغادرة الصفحة — وإلا سرق التركيز من خانات
+          // الـ OTP فتُفتح اللوحة ثم تُغلق ثم تُعاد (ومضة). إغلاق اللوحة على
+          // صفحات Welcome/CreateAccount يتم مرة واحدة عبر onPageChanged، لا في
+          // build (استدعاء unfocus في build يُلغي تركيز خانات الـ OTP الحيّة).
+          if (index == 2) {
             Future.delayed(const Duration(seconds: 1), () {
-              focusNode.requestFocus();
+              if (pageController.hasClients &&
+                  pageController.page?.round() == 2 &&
+                  pageContent.value == 2) {
+                focusNode.requestFocus();
+              }
             });
           }
           return Scaffold(
@@ -262,9 +270,21 @@ class _RegistrationPageState extends State<RegistrationPage>
                       child: WillPopScope(
                         child: PageView(
                           physics: const NeverScrollableScrollPhysics(),
-                          onPageChanged: (value) => setState(() {
-                            PopScopeValue = value;
-                          }),
+                          onPageChanged: (value) {
+                            setState(() {
+                              PopScopeValue = value;
+                            });
+                            // صفحة الـ OTP هي الفهرس 4 — أظهِر اللوحة عند
+                            // استقرار الصفحة فعلياً (توقيت موثوق بعكس initState).
+                            if (value == 4) {
+                              requestOtpKeyboard();
+                            } else if (value == 3 || value < 2) {
+                              // صفحات بلا حقول إدخال (الطرق/الترحيب/إنشاء حساب):
+                              // أغلق لوحة المفاتيح مرة واحدة عند الوصول (بدل
+                              // استدعاء unfocus في build).
+                              FocusManager.instance.primaryFocus?.unfocus();
+                            }
+                          },
                           controller: pageController,
                           children: [
                             WelcomeSection(

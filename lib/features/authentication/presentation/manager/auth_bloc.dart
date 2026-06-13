@@ -31,6 +31,8 @@ import 'package:rdb/features/authentication/domain/use_cases/send_otp_usecase.da
 import 'package:rdb/features/authentication/domain/use_cases/update_user_profile_usecase.dart';
 
 import 'package:rdb/features/authentication/domain/use_cases/verify_otp_signin_usecase.dart';
+import 'package:rdb/features/authentication/data/models/reset_passcode_models.dart';
+import 'package:rdb/features/authentication/domain/use_cases/reset_passcode_usecases.dart';
 import '../../../../common/helper/show_message.dart';
 import '../../../../core/domin/repositories/prefs_repository.dart';
 import '../../data/models/verify_otp_sign_up_and_in_response_model.dart';
@@ -65,6 +67,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     this.changePasscodeUseCase,
     this.refreshTokenUsecase,
     this.switchToAppUsecase,
+    this.resetInitUseCase,
+    this.resetSendOtpUseCase,
+    this.resetVerifyOtpUseCase,
+    this.resetQuestionsUseCase,
+    this.resetAnswersUseCase,
+    this.resetCompleteUseCase,
     // this.verifyOtpSignUpUseCase,
   ) : super(const AuthState()) {
     on<AuthEvent>((event, emit) {});
@@ -101,7 +109,45 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<SwitchToAppEvent>(_onSwitchToAppEvent);
     on<ResetSwitchToAppEvent>(_onResetSwitchToAppEvent);
     // on<CreateWalletEvent>(_onCreateWalletEvent);
+
+    // إعادة تعيين رمز المرور
+    on<ResetInitEvent>(_onResetInitEvent);
+    on<ResetSendOtpEvent>(_onResetSendOtpEvent);
+    on<ResetVerifyOtpEvent>(_onResetVerifyOtpEvent);
+    on<ResetQuestionsEvent>(_onResetQuestionsEvent);
+    on<ResetAnswersEvent>(_onResetAnswersEvent);
+    on<ResetCompleteEvent>(_onResetCompleteEvent);
+    on<ResetFlowClearEvent>(_onResetFlowClear);
   }
+
+  FutureOr<void> _onResetFlowClear(
+    ResetFlowClearEvent event,
+    Emitter<AuthState> emit,
+  ) {
+    emit(
+      state.copyWith(
+        resetInitStatus: ResetInitStatus.init,
+        resetSendOtpStatus: ResetSendOtpStatus.init,
+        resetVerifyOtpStatus: ResetVerifyOtpStatus.init,
+        resetQuestionsStatus: ResetQuestionsStatus.init,
+        resetAnswersStatus: ResetAnswersStatus.init,
+        resetCompleteStatus: ResetCompleteStatus.init,
+        resetQuestions: const [],
+        resetToken: '',
+        resetLockedUntil: '',
+        resetLockoutHours: 0,
+        resetAttemptsRemaining: 0,
+        resetError: null,
+      ),
+    );
+  }
+
+  final ResetInitUseCase resetInitUseCase;
+  final ResetSendOtpUseCase resetSendOtpUseCase;
+  final ResetVerifyOtpUseCase resetVerifyOtpUseCase;
+  final ResetQuestionsUseCase resetQuestionsUseCase;
+  final ResetAnswersUseCase resetAnswersUseCase;
+  final ResetCompleteUseCase resetCompleteUseCase;
 
   final SendOtpUseCase sendOtpUseCase;
   final VerifyOtpSignInUseCase verifyOtpSignInUseCase;
@@ -878,5 +924,176 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       },
     );
     // يمكن إضافة معالجة الحالة هنا لاحقاً
+  }
+
+  // ───────────── معالجات إعادة تعيين رمز المرور ─────────────
+
+  FutureOr<void> _onResetInitEvent(
+    ResetInitEvent event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(state.copyWith(resetInitStatus: ResetInitStatus.loading));
+    final res = await resetInitUseCase(
+      ResetEntryParams(midLogin: event.midLogin),
+    );
+    res.fold(
+      (f) => emit(
+        state.copyWith(
+          resetInitStatus: ResetInitStatus.failure,
+          resetError: f.message,
+        ),
+      ),
+      (r) => emit(
+        state.copyWith(
+          resetInitStatus: ResetInitStatus.success,
+          resetInitResult: r,
+          // '' لمسح أي قفل قديم عالق (AuthBloc مفرد). التفرّع يعتمد على
+          // resetInitResult.isLocked الطازج لا على هذا الحقل.
+          resetLockedUntil: r.lockout?.lockedUntil ?? '',
+          resetLockoutHours: r.lockout?.lockoutHours ?? 0,
+        ),
+      ),
+    );
+  }
+
+  FutureOr<void> _onResetSendOtpEvent(
+    ResetSendOtpEvent event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(state.copyWith(resetSendOtpStatus: ResetSendOtpStatus.loading));
+    final res = await resetSendOtpUseCase(
+      ResetSendOtpParams(
+        phoneNumber: event.phoneNumber,
+        channel: event.channel,
+      ),
+    );
+    res.fold(
+      (f) => emit(
+        state.copyWith(
+          resetSendOtpStatus: ResetSendOtpStatus.failure,
+          resetError: f.message,
+        ),
+      ),
+      (r) => emit(
+        state.copyWith(
+          resetSendOtpStatus: r.ok
+              ? ResetSendOtpStatus.success
+              : ResetSendOtpStatus.failure,
+          resetError: r.ok ? null : (r.error ?? 'error'),
+        ),
+      ),
+    );
+  }
+
+  FutureOr<void> _onResetVerifyOtpEvent(
+    ResetVerifyOtpEvent event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(state.copyWith(resetVerifyOtpStatus: ResetVerifyOtpStatus.loading));
+    final res = await resetVerifyOtpUseCase(
+      ResetVerifyOtpParams(
+        phoneNumber: event.phoneNumber,
+        otpCode: event.otpCode,
+      ),
+    );
+    res.fold(
+      (f) => emit(
+        state.copyWith(
+          resetVerifyOtpStatus: ResetVerifyOtpStatus.failure,
+          resetError: f.message,
+        ),
+      ),
+      (r) => emit(
+        state.copyWith(
+          resetVerifyOtpStatus: r.ok
+              ? ResetVerifyOtpStatus.success
+              : ResetVerifyOtpStatus.failure,
+          resetError: r.ok ? null : (r.error ?? 'Invalid code'),
+        ),
+      ),
+    );
+  }
+
+  FutureOr<void> _onResetQuestionsEvent(
+    ResetQuestionsEvent event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(state.copyWith(resetQuestionsStatus: ResetQuestionsStatus.loading));
+    final res = await resetQuestionsUseCase(
+      ResetEntryParams(midLogin: event.midLogin),
+    );
+    res.fold(
+      (f) => emit(
+        state.copyWith(
+          resetQuestionsStatus: ResetQuestionsStatus.failure,
+          resetError: f.message,
+        ),
+      ),
+      (r) => emit(
+        state.copyWith(
+          resetQuestionsStatus: ResetQuestionsStatus.success,
+          resetQuestions: r.questions,
+          resetAttemptsRemaining: r.attemptsRemaining,
+        ),
+      ),
+    );
+  }
+
+  FutureOr<void> _onResetAnswersEvent(
+    ResetAnswersEvent event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(state.copyWith(resetAnswersStatus: ResetAnswersStatus.loading));
+    final res = await resetAnswersUseCase(
+      ResetAnswersParams(answers: event.answers, midLogin: event.midLogin),
+    );
+    res.fold(
+      (f) => emit(
+        state.copyWith(
+          resetAnswersStatus: ResetAnswersStatus.failure,
+          resetError: f.message,
+        ),
+      ),
+      (r) => emit(
+        state.copyWith(
+          resetAnswersStatus: ResetAnswersStatus.success,
+          resetAttemptsRemaining: r.attemptsRemaining ?? 0,
+          // '' للمسح: نفرّق في الواجهة بين نجاح (resetToken غير فارغ) / قفل
+          // (resetLockedUntil غير فارغ) / خطأ (كلاهما فارغ مع بقاء محاولات).
+          resetToken: r.resetToken ?? '',
+          resetLockedUntil: r.lockedUntil ?? '',
+          resetLockoutHours: r.lockoutHours ?? 0,
+        ),
+      ),
+    );
+  }
+
+  FutureOr<void> _onResetCompleteEvent(
+    ResetCompleteEvent event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(state.copyWith(resetCompleteStatus: ResetCompleteStatus.loading));
+    final res = await resetCompleteUseCase(
+      ResetCompleteParams(
+        passcode: event.passcode,
+        resetToken: state.resetToken,
+        midLogin: event.midLogin,
+      ),
+    );
+    res.fold(
+      (f) => emit(
+        state.copyWith(
+          resetCompleteStatus: ResetCompleteStatus.failure,
+          resetError: f.message,
+        ),
+      ),
+      (r) => emit(
+        state.copyWith(
+          resetCompleteStatus: r.success
+              ? ResetCompleteStatus.success
+              : ResetCompleteStatus.failure,
+        ),
+      ),
+    );
   }
 }

@@ -87,7 +87,9 @@ class _TrydosApplicationState extends State<TrydosApplication>
 
   @override
   void didChangeMetrics() {
-    setState(() {});
+    // لا نستدعي setState هنا: MediaQuery يُحدّث المعتمدين عليه تلقائياً عند
+    // تغيّر الأبعاد. إعادة بناء جذر التطبيق في كل إطار من حركة لوحة المفاتيح
+    // كانت تُسقط التركيز/اتصال الإدخال ثم تُعيده → وميض ظهور/اختفاء اللوحة.
     super.didChangeMetrics();
   }
 

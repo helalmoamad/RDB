@@ -26,6 +26,22 @@ abstract class WalletEndPoints {
   static final sessionsPasscodeVerifyEP = "sessions/passcode/verify";
   static const passkeyListEP = "sessions/passkey/list";
 
+  // إعادة تعيين رمز المرور — مجموعة idle-lock (access token).
+  static const resetPasscodeInitEP = "auth/reset-passcode/init";
+  static const resetPasscodeSendOtpEP = "auth/reset-passcode/send-otp";
+  static const resetPasscodeVerifyOtpEP = "auth/reset-passcode/verify-otp";
+  static const resetPasscodeQuestionsEP = "auth/reset-passcode/questions";
+  static const resetPasscodeAnswersEP = "auth/reset-passcode/answers";
+  static const resetPasscodeCompleteEP = "auth/reset-passcode/complete";
+
+  // إعادة تعيين رمز المرور — مجموعة mid-login step (stepToken).
+  static const resetPasscodeStepInitEP = "auth/reset-passcode/step/init";
+  static const resetPasscodeStepQuestionsEP =
+      "auth/reset-passcode/step/questions";
+  static const resetPasscodeStepAnswersEP = "auth/reset-passcode/step/answers";
+  static const resetPasscodeStepCompleteEP =
+      "auth/reset-passcode/step/complete";
+
   //static final registerEP = "users/phone/register";
   static String walletBalanceEP(String assetId) =>
       "wallets/my/balances/$assetId";

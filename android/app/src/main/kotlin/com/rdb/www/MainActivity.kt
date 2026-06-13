@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.FrameLayout
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
@@ -18,6 +19,11 @@ class MainActivity : FlutterFragmentActivity() {
     private var overlayView: FrameLayout? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Must be called BEFORE super.onCreate() so the AndroidX SplashScreen
+        // takes over the system splash and hands off cleanly to the Flutter UI.
+        // This prevents the white-screen / splash hang seen on some Android 12/13
+        // devices (e.g. Infinix) where the platform splash never dismisses.
+        installSplashScreen()
         super.onCreate(savedInstanceState)
         ensureOverlayViewCreated()
     }

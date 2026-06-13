@@ -13,8 +13,13 @@ import '../../../../core/api/methods/post.dart';
 
 import '../models/get_user_country_response_model.dart';
 
+import '../models/reset_passcode_models.dart';
 import '../models/send_otp_response_model.dart';
 import '../models/verify_otp_sign_up_and_in_response_model.dart';
+
+/// تبديل mock تدفّق إعادة تعيين رمز المرور (لاختبار الواجهة بلا backend).
+/// **اجعلها `false` عند ربط الباك الفعلي.**
+const bool kResetPasscodeMock = false;
 
 @injectable
 class AuthRemoteDatasource {
@@ -62,6 +67,181 @@ class AuthRemoteDatasource {
     return sendOtp();
   }
 
+  // ───────────── إعادة تعيين رمز المرور ─────────────
+  // midLogin=false → idle-lock (access token)؛ midLogin=true → step (stepToken).
+
+  ServerName _resetServer(bool midLogin) =>
+      midLogin ? ServerName.passcode : ServerName.wallet;
+
+  // تأخير الـ mock (ليظهر shimmer الأزرار بوضوح أثناء الاختبار).
+  static const Duration _mockDelay = Duration(milliseconds: 1500);
+
+  Future<ResetInitResponse> resetPasscodeInit({required bool midLogin}) async {
+    if (kResetPasscodeMock) {
+      await Future.delayed(_mockDelay);
+      // الفرع الافتراضي للاختبار: أسئلة (غير موثّق). لاختبار القفل/الوجه بدّل هنا.
+      return const ResetInitResponse(isVerified: false);
+    }
+    return PostClient<ResetInitResponse>(
+      serverName: _resetServer(midLogin),
+      requestPrams: RequestConfig<ResetInitResponse>(
+        endpoint: midLogin
+            ? WalletEndPoints.resetPasscodeStepInitEP
+            : WalletEndPoints.resetPasscodeInitEP,
+        data: const <String, dynamic>{},
+        response: ResponseValue<ResetInitResponse>(
+          fromJson: (r) => ResetInitResponse.fromJson(r),
+        ),
+      ),
+    )();
+  }
+
+  Future<ResetSendOtpResponse> resetPasscodeSendOtp(
+    Map<String, dynamic> params,
+  ) async {
+    if (kResetPasscodeMock) {
+      await Future.delayed(_mockDelay);
+      return const ResetSendOtpResponse(ok: true, sessionInfo: 'mock');
+    }
+    return PostClient<ResetSendOtpResponse>(
+      serverName: ServerName.wallet,
+      requestPrams: RequestConfig<ResetSendOtpResponse>(
+        endpoint: WalletEndPoints.resetPasscodeSendOtpEP,
+        data: params,
+        response: ResponseValue<ResetSendOtpResponse>(
+          fromJson: (r) => ResetSendOtpResponse.fromJson(r),
+        ),
+      ),
+    )();
+  }
+
+  Future<ResetVerifyOtpResponse> resetPasscodeVerifyOtp(
+    Map<String, dynamic> params,
+  ) async {
+    if (kResetPasscodeMock) {
+      await Future.delayed(_mockDelay);
+      return const ResetVerifyOtpResponse(ok: true);
+    }
+    return PostClient<ResetVerifyOtpResponse>(
+      serverName: ServerName.wallet,
+      requestPrams: RequestConfig<ResetVerifyOtpResponse>(
+        endpoint: WalletEndPoints.resetPasscodeVerifyOtpEP,
+        data: params,
+        response: ResponseValue<ResetVerifyOtpResponse>(
+          fromJson: (r) => ResetVerifyOtpResponse.fromJson(r),
+        ),
+      ),
+    )();
+  }
+
+  Future<ResetQuestionsResponse> resetPasscodeQuestions({
+    required bool midLogin,
+  }) async {
+    if (kResetPasscodeMock) {
+      await Future.delayed(_mockDelay);
+      return _mockQuestions();
+    }
+    return GetClient<ResetQuestionsResponse>(
+      serverName: _resetServer(midLogin),
+      requestPrams: RequestConfig<ResetQuestionsResponse>(
+        endpoint: midLogin
+            ? WalletEndPoints.resetPasscodeStepQuestionsEP
+            : WalletEndPoints.resetPasscodeQuestionsEP,
+        response: ResponseValue<ResetQuestionsResponse>(
+          fromJson: (r) => ResetQuestionsResponse.fromJson(r),
+        ),
+      ),
+    )();
+  }
+
+  Future<ResetAnswersResponse> resetPasscodeAnswers(
+    Map<String, dynamic> params, {
+    required bool midLogin,
+  }) async {
+    if (kResetPasscodeMock) {
+      await Future.delayed(_mockDelay);
+      // نجاح افتراضي للاختبار. لاختبار الفشل/القفل بدّل القيم هنا.
+      return const ResetAnswersResponse(
+        success: true,
+        attemptsRemaining: 2,
+        resetToken: 'mock-reset-token',
+      );
+    }
+    return PostClient<ResetAnswersResponse>(
+      serverName: _resetServer(midLogin),
+      requestPrams: RequestConfig<ResetAnswersResponse>(
+        endpoint: midLogin
+            ? WalletEndPoints.resetPasscodeStepAnswersEP
+            : WalletEndPoints.resetPasscodeAnswersEP,
+        data: params,
+        response: ResponseValue<ResetAnswersResponse>(
+          fromJson: (r) => ResetAnswersResponse.fromJson(r),
+        ),
+      ),
+    )();
+  }
+
+  Future<ResetCompleteResponse> resetPasscodeComplete(
+    Map<String, dynamic> params, {
+    required bool midLogin,
+  }) async {
+    if (kResetPasscodeMock) {
+      await Future.delayed(_mockDelay);
+      return const ResetCompleteResponse(success: true);
+    }
+    return PostClient<ResetCompleteResponse>(
+      serverName: _resetServer(midLogin),
+      requestPrams: RequestConfig<ResetCompleteResponse>(
+        endpoint: midLogin
+            ? WalletEndPoints.resetPasscodeStepCompleteEP
+            : WalletEndPoints.resetPasscodeCompleteEP,
+        data: params,
+        response: ResponseValue<ResetCompleteResponse>(
+          fromJson: (r) => ResetCompleteResponse.fromJson(r),
+        ),
+      ),
+    )();
+  }
+
+  // أسئلة تجريبية (3) لاختبار العرض الديناميكي وإرسال optionId.
+  ResetQuestionsResponse _mockQuestions() => const ResetQuestionsResponse(
+    attemptsRemaining: 2,
+    questions: [
+      ResetQuestion(
+        id: 'q-last-login',
+        text: 'Do You Remember Your Last Login ?',
+        options: [
+          ResetQuestionOption(id: 'hours', label: 'Hours Ago'),
+          ResetQuestionOption(id: 'days', label: 'Days Ago'),
+          ResetQuestionOption(id: 'weeks', label: 'Weeks Ago'),
+          ResetQuestionOption(id: 'months', label: 'Months Ago'),
+          ResetQuestionOption(id: 'dunno', label: "I Don't Remember"),
+        ],
+      ),
+      ResetQuestion(
+        id: 'q-account-age',
+        text: 'How Long Ago Did You Create Your Account With Us?',
+        options: [
+          ResetQuestionOption(id: 'days', label: 'Days Ago'),
+          ResetQuestionOption(id: 'weeks', label: 'Weeks Ago'),
+          ResetQuestionOption(id: 'months', label: 'Months Ago'),
+          ResetQuestionOption(id: 'years', label: 'Years Ago'),
+          ResetQuestionOption(id: 'dunno', label: "I Don't Remember"),
+        ],
+      ),
+      ResetQuestion(
+        id: 'q-last-tx-type',
+        text: 'What Was Your Last Transaction?',
+        options: [
+          ResetQuestionOption(id: 'deposit', label: 'Deposit'),
+          ResetQuestionOption(id: 'transfer', label: 'Transfer'),
+          ResetQuestionOption(id: 'payment', label: 'Payment'),
+          ResetQuestionOption(id: 'dunno', label: "I Don't Remember"),
+        ],
+      ),
+    ],
+  );
+
   /*Future<VerifyOtpSignUpAndInResponseModel> verifyOtpSignUp(
     Map<String, dynamic> params,
   ) {
@@ -81,17 +261,18 @@ class AuthRemoteDatasource {
   }
 */
   Future<List<PasskeyModel>> getPasskeyList() {
-    GetClient<List<PasskeyModel>> getPasskeyList = GetClient<List<PasskeyModel>>(
-      serverName: ServerName.wallet,
-      requestPrams: RequestConfig<List<PasskeyModel>>(
-        endpoint: WalletEndPoints.passkeyListEP,
-        response: ResponseValue<List<PasskeyModel>>(
-          fromJson: (response) => (response as List<dynamic>)
-              .map((item) => PasskeyModel.fromJson(item))
-              .toList(),
-        ),
-      ),
-    );
+    GetClient<List<PasskeyModel>> getPasskeyList =
+        GetClient<List<PasskeyModel>>(
+          serverName: ServerName.wallet,
+          requestPrams: RequestConfig<List<PasskeyModel>>(
+            endpoint: WalletEndPoints.passkeyListEP,
+            response: ResponseValue<List<PasskeyModel>>(
+              fromJson: (response) => (response as List<dynamic>)
+                  .map((item) => PasskeyModel.fromJson(item))
+                  .toList(),
+            ),
+          ),
+        );
     return getPasskeyList();
   }
 

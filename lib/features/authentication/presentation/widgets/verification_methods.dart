@@ -176,7 +176,10 @@ class _VerificationMethodsState extends State<VerificationMethods> {
 
   @override
   Widget build(BuildContext context) {
-    FocusScope.of(context).unfocus();
+    // ملاحظة: لا نستدعي FocusScope.unfocus() هنا. صفحة الطرق تبقى حيّة داخل
+    // الـ PageView وتتشارك FocusScope مع صفحة الـ OTP، فاستدعاء unfocus في
+    // build كان يُلغي تركيز خانة الـ OTP عند كل إعادة بناء فتومض اللوحة.
+    // إغلاق اللوحة عند الوصول لهذه الصفحة يتم مرة واحدة عبر onPageChanged.
     FlutterError.onError = (FlutterErrorDetails error) {
       LastPagesTracker.sendErrorToBlocAndLog(error);
       FlutterError.dumpErrorToConsole(error);

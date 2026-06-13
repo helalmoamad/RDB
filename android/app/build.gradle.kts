@@ -71,4 +71,7 @@ flutter {
 dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
 
+    // Android 12+ Splash Screen API (backport for older versions).
+    // Fixes white-screen / splash hang on Android 12/13 devices (e.g. Infinix).
+    implementation("androidx.core:core-splashscreen:1.0.1")
 }

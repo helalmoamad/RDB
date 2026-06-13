@@ -185,3 +185,61 @@ class ChangePasscodeEvent extends AuthEvent {
   @override
   List<Object?> get props => [currentPasscode, newPasscode];
 }
+
+// ───────────── أحداث إعادة تعيين رمز المرور ─────────────
+// midLogin=false → idle-lock (access token)؛ true → step (stepToken).
+
+class ResetInitEvent extends AuthEvent {
+  final bool midLogin;
+  const ResetInitEvent({required this.midLogin});
+  @override
+  List<Object?> get props => [midLogin];
+}
+
+class ResetSendOtpEvent extends AuthEvent {
+  final String phoneNumber; // يبدأ بـ +
+  final String channel; // sms | whatsapp
+  const ResetSendOtpEvent({required this.phoneNumber, required this.channel});
+  @override
+  List<Object?> get props => [phoneNumber, channel];
+}
+
+class ResetVerifyOtpEvent extends AuthEvent {
+  final String phoneNumber;
+  final String otpCode;
+  const ResetVerifyOtpEvent({required this.phoneNumber, required this.otpCode});
+  @override
+  List<Object?> get props => [phoneNumber, otpCode];
+}
+
+class ResetQuestionsEvent extends AuthEvent {
+  final bool midLogin;
+  const ResetQuestionsEvent({required this.midLogin});
+  @override
+  List<Object?> get props => [midLogin];
+}
+
+class ResetAnswersEvent extends AuthEvent {
+  /// قائمة {questionId, optionId}.
+  final List<Map<String, String>> answers;
+  final bool midLogin;
+  const ResetAnswersEvent({required this.answers, required this.midLogin});
+  @override
+  List<Object?> get props => [answers, midLogin];
+}
+
+class ResetCompleteEvent extends AuthEvent {
+  final String passcode;
+  final bool midLogin;
+  const ResetCompleteEvent({required this.passcode, required this.midLogin});
+  @override
+  List<Object?> get props => [passcode, midLogin];
+}
+
+/// تصفير كل حالة تدفّق إعادة التعيين عند فتح التدفّق (AuthBloc مفرد، فقد تبقى
+/// حالة قديمة من محاولة سابقة).
+class ResetFlowClearEvent extends AuthEvent {
+  const ResetFlowClearEvent();
+  @override
+  List<Object?> get props => [];
+}

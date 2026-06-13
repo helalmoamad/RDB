@@ -24,6 +24,19 @@ enum ChangePasscodeStatus { init, loading, success, failure }
 
 enum SwitchToAppStatus { init, loading, success, failure }
 
+// إعادة تعيين رمز المرور
+enum ResetInitStatus { init, loading, success, failure }
+
+enum ResetSendOtpStatus { init, loading, success, failure }
+
+enum ResetVerifyOtpStatus { init, loading, success, failure }
+
+enum ResetQuestionsStatus { init, loading, success, failure }
+
+enum ResetAnswersStatus { init, loading, success, failure }
+
+enum ResetCompleteStatus { init, loading, success, failure }
+
 class AuthState {
   const AuthState({
     this.sendOtpStatus = SendOtpStatus.init,
@@ -48,6 +61,20 @@ class AuthState {
     this.updateUserProfileStatus = UpdateUserProfileStatus.init,
     this.verifyOtpFromGuestStatus = VerifyOtpFromGuestStatus.init,
     this.getCustomerCountryStatus = GetCustomerCountryStatus.loading,
+    // إعادة تعيين رمز المرور
+    this.resetInitStatus = ResetInitStatus.init,
+    this.resetSendOtpStatus = ResetSendOtpStatus.init,
+    this.resetVerifyOtpStatus = ResetVerifyOtpStatus.init,
+    this.resetQuestionsStatus = ResetQuestionsStatus.init,
+    this.resetAnswersStatus = ResetAnswersStatus.init,
+    this.resetCompleteStatus = ResetCompleteStatus.init,
+    this.resetInitResult,
+    this.resetQuestions = const [],
+    this.resetAttemptsRemaining,
+    this.resetToken,
+    this.resetLockedUntil,
+    this.resetLockoutHours,
+    this.resetError,
   });
 
   final SendOtpStatus sendOtpStatus;
@@ -77,6 +104,21 @@ class AuthState {
   final int? otpMsegatId;
   final String? otpProvider;
 
+  // إعادة تعيين رمز المرور
+  final ResetInitStatus resetInitStatus;
+  final ResetSendOtpStatus resetSendOtpStatus;
+  final ResetVerifyOtpStatus resetVerifyOtpStatus;
+  final ResetQuestionsStatus resetQuestionsStatus;
+  final ResetAnswersStatus resetAnswersStatus;
+  final ResetCompleteStatus resetCompleteStatus;
+  final ResetInitResponse? resetInitResult;
+  final List<ResetQuestion> resetQuestions;
+  final int? resetAttemptsRemaining;
+  final String? resetToken;
+  final String? resetLockedUntil;
+  final int? resetLockoutHours;
+  final String? resetError;
+
   AuthState copyWith({
     final SendOtpStatus? sendOtpStatus,
     final GetUserCountryResponseModel? getUserCountryResponseModel,
@@ -102,6 +144,19 @@ class AuthState {
     final VerifyOtpSignInStatus? verifyOtpSignInStatus,
     final UpdateUserProfileStatus? updateUserProfileStatus,
     final VerifyOtpFromGuestStatus? verifyOtpFromGuestStatus,
+    final ResetInitStatus? resetInitStatus,
+    final ResetSendOtpStatus? resetSendOtpStatus,
+    final ResetVerifyOtpStatus? resetVerifyOtpStatus,
+    final ResetQuestionsStatus? resetQuestionsStatus,
+    final ResetAnswersStatus? resetAnswersStatus,
+    final ResetCompleteStatus? resetCompleteStatus,
+    final ResetInitResponse? resetInitResult,
+    final List<ResetQuestion>? resetQuestions,
+    final int? resetAttemptsRemaining,
+    final String? resetToken,
+    final String? resetLockedUntil,
+    final int? resetLockoutHours,
+    final String? resetError,
   }) {
     return AuthState(
       countryName: countryName ?? this.countryName,
@@ -135,6 +190,20 @@ class AuthState {
           updateUserProfileStatus ?? this.updateUserProfileStatus,
       verifyOtpFromGuestStatus:
           verifyOtpFromGuestStatus ?? this.verifyOtpFromGuestStatus,
+      resetInitStatus: resetInitStatus ?? this.resetInitStatus,
+      resetSendOtpStatus: resetSendOtpStatus ?? this.resetSendOtpStatus,
+      resetVerifyOtpStatus: resetVerifyOtpStatus ?? this.resetVerifyOtpStatus,
+      resetQuestionsStatus: resetQuestionsStatus ?? this.resetQuestionsStatus,
+      resetAnswersStatus: resetAnswersStatus ?? this.resetAnswersStatus,
+      resetCompleteStatus: resetCompleteStatus ?? this.resetCompleteStatus,
+      resetInitResult: resetInitResult ?? this.resetInitResult,
+      resetQuestions: resetQuestions ?? this.resetQuestions,
+      resetAttemptsRemaining:
+          resetAttemptsRemaining ?? this.resetAttemptsRemaining,
+      resetToken: resetToken ?? this.resetToken,
+      resetLockedUntil: resetLockedUntil ?? this.resetLockedUntil,
+      resetLockoutHours: resetLockoutHours ?? this.resetLockoutHours,
+      resetError: resetError,
     );
   }
 }

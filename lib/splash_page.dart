@@ -25,15 +25,13 @@ class _SplashPageState extends State<SplashPage> {
     GetIt.I<AuthBloc>().add(const EnsureWalletTokenValidEvent());
     Future.delayed(const Duration(milliseconds: 6300), () {
       final hasToken = prefsRepository.walletToken != null;
-      final isVerified =
-          (prefsRepository.isVerifiedPhone ?? false) ||
-          (prefsRepository.isVerifiedPhonePeforeExpiredToken ?? false);
+
       final isNameEntered = (prefsRepository.userName?.length ?? 0) > 2;
       final isPinSet = (prefsRepository.passcode?.length ?? 0) > 3;
 
       // ignore: use_build_context_synchronously
       context.go(
-        !hasToken || !isVerified
+        !hasToken
             ? GRouter.config.applicationRoutes.kRegistrationPage
             : !isNameEntered
             ? GRouter.config.applicationRoutes.kEnterNamePage

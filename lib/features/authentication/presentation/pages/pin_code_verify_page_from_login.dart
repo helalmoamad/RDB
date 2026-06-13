@@ -12,6 +12,7 @@ import 'package:rdb/core/utils/form_state_mixin.dart';
 import 'package:rdb/core/utils/form_utils.dart';
 import 'package:rdb/features/authentication/presentation/manager/auth_bloc.dart';
 import 'package:rdb/features/authentication/presentation/widgets/pin_item.dart';
+import 'package:rdb/features/authentication/presentation/widgets/reset_passcode_widgets/forget_passcode_flow.dart';
 import 'package:rdb/routes/router.dart';
 import 'package:rdb/theme/typography.dart';
 import 'package:rdb/generated/locale_keys.g.dart';
@@ -67,8 +68,21 @@ class _PinCodeVerifyFromLoginPageState extends State<PinCodeVerifyFromLoginPage>
   void initState() {
     super.initState();
     checkOtp = ValueNotifier<int>(0);
+    // فكّ قفل لوحة الـ OTP عند دخول صفحة رمز المرور حتى تعمل خاناتها
+    // (القفل قد يكون مرفوعاً من مسار نجاح الـ OTP السابق).
+    unlockOtpKeyboard();
     //_checkBiometricAvailability();
     _resumeLockoutIfActive();
+
+    // إظهار لوحة المفاتيح بعد استقرار الصفحة (وانتهاء الانتقال من صفحة
+    // النجاح) لا أثناء الانتقال — وإلا ظهرت اللوحة ونحن ما زلنا على
+    // صفحة LoginSuccessfully. التأخير يضمن أنها تفتح بعد الوصول هنا.
+    Future.delayed(const Duration(seconds: 1), () {
+      // عبر البوابة الوحيدة showOtpKeyboard التي تحترم القفل.
+      if (mounted && !_isLockedOut) {
+        showOtpKeyboard(0);
+      }
+    });
   }
 
   @override
@@ -392,6 +406,27 @@ class _PinCodeVerifyFromLoginPageState extends State<PinCodeVerifyFromLoginPage>
                           ),
                         ),
                         10.verticalSpace,
+                        // نسيت رمز المرور أثناء تسجيل الدخول: يفتح تدفّق reset
+                        // في وضع mid-login (تخطّي الهاتف/الطرق/OTP → أسئلة مباشرة).
+                        GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onTap: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) =>
+                                    const ForgetPasscodeFlow(midLogin: true),
+                              ),
+                            );
+                          },
+                          child: Text(
+                            LocaleKeys.reset_forget_passcode_q.tr(),
+                            style: context.textTheme.titleLarge?.mq.copyWith(
+                              fontSize: 11.sp,
+                              color: Colors.black45,
+                            ),
+                          ),
+                        ),
+                        10.verticalSpace,
                         /*  if (_supportsFingerprint)
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -515,7 +550,9 @@ class _PinCodeVerifyFromLoginPageState extends State<PinCodeVerifyFromLoginPage>
               index: 0,
               pasteOtpCode: pasteOtpCode,
               onChange: _onPinChanged,
-              autoFocus: true,
+              // الإظهار يتم بعد استقرار الصفحة عبر initState، لا في
+              // initState للخانة (يقع أثناء الانتقال من صفحة النجاح).
+              autoFocus: false,
             ),
             PinItem(
               key: const Key('otp_item_2'),

@@ -10,7 +10,6 @@ import 'package:rdb/common/constant/design/assets_provider.dart';
 import 'package:rdb/core/domin/repositories/prefs_repository.dart';
 import 'package:rdb/core/utils/extensions/build_context.dart';
 import 'package:rdb/features/authentication/presentation/manager/auth_bloc.dart';
-import 'package:rdb/routes/router.dart';
 import 'package:rdb/theme/typography.dart';
 import 'package:rdb/generated/locale_keys.g.dart';
 
@@ -75,7 +74,7 @@ class _SwitchWepAppPageState extends State<SwitchWepAppPage> {
                 // بعد النجاح بـ 3 ثوانٍ ننتقل لصفحة السبلاش لإعادة تهيئة التطبيق
                 // وتحميل الصفحة الرئيسية من جديد
                 await Future.delayed(const Duration(seconds: 3));
-                GRouter.router.go(GRouter.config.kRootRoute);
+                widget.onSuccess();
               }
             },
             buildWhen: (previous, current) =>

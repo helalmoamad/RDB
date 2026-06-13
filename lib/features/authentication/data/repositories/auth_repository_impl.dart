@@ -4,6 +4,7 @@ import 'package:rdb/features/authentication/data/models/get_user_country_respons
 import 'package:rdb/features/authentication/data/models/login_to_wallet_model.dart';
 import 'package:rdb/features/authentication/data/models/passcode_verify_model.dart';
 import 'package:rdb/features/authentication/data/models/passkey_model.dart';
+import 'package:rdb/features/authentication/data/models/reset_passcode_models.dart';
 import 'package:rdb/features/authentication/data/models/send_otp_response_model.dart';
 import 'package:rdb/features/authentication/data/models/user_profile_model.dart';
 import 'package:rdb/features/authentication/data/models/verify_otp_sign_up_and_in_response_model.dart';
@@ -133,5 +134,63 @@ class AuthRepositoryImpl extends AuthRepository with HandlingExceptionRequest {
   @override
   Future<Either<Failure, GetUserCountryResponseModel>> getUserCountry() {
     return handlingExceptionRequest(tryCall: dataSource.getUserCountry);
+  }
+
+  // ── إعادة تعيين رمز المرور ──
+  @override
+  Future<Either<Failure, ResetInitResponse>> resetPasscodeInit({
+    required bool midLogin,
+  }) {
+    return handlingExceptionRequest(
+      tryCall: () => dataSource.resetPasscodeInit(midLogin: midLogin),
+    );
+  }
+
+  @override
+  Future<Either<Failure, ResetSendOtpResponse>> resetPasscodeSendOtp(
+    Map<String, dynamic> params,
+  ) {
+    return handlingExceptionRequest(
+      tryCall: () => dataSource.resetPasscodeSendOtp(params),
+    );
+  }
+
+  @override
+  Future<Either<Failure, ResetVerifyOtpResponse>> resetPasscodeVerifyOtp(
+    Map<String, dynamic> params,
+  ) {
+    return handlingExceptionRequest(
+      tryCall: () => dataSource.resetPasscodeVerifyOtp(params),
+    );
+  }
+
+  @override
+  Future<Either<Failure, ResetQuestionsResponse>> resetPasscodeQuestions({
+    required bool midLogin,
+  }) {
+    return handlingExceptionRequest(
+      tryCall: () => dataSource.resetPasscodeQuestions(midLogin: midLogin),
+    );
+  }
+
+  @override
+  Future<Either<Failure, ResetAnswersResponse>> resetPasscodeAnswers(
+    Map<String, dynamic> params, {
+    required bool midLogin,
+  }) {
+    return handlingExceptionRequest(
+      tryCall: () => dataSource.resetPasscodeAnswers(params, midLogin: midLogin),
+    );
+  }
+
+  @override
+  Future<Either<Failure, ResetCompleteResponse>> resetPasscodeComplete(
+    Map<String, dynamic> params, {
+    required bool midLogin,
+  }) {
+    return handlingExceptionRequest(
+      tryCall: () =>
+          dataSource.resetPasscodeComplete(params, midLogin: midLogin),
+    );
   }
 }

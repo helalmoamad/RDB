@@ -37,7 +37,10 @@ class _PinCodeSetupPageState extends State<PinCodeSetupPage>
   @override
   void initState() {
     super.initState();
+    prefsRepository.setPasscode("");
     checkOtp = ValueNotifier<int>(0);
+    // فكّ قفل لوحة الـ OTP عند دخول صفحة رمز المرور حتى تعمل خاناتها.
+    unlockOtpKeyboard();
   }
 
   void _onPinChanged() => setState(() => codeStatus = 0);

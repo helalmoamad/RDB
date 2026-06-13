@@ -56,6 +56,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         kycBaseUrl: dotenv.env['KYC_URL'] ?? '', // رابط KYC
         token: GetIt.I<PrefsRepository>().walletToken, // استخدم القيمة الفعلية
         languageCode: LanguageService.languageCode,
+        refreshToken: GetIt.I<PrefsRepository>().walletRefreshToken,
         clientIp: authBloc.state.getUserCountryResponseModel?.ip ?? '',
 
         email: GetIt.I<PrefsRepository>().email ?? '',

@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get_it/get_it.dart';
+import 'package:rdb/common/constant/configuration/wallet_url_routes.dart';
 import 'package:rdb/common/helper/show_message.dart';
 import 'package:rdb/features/authentication/presentation/manager/auth_bloc.dart';
 import '../../enums/status_code_type.dart';
@@ -124,7 +125,12 @@ class LoggerInterceptor extends Interceptor with HandlingExceptionRequest {
               jsonDecode(err.response.toString())["statusCode"].toString() ==
                   "401") &&
           (err.requestOptions.path.contains(dotenv.env['WALLET_URL']!))) {
-        _prefsRepository.setWalletToken("");
+        // _prefsRepository.setWalletToken("");
+        if (!(err.requestOptions.path.contains(
+          WalletEndPoints.switchToAppEP,
+        ))) {
+          GetIt.I<AuthBloc>().add(RefreshTokenEvent());
+        }
       }
 
       if ((jsonDecode(

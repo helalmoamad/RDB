@@ -13,6 +13,7 @@ import 'package:rdb/core/utils/form_utils.dart';
 import 'package:rdb/features/authentication/presentation/manager/auth_bloc.dart';
 import 'package:rdb/features/authentication/presentation/widgets/biometric_auth_services.dart';
 import 'package:rdb/features/authentication/presentation/widgets/pin_item.dart';
+import 'package:rdb/features/authentication/presentation/widgets/reset_passcode_widgets/forget_passcode_flow.dart';
 import 'package:rdb/theme/typography.dart';
 import 'package:rdb/generated/locale_keys.g.dart';
 import 'dart:async';
@@ -65,6 +66,8 @@ class _PinCodeVerifyPageState extends State<PinCodeVerifyPage>
   void initState() {
     super.initState();
     checkOtp = ValueNotifier<int>(0);
+    // فكّ قفل لوحة الـ OTP عند دخول صفحة رمز المرور حتى تعمل خاناتها.
+    unlockOtpKeyboard();
     _isBiometricEnable();
     _checkStatusAndAutoUnlock();
     _resumeLockoutIfActive();
@@ -429,6 +432,24 @@ class _PinCodeVerifyPageState extends State<PinCodeVerifyPage>
                         style: context.textTheme.titleLarge?.bq.copyWith(
                           fontSize: 14.sp,
                           color: Colors.black45,
+                        ),
+                      ),
+                      10.verticalSpace,
+                      GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => const ForgetPasscodeFlow(),
+                            ),
+                          );
+                        },
+                        child: Text(
+                          LocaleKeys.reset_forget_passcode_q.tr(),
+                          style: context.textTheme.titleLarge?.mq.copyWith(
+                            fontSize: 11.sp,
+                            color: Colors.black45,
+                          ),
                         ),
                       ),
                       10.verticalSpace,
