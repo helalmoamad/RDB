@@ -32,7 +32,17 @@ class AppLockController {
 
   Route<void>? _gateRoute;
 
-  bool get _needsGate => !isPasscodeVerified.value || isShowSwitch.value;
+  /// لا تظهر طبقة الحماية إطلاقاً على صفحات الـ auth: تتطلّب جلسة مكتملة
+  /// (walletToken + passcode مضبوط). بهذا لا يظهر القفل أبداً قبل تسجيل الدخول
+  /// أو على صفحة تعيين الرمز (حيث الـ passcode لم يُضبَط بعد).
+  bool get _canShowGate {
+    final prefs = GetIt.I<PrefsRepository>();
+    return (prefs.walletToken ?? '').isNotEmpty &&
+        (prefs.passcode ?? '').isNotEmpty;
+  }
+
+  bool get _needsGate =>
+      _canShowGate && (!isPasscodeVerified.value || isShowSwitch.value);
 
   // ── واجهة التحكّم (تُستدعى من HomePage) ──
 

@@ -393,6 +393,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
             _prefsRepository.setIsTwoFactorEnabled(
               r.user?.isTwoFactorEnabled ?? false,
             );
+            _prefsRepository.setIsKycVerification(
+              (r.user?.kycVerification?.status ?? '').toLowerCase() ==
+                  'verified',
+            );
             _prefsRepository.setVerifiedPhonePeforeExpiredToken(false);
 
             ////////////////////////
@@ -577,6 +581,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
               _prefsRepository.setIsTwoFactorEnabled(
                 r.user?.isTwoFactorEnabled ?? false,
               );
+              _prefsRepository.setIsKycVerification(
+                (r.user?.kycVerification?.status ?? '').toLowerCase() ==
+                    'verified',
+              );
               _prefsRepository.setVerifiedPhonePeforeExpiredToken(false);
 
               ////////////////////////
@@ -620,6 +628,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
             _prefsRepository.setIsAccountActive(!(r.user?.isBlocked ?? false));
             _prefsRepository.setIsTwoFactorEnabled(
               r.user?.isTwoFactorEnabled ?? false,
+            );
+            _prefsRepository.setIsKycVerification(
+              (r.user?.kycVerification?.status ?? '').toLowerCase() ==
+                  'verified',
             );
             _prefsRepository.setVerifiedPhonePeforeExpiredToken(false);
 
@@ -690,6 +702,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         // ignore: unrelated_type_equality_checks
         _prefsRepository.setVerifiedPhone(r.user?.isPhoneVerified ?? false);
         _prefsRepository.setPhoneNumber((r.user?.phoneNumber).toString());
+        _prefsRepository.setIsKycVerification(
+          (r.user?.kycVerification?.status ?? '').toLowerCase() == 'verified',
+        );
 
         emit(
           state.copyWith(
