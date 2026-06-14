@@ -236,6 +236,28 @@ class ResetCompleteEvent extends AuthEvent {
   List<Object?> get props => [passcode, midLogin];
 }
 
+/// بدء جلسة التحقّق بالوجه (start) — يُرسَل عند دخول شاشة الوجه قبل الالتقاط.
+class ReverifyStartEvent extends AuthEvent {
+  final String challengeId;
+  const ReverifyStartEvent({required this.challengeId});
+  @override
+  List<Object?> get props => [challengeId];
+}
+
+/// التحقّق بالوجه (step-up) في تدفّق إعادة التعيين. [liveFaceImageData] هو
+/// data URL لصورة وجه مباشرة. عند النجاح يُخزَّن stepToken في resetToken لحمله
+/// على complete.
+class ReverifyFaceEvent extends AuthEvent {
+  final String challengeId;
+  final String liveFaceImageData;
+  const ReverifyFaceEvent({
+    required this.challengeId,
+    required this.liveFaceImageData,
+  });
+  @override
+  List<Object?> get props => [challengeId, liveFaceImageData];
+}
+
 /// تصفير كل حالة تدفّق إعادة التعيين عند فتح التدفّق (AuthBloc مفرد، فقد تبقى
 /// حالة قديمة من محاولة سابقة).
 class ResetFlowClearEvent extends AuthEvent {

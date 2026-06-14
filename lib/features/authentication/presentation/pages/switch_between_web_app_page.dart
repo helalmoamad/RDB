@@ -101,6 +101,11 @@ class _SwitchWepAppPageState extends State<SwitchWepAppPage> {
                             AppAssets.verifiedSvg,
                             width: 23,
                             height: 23,
+                            color: Color(
+                              (prefsRepository.isKycVerification ?? false)
+                                  ? 0xff388CFF
+                                  : 0xff8D8D8D,
+                            ),
                           ),
                           SizedBox(height: 10.h),
                           Text(

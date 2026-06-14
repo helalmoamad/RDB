@@ -193,4 +193,28 @@ class AuthRepositoryImpl extends AuthRepository with HandlingExceptionRequest {
           dataSource.resetPasscodeComplete(params, midLogin: midLogin),
     );
   }
+
+  @override
+  Future<Either<Failure, ReverifyStartResponse>> reverifyFaceStart(
+    String challengeId,
+  ) {
+    return handlingExceptionRequest(
+      tryCall: () => dataSource.reverifyFaceStart(challengeId),
+    );
+  }
+
+  @override
+  Future<Either<Failure, ReverifyVerifyResponse>> reverifyFaceVerify({
+    required String challengeId,
+    required String liveFaceImageData,
+    String? sessionId,
+  }) {
+    return handlingExceptionRequest(
+      tryCall: () => dataSource.reverifyFaceVerify(
+        challengeId: challengeId,
+        liveFaceImageData: liveFaceImageData,
+        sessionId: sessionId,
+      ),
+    );
+  }
 }

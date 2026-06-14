@@ -1,6 +1,4 @@
 import 'dart:async';
-
-import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:rdb/features/authentication/data/models/reset_passcode_models.dart';
 import 'reset_question_page.dart';
@@ -29,7 +27,7 @@ class ResetQuestionsViewState extends State<ResetQuestionsView> {
   /// questionId → optionId
   final Map<String, String> _answers = {};
 
-  static const int _countdownSeconds = kDebugMode ? 3 : 30;
+  static const int _countdownSeconds = 30;
   Timer? _submitTimer;
   Timer? _advanceTimer;
   bool _submitActive = false;
@@ -78,6 +76,9 @@ class ResetQuestionsViewState extends State<ResetQuestionsView> {
       if (_countdown.value <= 1) {
         _countdown.value = 0;
         t.cancel();
+        // انتهت المهلة → إرسال الإجابات تلقائياً (المستخدم لا يضغط الزرّ؛
+        // الـ 30 ثانية كانت مهلة لتعديل الإجابات فقط).
+        if (mounted && _allAnswered) _submit();
       } else {
         _countdown.value -= 1;
       }

@@ -70,6 +70,14 @@ abstract class AuthRepository {
     Map<String, dynamic> params, {
     required bool midLogin,
   });
+  Future<Either<Failure, ReverifyStartResponse>> reverifyFaceStart(
+    String challengeId,
+  );
+  Future<Either<Failure, ReverifyVerifyResponse>> reverifyFaceVerify({
+    required String challengeId,
+    required String liveFaceImageData,
+    String? sessionId,
+  });
   /*Future<Either<Failure, VerifyOtpSignUpAndInResponseModel>> verifyOtpSignUp(
     Map<String, dynamic> params,
   );*/

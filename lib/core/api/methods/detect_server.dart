@@ -1,9 +1,10 @@
 import 'package:get_it/get_it.dart';
 import 'package:rdb/common/constant/configuration/cloudinary_url_routes.dart';
+import 'package:rdb/common/constant/configuration/kyc_url_routes.dart';
 import 'package:rdb/common/constant/configuration/wallet_url_routes.dart';
 import 'package:rdb/core/domin/repositories/prefs_repository.dart';
 
-enum ServerName { location, cloudinary, wallet, passcode }
+enum ServerName { location, cloudinary, wallet, passcode, kyc }
 
 //todo make the return value dynamic to return the cloudinary as String
 Uri getBaseUriForSpecificServer(ServerName serverName) {
@@ -16,6 +17,8 @@ Uri getBaseUriForSpecificServer(ServerName serverName) {
       return Uri.parse('https://ipwho.is/');
     case ServerName.cloudinary:
       return CloudinaryUrls.baseUri;
+    case ServerName.kyc:
+      return KycUrls.baseUri;
   }
 }
 
@@ -30,5 +33,8 @@ String? getServerToken(ServerName serverName) {
       return null;
     case ServerName.passcode:
       return prefsRepository.stepToken;
+    case ServerName.kyc:
+      // مسارات reverify تقبل Authorization: Bearer (توكن المحفظة).
+      return prefsRepository.walletToken;
   }
 }

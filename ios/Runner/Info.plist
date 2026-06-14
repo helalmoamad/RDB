@@ -47,5 +47,7 @@
 	<true/>
 	<key>NSFaceIDUsageDescription</key>
 	<string>Use Face ID to securely sign in to your account.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>We need camera access to verify your identity (face check) when resetting your passcode.</string>
 </dict>
 </plist>

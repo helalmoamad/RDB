@@ -133,3 +133,43 @@ class ResetCompleteUseCase
     ResetCompleteParams params,
   ) => repository.resetPasscodeComplete(params.map, midLogin: params.midLogin);
 }
+
+@injectable
+class ReverifyFaceStartUseCase
+    implements UseCase<ReverifyStartResponse, String> {
+  ReverifyFaceStartUseCase(this.repository);
+  final AuthRepository repository;
+
+  @override
+  Future<Either<Failure, ReverifyStartResponse>> call(String challengeId) =>
+      repository.reverifyFaceStart(challengeId);
+}
+
+/// معاملات التحقّق بالوجه (step-up): challengeId من init + صورة وجه مباشرة +
+/// sessionId العائد من start.
+class ReverifyFaceParams {
+  ReverifyFaceParams({
+    required this.challengeId,
+    required this.liveFaceImageData,
+    this.sessionId,
+  });
+  final String challengeId;
+  final String liveFaceImageData; // data:image/jpeg;base64,...
+  final String? sessionId;
+}
+
+@injectable
+class ReverifyFaceVerifyUseCase
+    implements UseCase<ReverifyVerifyResponse, ReverifyFaceParams> {
+  ReverifyFaceVerifyUseCase(this.repository);
+  final AuthRepository repository;
+
+  @override
+  Future<Either<Failure, ReverifyVerifyResponse>> call(
+    ReverifyFaceParams params,
+  ) => repository.reverifyFaceVerify(
+    challengeId: params.challengeId,
+    liveFaceImageData: params.liveFaceImageData,
+    sessionId: params.sessionId,
+  );
+}

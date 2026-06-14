@@ -6,6 +6,7 @@ import 'package:get_it/get_it.dart';
 import 'package:rdb/common/constant/design/assets_provider.dart';
 import 'package:rdb/common/helper/show_message.dart';
 import 'package:rdb/features/authentication/presentation/manager/auth_bloc.dart';
+import 'face_verification_view.dart';
 import 'forget_passcode_intro.dart';
 import 'reset_phone_tab.dart';
 import 'reset_pin_item.dart';
@@ -122,6 +123,17 @@ class _ForgetPasscodeFlowState extends State<ForgetPasscodeFlow> {
       }
       return;
     }
+    // 3) نجاح التحقّق بالوجه (ونحن على صفحة الوجه) → ننتقل لتعيين الرمز الجديد
+    // دون رجوع (مطابق لنجاح الأسئلة). stepToken محمول في state.resetToken.
+    if (s.reverifyFaceStatus == ReverifyFaceStatus.passed &&
+        _currentPage.value == _facePage) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (_) => ResetSetupPasscodePage(midLogin: widget.midLogin),
+        ),
+      );
+      return;
+    }
   }
 
   /// يعرض رسالة خطأ ويُغلق التدفّق (يعود لشاشة إدخال الـ passcode).
@@ -205,7 +217,8 @@ class _ForgetPasscodeFlowState extends State<ForgetPasscodeFlow> {
         listenWhen: (p, c) =>
             p.resetInitStatus != c.resetInitStatus ||
             p.resetQuestionsStatus != c.resetQuestionsStatus ||
-            p.resetAnswersStatus != c.resetAnswersStatus,
+            p.resetAnswersStatus != c.resetAnswersStatus ||
+            p.reverifyFaceStatus != c.reverifyFaceStatus,
         listener: _onResetState,
         child: _buildScaffold(context),
       ),
@@ -346,8 +359,24 @@ class _ForgetPasscodeFlowState extends State<ForgetPasscodeFlow> {
                           builder: (context, s) =>
                               ResetLockedPage(retryAfter: _formatLockout(s)),
                         ),
-                        // 7) فرع الوجه — عنصر نائب (لاحقاً).
-                        const _FacePlaceholder(),
+                        // 7) فرع الوجه — معاينة كاميرا + التقاط. يُبنى فقط عند
+                        // الوصول للصفحة (حتى لا تبدأ الكاميرا قبل أوانها).
+                        ValueListenableBuilder<int>(
+                          valueListenable: _currentPage,
+                          builder: (context, page, _) {
+                            if (page != _facePage) {
+                              return const SizedBox.shrink();
+                            }
+                            final challengeId = _bloc
+                                .state
+                                .resetInitResult
+                                ?.stepUp
+                                ?.challengeId ?? '';
+                            return FaceVerificationView(
+                              challengeId: challengeId,
+                            );
+                          },
+                        ),
                       ],
                     ),
                   ),
@@ -368,25 +397,6 @@ class _ForgetPasscodeFlowState extends State<ForgetPasscodeFlow> {
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-}
-
-/// عنصر نائب لفرع الوجه (مستخدم موثّق على idle-lock). التقاط الوجه سيُضاف لاحقاً.
-class _FacePlaceholder extends StatelessWidget {
-  const _FacePlaceholder();
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 40.w),
-        child: Text(
-          'التحقق بالوجه — قيد الإنشاء',
-          textAlign: TextAlign.center,
-          style: TextStyle(color: const Color(0xff5D5C5D), fontSize: 16.sp),
         ),
       ),
     );

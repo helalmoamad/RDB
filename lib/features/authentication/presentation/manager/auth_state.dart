@@ -37,6 +37,12 @@ enum ResetAnswersStatus { init, loading, success, failure }
 
 enum ResetCompleteStatus { init, loading, success, failure }
 
+/// حالة بدء جلسة التحقّق بالوجه (start).
+enum ReverifyStartStatus { init, loading, success, failure }
+
+/// حالة التحقّق بالوجه (step-up) في تدفّق إعادة تعيين رمز المرور.
+enum ReverifyFaceStatus { init, loading, passed, failed, error }
+
 class AuthState {
   const AuthState({
     this.sendOtpStatus = SendOtpStatus.init,
@@ -75,6 +81,9 @@ class AuthState {
     this.resetLockedUntil,
     this.resetLockoutHours,
     this.resetError,
+    this.reverifyFaceStatus = ReverifyFaceStatus.init,
+    this.reverifyStartStatus = ReverifyStartStatus.init,
+    this.reverifySessionId,
   });
 
   final SendOtpStatus sendOtpStatus;
@@ -118,6 +127,11 @@ class AuthState {
   final String? resetLockedUntil;
   final int? resetLockoutHours;
   final String? resetError;
+  final ReverifyFaceStatus reverifyFaceStatus;
+  final ReverifyStartStatus reverifyStartStatus;
+
+  /// sessionId العائد من start — يُرسَل في verify التالي.
+  final String? reverifySessionId;
 
   AuthState copyWith({
     final SendOtpStatus? sendOtpStatus,
@@ -157,6 +171,9 @@ class AuthState {
     final String? resetLockedUntil,
     final int? resetLockoutHours,
     final String? resetError,
+    final ReverifyFaceStatus? reverifyFaceStatus,
+    final ReverifyStartStatus? reverifyStartStatus,
+    final String? reverifySessionId,
   }) {
     return AuthState(
       countryName: countryName ?? this.countryName,
@@ -204,6 +221,9 @@ class AuthState {
       resetLockedUntil: resetLockedUntil ?? this.resetLockedUntil,
       resetLockoutHours: resetLockoutHours ?? this.resetLockoutHours,
       resetError: resetError,
+      reverifyFaceStatus: reverifyFaceStatus ?? this.reverifyFaceStatus,
+      reverifyStartStatus: reverifyStartStatus ?? this.reverifyStartStatus,
+      reverifySessionId: reverifySessionId ?? this.reverifySessionId,
     );
   }
 }

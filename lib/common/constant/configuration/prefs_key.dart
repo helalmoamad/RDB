@@ -53,4 +53,5 @@ abstract class PrefsKey {
   static const pinLockoutLevel = r'__$__pinLockoutLevel__$__';
   static const isAccountActive = r'__$__isAccountActive__$__';
   static const isTwoFactorEnabled = r'__$__isTwoFactorEnabled__$__';
+  static const isKycVerification = r'__$__isKycVerification__$__';
 }

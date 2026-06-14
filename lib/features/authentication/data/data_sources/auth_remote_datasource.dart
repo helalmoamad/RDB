@@ -1,5 +1,6 @@
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:injectable/injectable.dart';
+import 'package:rdb/common/constant/configuration/kyc_url_routes.dart';
 import 'package:rdb/common/constant/configuration/wallet_url_routes.dart';
 import 'package:rdb/core/api/methods/detect_server.dart';
 import 'package:rdb/features/authentication/data/models/login_to_wallet_model.dart';
@@ -19,7 +20,6 @@ import '../models/verify_otp_sign_up_and_in_response_model.dart';
 
 /// تبديل mock تدفّق إعادة تعيين رمز المرور (لاختبار الواجهة بلا backend).
 /// **اجعلها `false` عند ربط الباك الفعلي.**
-const bool kResetPasscodeMock = false;
 
 @injectable
 class AuthRemoteDatasource {
@@ -73,15 +73,7 @@ class AuthRemoteDatasource {
   ServerName _resetServer(bool midLogin) =>
       midLogin ? ServerName.passcode : ServerName.wallet;
 
-  // تأخير الـ mock (ليظهر shimmer الأزرار بوضوح أثناء الاختبار).
-  static const Duration _mockDelay = Duration(milliseconds: 1500);
-
   Future<ResetInitResponse> resetPasscodeInit({required bool midLogin}) async {
-    if (kResetPasscodeMock) {
-      await Future.delayed(_mockDelay);
-      // الفرع الافتراضي للاختبار: أسئلة (غير موثّق). لاختبار القفل/الوجه بدّل هنا.
-      return const ResetInitResponse(isVerified: false);
-    }
     return PostClient<ResetInitResponse>(
       serverName: _resetServer(midLogin),
       requestPrams: RequestConfig<ResetInitResponse>(
@@ -99,10 +91,6 @@ class AuthRemoteDatasource {
   Future<ResetSendOtpResponse> resetPasscodeSendOtp(
     Map<String, dynamic> params,
   ) async {
-    if (kResetPasscodeMock) {
-      await Future.delayed(_mockDelay);
-      return const ResetSendOtpResponse(ok: true, sessionInfo: 'mock');
-    }
     return PostClient<ResetSendOtpResponse>(
       serverName: ServerName.wallet,
       requestPrams: RequestConfig<ResetSendOtpResponse>(
@@ -118,10 +106,6 @@ class AuthRemoteDatasource {
   Future<ResetVerifyOtpResponse> resetPasscodeVerifyOtp(
     Map<String, dynamic> params,
   ) async {
-    if (kResetPasscodeMock) {
-      await Future.delayed(_mockDelay);
-      return const ResetVerifyOtpResponse(ok: true);
-    }
     return PostClient<ResetVerifyOtpResponse>(
       serverName: ServerName.wallet,
       requestPrams: RequestConfig<ResetVerifyOtpResponse>(
@@ -137,10 +121,6 @@ class AuthRemoteDatasource {
   Future<ResetQuestionsResponse> resetPasscodeQuestions({
     required bool midLogin,
   }) async {
-    if (kResetPasscodeMock) {
-      await Future.delayed(_mockDelay);
-      return _mockQuestions();
-    }
     return GetClient<ResetQuestionsResponse>(
       serverName: _resetServer(midLogin),
       requestPrams: RequestConfig<ResetQuestionsResponse>(
@@ -158,15 +138,6 @@ class AuthRemoteDatasource {
     Map<String, dynamic> params, {
     required bool midLogin,
   }) async {
-    if (kResetPasscodeMock) {
-      await Future.delayed(_mockDelay);
-      // نجاح افتراضي للاختبار. لاختبار الفشل/القفل بدّل القيم هنا.
-      return const ResetAnswersResponse(
-        success: true,
-        attemptsRemaining: 2,
-        resetToken: 'mock-reset-token',
-      );
-    }
     return PostClient<ResetAnswersResponse>(
       serverName: _resetServer(midLogin),
       requestPrams: RequestConfig<ResetAnswersResponse>(
@@ -185,10 +156,6 @@ class AuthRemoteDatasource {
     Map<String, dynamic> params, {
     required bool midLogin,
   }) async {
-    if (kResetPasscodeMock) {
-      await Future.delayed(_mockDelay);
-      return const ResetCompleteResponse(success: true);
-    }
     return PostClient<ResetCompleteResponse>(
       serverName: _resetServer(midLogin),
       requestPrams: RequestConfig<ResetCompleteResponse>(
@@ -203,44 +170,42 @@ class AuthRemoteDatasource {
     )();
   }
 
-  // أسئلة تجريبية (3) لاختبار العرض الديناميكي وإرسال optionId.
-  ResetQuestionsResponse _mockQuestions() => const ResetQuestionsResponse(
-    attemptsRemaining: 2,
-    questions: [
-      ResetQuestion(
-        id: 'q-last-login',
-        text: 'Do You Remember Your Last Login ?',
-        options: [
-          ResetQuestionOption(id: 'hours', label: 'Hours Ago'),
-          ResetQuestionOption(id: 'days', label: 'Days Ago'),
-          ResetQuestionOption(id: 'weeks', label: 'Weeks Ago'),
-          ResetQuestionOption(id: 'months', label: 'Months Ago'),
-          ResetQuestionOption(id: 'dunno', label: "I Don't Remember"),
-        ],
+  /// بدء جلسة التحقّق بالوجه (step-up) — تُستدعى عند دخول شاشة الوجه.
+  Future<ReverifyStartResponse> reverifyFaceStart(String challengeId) {
+    return PostClient<ReverifyStartResponse>(
+      serverName: ServerName.kyc,
+      requestPrams: RequestConfig<ReverifyStartResponse>(
+        endpoint: KycEndPoints.reverifyStartEP,
+        data: {'challengeId': challengeId},
+        response: ResponseValue<ReverifyStartResponse>(
+          fromJson: (r) => ReverifyStartResponse.fromJson(r),
+        ),
       ),
-      ResetQuestion(
-        id: 'q-account-age',
-        text: 'How Long Ago Did You Create Your Account With Us?',
-        options: [
-          ResetQuestionOption(id: 'days', label: 'Days Ago'),
-          ResetQuestionOption(id: 'weeks', label: 'Weeks Ago'),
-          ResetQuestionOption(id: 'months', label: 'Months Ago'),
-          ResetQuestionOption(id: 'years', label: 'Years Ago'),
-          ResetQuestionOption(id: 'dunno', label: "I Don't Remember"),
-        ],
+    )();
+  }
+
+  /// التحقّق بالوجه (step-up) عبر خادم الـ KYC — المسار أحادي الإطار.
+  /// [liveFaceImageData] هو data URL لصورة وجه مباشرة (data:image/jpeg;base64,...).
+  Future<ReverifyVerifyResponse> reverifyFaceVerify({
+    required String challengeId,
+    required String liveFaceImageData,
+    String? sessionId,
+  }) {
+    return PostClient<ReverifyVerifyResponse>(
+      serverName: ServerName.kyc,
+      requestPrams: RequestConfig<ReverifyVerifyResponse>(
+        endpoint: KycEndPoints.reverifyVerifyEP,
+        data: {
+          'challengeId': challengeId,
+          if (sessionId != null && sessionId.isNotEmpty) 'sessionId': sessionId,
+          'liveFaceImageData': liveFaceImageData,
+        },
+        response: ResponseValue<ReverifyVerifyResponse>(
+          fromJson: (r) => ReverifyVerifyResponse.fromJson(r),
+        ),
       ),
-      ResetQuestion(
-        id: 'q-last-tx-type',
-        text: 'What Was Your Last Transaction?',
-        options: [
-          ResetQuestionOption(id: 'deposit', label: 'Deposit'),
-          ResetQuestionOption(id: 'transfer', label: 'Transfer'),
-          ResetQuestionOption(id: 'payment', label: 'Payment'),
-          ResetQuestionOption(id: 'dunno', label: "I Don't Remember"),
-        ],
-      ),
-    ],
-  );
+    )();
+  }
 
   /*Future<VerifyOtpSignUpAndInResponseModel> verifyOtpSignUp(
     Map<String, dynamic> params,

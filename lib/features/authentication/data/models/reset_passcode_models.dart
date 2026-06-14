@@ -181,3 +181,51 @@ class ResetCompleteResponse {
   factory ResetCompleteResponse.fromJson(Map<String, dynamic> json) =>
       ResetCompleteResponse(success: (json['success'] as bool?) ?? false);
 }
+
+/// استجابة `POST /api/kyc/reverify/start` (بدء جلسة التحقّق بالوجه).
+/// تُستدعى عند الدخول لشاشة الوجه قبل الالتقاط.
+class ReverifyStartResponse {
+  const ReverifyStartResponse({this.sessionId, this.region, this.mock});
+
+  final String? sessionId;
+  final String? region;
+  final bool? mock;
+
+  factory ReverifyStartResponse.fromJson(Map<String, dynamic> json) =>
+      ReverifyStartResponse(
+        sessionId: json['sessionId'] as String?,
+        region: json['region'] as String?,
+        mock: json['mock'] as bool?,
+      );
+}
+
+/// استجابة `POST /api/kyc/reverify/verify` (التحقّق بالوجه — step-up).
+/// المسار أحادي الإطار: نرسل `liveFaceImageData` ونتلقّى الحالة + `stepToken`
+/// عند النجاح ليُحمَل على إكمال إعادة التعيين (complete).
+class ReverifyVerifyResponse {
+  const ReverifyVerifyResponse({
+    required this.status,
+    this.reason,
+    this.stepToken,
+    this.faceMatchScore,
+    this.livenessConfidence,
+  });
+
+  /// "passed" | "failed" | "error".
+  final String status;
+  final String? reason;
+  final String? stepToken;
+  final num? faceMatchScore;
+  final num? livenessConfidence;
+
+  bool get isPassed => status.toLowerCase() == 'passed';
+
+  factory ReverifyVerifyResponse.fromJson(Map<String, dynamic> json) =>
+      ReverifyVerifyResponse(
+        status: json['status'] as String? ?? 'error',
+        reason: json['reason'] as String?,
+        stepToken: json['stepToken'] as String?,
+        faceMatchScore: json['faceMatchScore'] as num?,
+        livenessConfidence: json['livenessConfidence'] as num?,
+      );
+}

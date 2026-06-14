@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get_it/get_it.dart';
 import 'package:rdb/common/helper/show_message.dart';
+import 'package:rdb/core/domin/repositories/prefs_repository.dart';
 import 'package:rdb/core/utils/extensions/build_context.dart';
 import 'package:rdb/features/authentication/presentation/manager/auth_bloc.dart';
 import 'package:rdb/generated/locale_keys.g.dart';
@@ -44,6 +45,7 @@ class _ResetSetupPasscodePageState extends State<ResetSetupPasscodePage> {
   @override
   void initState() {
     super.initState();
+    GetIt.I<PrefsRepository>().setPasscode("");
     for (final c in _controllers) {
       c.text = _zwsp;
     }
@@ -120,6 +122,7 @@ class _ResetSetupPasscodePageState extends State<ResetSetupPasscodePage> {
 
   void _onCompleteResult(BuildContext context, AuthState state) {
     if (state.resetCompleteStatus == ResetCompleteStatus.success) {
+      GetIt.I<PrefsRepository>().setPasscode("true");
       final navigator = Navigator.of(context);
       Future.delayed(const Duration(milliseconds: 300), () {
         if (!mounted) return;
@@ -177,8 +180,7 @@ class _ResetSetupPasscodePageState extends State<ResetSetupPasscodePage> {
         },
         child: BlocListener<AuthBloc, AuthState>(
           bloc: _bloc,
-          listenWhen: (p, c) =>
-              p.resetCompleteStatus != c.resetCompleteStatus,
+          listenWhen: (p, c) => p.resetCompleteStatus != c.resetCompleteStatus,
           listener: _onCompleteResult,
           child: SingleChildScrollView(
             physics: const ClampingScrollPhysics(),

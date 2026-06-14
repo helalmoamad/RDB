@@ -405,6 +405,9 @@ class _PinCodeVerifyPageState extends State<PinCodeVerifyPage>
                         AppAssets.verifiedNumberSvg,
                         width: 23,
                         height: 23,
+                        color: (prefsRepository.isKycVerification ?? false)
+                            ? null
+                            : Color(0xff8D8D8D),
                       ),
                       SizedBox(height: 10.h),
                       Text(

@@ -14,6 +14,7 @@ class UserProfileModel {
   final String? address;
   final String createdAt;
   final String updatedAt;
+  final KycVerification kycVerification;
 
   UserProfileModel({
     required this.id,
@@ -31,6 +32,7 @@ class UserProfileModel {
     required this.address,
     required this.createdAt,
     required this.updatedAt,
+    required this.kycVerification,
   });
 
   factory UserProfileModel.fromJson(Map<String, dynamic> json) {
@@ -51,6 +53,39 @@ class UserProfileModel {
       address: json['address'],
       createdAt: json['createdAt'] ?? '',
       updatedAt: json['updatedAt'] ?? '',
+      kycVerification: KycVerification.fromJson(
+        json['kycVerification'] as Map<String, dynamic>?,
+      ),
+    );
+  }
+}
+
+/// حالة توثيق الهوية (KYC) القادمة من الباك.
+/// مثال: {status: not_submitted, statusLabel: Not Submitted,
+///        expiresAt: null, rejectionReason: null}
+class KycVerification {
+  final String status;
+  final String statusLabel;
+  final String? expiresAt;
+  final String? rejectionReason;
+
+  const KycVerification({
+    required this.status,
+    required this.statusLabel,
+    this.expiresAt,
+    this.rejectionReason,
+  });
+
+  /// true فقط عندما تكون الهوية موثّقة فعلياً.
+  bool get isVerified => status.toLowerCase() == 'verified';
+
+  factory KycVerification.fromJson(Map<String, dynamic>? json) {
+    final map = json ?? const {};
+    return KycVerification(
+      status: map['status'] as String? ?? 'not_submitted',
+      statusLabel: map['statusLabel'] as String? ?? 'Not Submitted',
+      expiresAt: map['expiresAt'] as String?,
+      rejectionReason: map['rejectionReason'] as String?,
     );
   }
 }

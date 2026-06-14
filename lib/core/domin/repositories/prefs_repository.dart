@@ -106,6 +106,8 @@ abstract class PrefsRepository {
   Future<bool> setIsAccountActive(bool value);
   bool? get isTwoFactorEnabled;
   Future<bool> setIsTwoFactorEnabled(bool value);
+  bool? get isKycVerification;
+  Future<bool> setIsKycVerification(bool value);
 
   // PIN lockout state
   int get pinFailedAttempts;

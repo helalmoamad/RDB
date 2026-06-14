@@ -162,7 +162,7 @@ packages:
     source: hosted
     version: "8.12.4"
   camera:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: camera
       sha256: "4142a19a38e388d3bab444227636610ba88982e36dff4552d5191a86f65dc437"
@@ -1622,10 +1622,10 @@ packages:
     dependency: transitive
     description:
       name: socket_io_client
-      sha256: "740d3895e220e976570da7dbb2f084cd60dd0c46d174c4a830f9849faec23ef9"
+      sha256: f5990ff303d385e7b2150f0e57cca097a8d20c6a2ae0a22cb2d496661ea8ed9b
       url: "https://pub.dev"
     source: hosted
-    version: "3.1.5"
+    version: "3.1.6"
   socket_io_common:
     dependency: transitive
     description:
@@ -1735,7 +1735,7 @@ packages:
     description:
       path: "."
       ref: main
-      resolved-ref: e17c255fdccb7d0f82c739b34bf6fcc7d3721663
+      resolved-ref: "7059a3d85adaeb9ac749b97c186ca813138143ea"
       url: "https://github.com/helalmoamad/trydos_wallet.git"
     source: git
     version: "0.0.1"

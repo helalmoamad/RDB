@@ -73,6 +73,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     this.resetQuestionsUseCase,
     this.resetAnswersUseCase,
     this.resetCompleteUseCase,
+    this.reverifyFaceVerifyUseCase,
+    this.reverifyFaceStartUseCase,
     // this.verifyOtpSignUpUseCase,
   ) : super(const AuthState()) {
     on<AuthEvent>((event, emit) {});
@@ -117,6 +119,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<ResetQuestionsEvent>(_onResetQuestionsEvent);
     on<ResetAnswersEvent>(_onResetAnswersEvent);
     on<ResetCompleteEvent>(_onResetCompleteEvent);
+    on<ReverifyStartEvent>(_onReverifyStartEvent);
+    on<ReverifyFaceEvent>(_onReverifyFaceEvent);
     on<ResetFlowClearEvent>(_onResetFlowClear);
   }
 
@@ -132,6 +136,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         resetQuestionsStatus: ResetQuestionsStatus.init,
         resetAnswersStatus: ResetAnswersStatus.init,
         resetCompleteStatus: ResetCompleteStatus.init,
+        reverifyFaceStatus: ReverifyFaceStatus.init,
+        reverifyStartStatus: ReverifyStartStatus.init,
+        reverifySessionId: '',
         resetQuestions: const [],
         resetToken: '',
         resetLockedUntil: '',
@@ -148,6 +155,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final ResetQuestionsUseCase resetQuestionsUseCase;
   final ResetAnswersUseCase resetAnswersUseCase;
   final ResetCompleteUseCase resetCompleteUseCase;
+  final ReverifyFaceVerifyUseCase reverifyFaceVerifyUseCase;
+  final ReverifyFaceStartUseCase reverifyFaceStartUseCase;
 
   final SendOtpUseCase sendOtpUseCase;
   final VerifyOtpSignInUseCase verifyOtpSignInUseCase;
@@ -240,6 +249,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       _prefsRepository.setVerifiedPhone(userProfile.isPhoneVerified);
       _prefsRepository.setIsAccountActive(!userProfile.isBlocked);
       _prefsRepository.setIsTwoFactorEnabled(userProfile.isTwoFactorEnabled);
+      // تحديث حالة توثيق الهوية (KYC) كل مرة يُجلب فيها البروفايل.
+      _prefsRepository.setIsKycVerification(
+        userProfile.kycVerification.isVerified,
+      );
     });
   }
 
@@ -1092,6 +1105,68 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           resetCompleteStatus: r.success
               ? ResetCompleteStatus.success
               : ResetCompleteStatus.failure,
+        ),
+      ),
+    );
+  }
+
+  FutureOr<void> _onReverifyFaceEvent(
+    ReverifyFaceEvent event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(state.copyWith(reverifyFaceStatus: ReverifyFaceStatus.loading));
+    final res = await reverifyFaceVerifyUseCase(
+      ReverifyFaceParams(
+        challengeId: event.challengeId,
+        liveFaceImageData: event.liveFaceImageData,
+        sessionId: state.reverifySessionId,
+      ),
+    );
+    res.fold(
+      (f) => emit(
+        state.copyWith(
+          reverifyFaceStatus: ReverifyFaceStatus.error,
+          resetError: f.message,
+        ),
+      ),
+      (r) {
+        if (r.isPassed) {
+          // نخزّن stepToken في resetToken ليُحمَل على complete (مثل مسار الأسئلة).
+          emit(
+            state.copyWith(
+              reverifyFaceStatus: ReverifyFaceStatus.passed,
+              resetToken: r.stepToken ?? '',
+            ),
+          );
+        } else {
+          emit(
+            state.copyWith(
+              reverifyFaceStatus: ReverifyFaceStatus.failed,
+              resetError: r.reason,
+            ),
+          );
+        }
+      },
+    );
+  }
+
+  FutureOr<void> _onReverifyStartEvent(
+    ReverifyStartEvent event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(state.copyWith(reverifyStartStatus: ReverifyStartStatus.loading));
+    final res = await reverifyFaceStartUseCase(event.challengeId);
+    res.fold(
+      (f) => emit(
+        state.copyWith(
+          reverifyStartStatus: ReverifyStartStatus.failure,
+          resetError: f.message,
+        ),
+      ),
+      (r) => emit(
+        state.copyWith(
+          reverifyStartStatus: ReverifyStartStatus.success,
+          reverifySessionId: r.sessionId,
         ),
       ),
     );

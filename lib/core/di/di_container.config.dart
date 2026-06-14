@@ -138,6 +138,12 @@ Future<_i174.GetIt> $initGetIt(
   gh.factory<_i919.ResetCompleteUseCase>(
     () => _i919.ResetCompleteUseCase(gh<_i742.AuthRepository>()),
   );
+  gh.factory<_i919.ReverifyFaceStartUseCase>(
+    () => _i919.ReverifyFaceStartUseCase(gh<_i742.AuthRepository>()),
+  );
+  gh.factory<_i919.ReverifyFaceVerifyUseCase>(
+    () => _i919.ReverifyFaceVerifyUseCase(gh<_i742.AuthRepository>()),
+  );
   gh.factory<_i952.SendOtpUseCase>(
     () => _i952.SendOtpUseCase(gh<_i742.AuthRepository>()),
   );
@@ -180,6 +186,8 @@ Future<_i174.GetIt> $initGetIt(
       gh<_i919.ResetQuestionsUseCase>(),
       gh<_i919.ResetAnswersUseCase>(),
       gh<_i919.ResetCompleteUseCase>(),
+      gh<_i919.ReverifyFaceVerifyUseCase>(),
+      gh<_i919.ReverifyFaceStartUseCase>(),
     ),
   );
   return getIt;

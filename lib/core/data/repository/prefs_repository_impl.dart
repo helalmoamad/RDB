@@ -397,6 +397,14 @@ class PrefsRepositoryImpl extends PrefsRepository {
       _preferences.setBool(PrefsKey.isTwoFactorEnabled, value);
 
   @override
+  bool? get isKycVerification =>
+      _preferences.getBool(PrefsKey.isKycVerification);
+
+  @override
+  Future<bool> setIsKycVerification(bool value) =>
+      _preferences.setBool(PrefsKey.isKycVerification, value);
+
+  @override
   int get pinFailedAttempts =>
       _preferences.getInt(PrefsKey.pinFailedAttempts) ?? 0;
 

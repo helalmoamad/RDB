@@ -1,13 +1,11 @@
 import 'dart:async';
-import 'dart:ui';
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:rdb/features/authentication/presentation/pages/pin_code_verify_page.dart';
-import 'package:rdb/features/authentication/presentation/pages/switch_between_web_app_page.dart';
+import 'package:rdb/core/utils/app_lock_overlay.dart';
 import 'package:rdb/routes/router.dart';
 import 'package:rdb/service/language_service.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -15,7 +13,6 @@ import 'package:get_it/get_it.dart';
 import 'package:rdb/core/domin/repositories/prefs_repository.dart';
 import 'package:rdb/core/utils/responsive_padding.dart';
 import 'package:rdb/features/authentication/presentation/manager/auth_bloc.dart';
-import 'package:shimmer/shimmer.dart';
 import 'package:trydos_wallet/trydos_wallet.dart';
 
 class HomePage extends StatefulWidget {
@@ -35,8 +32,13 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   // 🛡️ حماية حالة الصفحة الرئيسية
 
   late AuthBloc authBloc;
-  final ValueNotifier<bool> isPasscodeVerified = ValueNotifier(true);
-  final ValueNotifier<bool> isShowSwitch = ValueNotifier(true);
+  // حالة القفل/التبديل يديرها AppLockController كـ route فوق الـ root navigator
+  // (HomePage يبقى يتحكّم بها عبر showLock/showSwitch/syncFromPrefs). هذان
+  // الـ getter يبقيان لعرض/إخفاء صورة الخلفية في HomePage خلف القفل.
+  ValueNotifier<bool> get isPasscodeVerified =>
+      AppLockController.instance.isPasscodeVerified;
+  ValueNotifier<bool> get isShowSwitch =>
+      AppLockController.instance.isShowSwitch;
   @override
   void initState() {
     WidgetsBinding.instance.addObserver(this);
@@ -75,9 +77,10 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         phoneNumber: GetIt.I<PrefsRepository>().myPhoneNumber,
         isKurdish: LanguageService.languageCode == "ku",
         isTwoFactorEnabled:
-            GetIt.I<PrefsRepository>().isTwoFactorEnabled ?? false,
+            GetIt.I<PrefsRepository>().isKycVerification ?? false,
         applicationVersion: "1.0.0",
         skipSplash: true,
+        isVerified: GetIt.I<PrefsRepository>().isKycVerification ?? false,
         disableWalletOverscrollIndicator: true,
         // استخدم اللغة الحالية
         allowBadCertificate: true, // true للتطوير فقط عند خطأ SSL
@@ -97,6 +100,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       );
       await GetIt.I<PrefsRepository>().setIsAccountActive(false);
       await GetIt.I<PrefsRepository>().setIsTwoFactorEnabled(false);
+      await GetIt.I<PrefsRepository>().setIsKycVerification(false);
       await GetIt.I<PrefsRepository>().setUserName("");
 
       // إلغاء الاشتراك مباشرة بعد تسجيل الخروج
@@ -106,6 +110,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       await logoutEvent.cancel();
       await lockEvent.cancel();
       TrydosWallet.logout();
+      AppLockController.instance.reset(); // إزالة القفل وتصفير حالته عند الخروج
       authBloc.add(ResetAllData()); // إعادة تعيين كل البيانات في AuthBloc
 
       // تنظيف باقي الموارد
@@ -120,11 +125,11 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         prefs.setSwitchShownAtMs(DateTime.now().millisecondsSinceEpoch);
       }
       prefs.setShouldShowSwitch(true);
-      isShowSwitch.value = true;
+      AppLockController.instance.showSwitch();
     });
     lockEvent = lockEvents.listen((event) async {
       GetIt.I<PrefsRepository>().setShouldShowPin(true);
-      isPasscodeVerified.value = false;
+      AppLockController.instance.showLock();
     });
     // الاستماع لأحداث تغيير اللغة
     languageChangeEvent = languageChangeEvents.listen((event) async {
@@ -151,6 +156,12 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         authBloc.add(const RefreshTokenEvent());
       }
     });
+    // مزامنة أولية لحالة القفل/التبديل من التخزين بعد أول إطار. يغطّي حالة
+    // الإقلاع البارد وهو مقفول (splash يضبط shouldShowPin=true).
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      AppLockController.instance.syncFromPrefs();
+    });
     super.initState();
   }
 
@@ -171,10 +182,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
     if (state == AppLifecycleState.resumed) {
-      // تحديث حالة التحقق من رمز المرور عند العودة من الخلفية
-      isPasscodeVerified.value =
-          !(GetIt.I<PrefsRepository>().shouldShowPin ?? false);
-      isShowSwitch.value = GetIt.I<PrefsRepository>().shouldShowSwitch ?? false;
+      // تحديث حالة القفل/التبديل عند العودة من الخلفية (يدفع/يُزيل route القفل).
+      AppLockController.instance.syncFromPrefs();
       // قد ينتهي التوكن أثناء وجود التطبيق في الخلفية — حدّثه استباقيًا
       authBloc.add(const EnsureWalletTokenValidEvent());
     }
@@ -184,9 +193,9 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    isPasscodeVerified.value =
-        !(GetIt.I<PrefsRepository>().shouldShowPin ?? false);
-    isShowSwitch.value = GetIt.I<PrefsRepository>().shouldShowSwitch ?? false;
+    // ملاحظة: لا نضبط حالة القفل هنا. المزامنة تتم خارج build عبر
+    // AppLockController (initState post-frame + didChangeAppLifecycleState +
+    // مستمعو الأحداث) حتى يُدفع/يُزال route القفل بشكل موثوق.
     return Scaffold(
       backgroundColor: Colors.white,
       resizeToAvoidBottomInset: isPasscodeVerified.value != true ? false : true,
@@ -202,109 +211,10 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
               child: TrydosWalletWelcomeScreen(),
             ),
 
-            (GetIt.I<PrefsRepository>().photo ?? '') == ''
-                ? SizedBox.fromSize()
-                : Positioned(
-                    top: 120.h,
-                    child: ValueListenableBuilder<bool>(
-                      valueListenable: isShowSwitch,
-                      builder: (context, isShowSwitch, _) {
-                        return ValueListenableBuilder<bool>(
-                          valueListenable: isPasscodeVerified,
-                          builder: (context, passcodeVerified, _) {
-                            if (passcodeVerified && (!isShowSwitch)) {
-                              return const SizedBox.shrink();
-                            }
-                            return Container(
-                              width: 200.w,
-                              height: 200.h,
-                              decoration: BoxDecoration(
-                                color: Color(0xff1D1D1D),
-                                borderRadius: BorderRadius.circular(15.r),
-                              ),
-                              child: Image.network(
-                                GetIt.I<PrefsRepository>().photo ??
-                                    '', // صورة افتراضية إذا لم تكن موجودة
-                                width: 200.w,
-                                loadingBuilder:
-                                    (context, child, loadingProgress) =>
-                                        loadingProgress == null
-                                        ? child
-                                        : Shimmer.fromColors(
-                                            baseColor: Colors.grey[300]!,
-                                            highlightColor: Colors.grey[100]!,
-                                            child: Container(
-                                              width: 200.w,
-                                              height: 200.h,
-                                              color: Colors.white,
-                                            ),
-                                          ),
-                                height: 200.h,
-                                fit: BoxFit.cover,
-                              ),
-                            );
-                          },
-                        );
-                      },
-                    ),
-                  ),
-            // شاشة القفل PinCodeVerifyPage فوق كل شيء مع ضبابية
-            Positioned.fill(
-              child: ValueListenableBuilder<bool>(
-                valueListenable: isShowSwitch,
-                builder: (context, isShowSwitched, _) {
-                  return ValueListenableBuilder<bool>(
-                    valueListenable: isPasscodeVerified,
-                    builder: (context, passcodeVerified, _) {
-                      if (passcodeVerified || isShowSwitched) {
-                        return const SizedBox.shrink();
-                      }
-                      return BackdropFilter(
-                        filter: ImageFilter.blur(sigmaX: 8.0, sigmaY: 8.0),
-                        // ignore: deprecated_member_use
-                        child: SizedBox(
-                          width: 1.sw,
-                          height: 1.sh,
-                          child: PinCodeVerifyPage(
-                            onSuccess: () {
-                              GetIt.I<PrefsRepository>().setShouldShowPin(
-                                false,
-                              );
-                              isPasscodeVerified.value = true;
-                            },
-                          ),
-                        ), // تقليل العتامة
-                      );
-                    },
-                  );
-                },
-              ),
-            ),
-            Positioned.fill(
-              child: ValueListenableBuilder<bool>(
-                valueListenable: isShowSwitch,
-                builder: (context, isShowSwitched, _) {
-                  if (!isShowSwitched) return const SizedBox.shrink();
-                  return BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 8.0, sigmaY: 8.0),
-                    // ignore: deprecated_member_use
-                    child: SizedBox(
-                      width: 1.sw,
-                      height: 1.sh,
-                      child: SwitchWepAppPage(
-                        onSuccess: () {
-                          final prefs = GetIt.I<PrefsRepository>();
-                          prefs.setShouldShowSwitch(false);
-                          // تصفير عدّاد الوقت عند إغلاق switch
-                          prefs.setSwitchShownAtMs(null);
-                          isShowSwitch.value = false;
-                        },
-                      ),
-                    ), // تقليل العتامة
-                  );
-                },
-              ),
-            ),
+            // ملاحظة: طبقتا القفل (PinCodeVerifyPage) والتبديل (SwitchWepAppPage)
+            // أصبحتا route يدفعه AppLockController فوق الـ root navigator، فتغطّيان
+            // جميع المسارات (بما فيها صفحات KYC/تفاصيل الحساب الداخلية). هنا نبقي
+            // فقط على إدارة حالتهما عبر الأحداث.
           ],
         ),
       ),
