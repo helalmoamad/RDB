@@ -155,6 +155,9 @@ class _TrydosApplicationState extends State<TrydosApplication>
                     child: widget.isSecurityIssueFound
                         ? MaterialApp(
                             debugShowCheckedModeBanner: false,
+                            // خلفية بيضاء أثناء تحميل الـ localizations في أول
+                            // بناء (وإلا يظهر إطار داكن/أسود لحظياً قبل الواجهة).
+                            color: const Color(0xFFFFFFFF),
                             locale: context.locale,
                             theme: AppTheme.light,
                             supportedLocales: context.supportedLocales,
@@ -168,6 +171,10 @@ class _TrydosApplicationState extends State<TrydosApplication>
                           )
                         : MaterialApp.router(
                             debugShowCheckedModeBanner: false,
+                            // خلفية بيضاء أثناء تحميل الـ localizations في أول
+                            // بناء — يمنع الإطار الأسود بين الصفحة البيضاء وسبلاش
+                            // التطبيق.
+                            color: const Color(0xFFFFFFFF),
                             locale: context.locale,
                             routerConfig: GRouter.router,
                             theme: AppTheme.light,

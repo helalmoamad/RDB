@@ -405,6 +405,7 @@ class _PinCodeVerifyPageState extends State<PinCodeVerifyPage>
                         AppAssets.verifiedNumberSvg,
                         width: 23,
                         height: 23,
+                        // ignore: deprecated_member_use
                         color: (prefsRepository.isKycVerification ?? false)
                             ? null
                             : Color(0xff8D8D8D),

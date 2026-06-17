@@ -101,6 +101,7 @@ class _SwitchWepAppPageState extends State<SwitchWepAppPage> {
                             AppAssets.verifiedSvg,
                             width: 23,
                             height: 23,
+                            // ignore: deprecated_member_use
                             color: Color(
                               (prefsRepository.isKycVerification ?? false)
                                   ? 0xff388CFF

@@ -45,7 +45,7 @@ class _ResetSetupPasscodePageState extends State<ResetSetupPasscodePage> {
   @override
   void initState() {
     super.initState();
-    GetIt.I<PrefsRepository>().setPasscode("");
+
     for (final c in _controllers) {
       c.text = _zwsp;
     }

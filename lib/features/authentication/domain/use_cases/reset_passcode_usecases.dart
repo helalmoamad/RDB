@@ -170,6 +170,5 @@ class ReverifyFaceVerifyUseCase
   ) => repository.reverifyFaceVerify(
     challengeId: params.challengeId,
     liveFaceImageData: params.liveFaceImageData,
-    sessionId: params.sessionId,
   );
 }

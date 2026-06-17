@@ -8,6 +8,7 @@ import android.widget.FrameLayout
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
+import io.flutter.embedding.engine.renderer.FlutterUiDisplayListener
 import io.flutter.plugin.common.MethodChannel
 
 class MainActivity : FlutterFragmentActivity() {
@@ -18,18 +19,33 @@ class MainActivity : FlutterFragmentActivity() {
 
     private var overlayView: FrameLayout? = null
 
+    // يصبح true عند رسم Flutter أوّل إطار؛ نُبقي سبلاش النظام ظاهراً حتى ذلك.
+    private var flutterUiDisplayed = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
-        // Must be called BEFORE super.onCreate() so the AndroidX SplashScreen
-        // takes over the system splash and hands off cleanly to the Flutter UI.
-        // This prevents the white-screen / splash hang seen on some Android 12/13
-        // devices (e.g. Infinix) where the platform splash never dismisses.
-        installSplashScreen()
+        // يُستدعى قبل super.onCreate() ليتولّى AndroidX SplashScreen سبلاش النظام.
+        val splashScreen = installSplashScreen()
+        // أبقِ سبلاش النظام (الأبيض) ظاهراً حتى يرسم Flutter أوّل إطار فعلياً،
+        // لمنع الوميض الأسود من الـ SurfaceView في الفجوة بين انتهاء السبلاش وأوّل
+        // إطار (ظهر على بعض أجهزة Android 12/13 مثل HiOS/TECNO).
+        splashScreen.setKeepOnScreenCondition { !flutterUiDisplayed }
         super.onCreate(savedInstanceState)
         ensureOverlayViewCreated()
     }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+
+        // علّم جهوز أوّل إطار من Flutter ليُغلَق سبلاش النظام عندها تحديداً (لا قبلها).
+        flutterEngine.renderer.addIsDisplayingFlutterUiListener(
+            object : FlutterUiDisplayListener {
+                override fun onFlutterUiDisplayed() {
+                    flutterUiDisplayed = true
+                }
+
+                override fun onFlutterUiNoLongerDisplayed() {}
+            },
+        )
 
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL)
             .setMethodCallHandler { call, result ->

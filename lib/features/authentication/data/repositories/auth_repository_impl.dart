@@ -179,7 +179,8 @@ class AuthRepositoryImpl extends AuthRepository with HandlingExceptionRequest {
     required bool midLogin,
   }) {
     return handlingExceptionRequest(
-      tryCall: () => dataSource.resetPasscodeAnswers(params, midLogin: midLogin),
+      tryCall: () =>
+          dataSource.resetPasscodeAnswers(params, midLogin: midLogin),
     );
   }
 
@@ -207,13 +208,11 @@ class AuthRepositoryImpl extends AuthRepository with HandlingExceptionRequest {
   Future<Either<Failure, ReverifyVerifyResponse>> reverifyFaceVerify({
     required String challengeId,
     required String liveFaceImageData,
-    String? sessionId,
   }) {
     return handlingExceptionRequest(
       tryCall: () => dataSource.reverifyFaceVerify(
         challengeId: challengeId,
         liveFaceImageData: liveFaceImageData,
-        sessionId: sessionId,
       ),
     );
   }

@@ -76,7 +76,6 @@ abstract class AuthRepository {
   Future<Either<Failure, ReverifyVerifyResponse>> reverifyFaceVerify({
     required String challengeId,
     required String liveFaceImageData,
-    String? sessionId,
   });
   /*Future<Either<Failure, VerifyOtpSignUpAndInResponseModel>> verifyOtpSignUp(
     Map<String, dynamic> params,

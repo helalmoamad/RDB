@@ -162,7 +162,8 @@ class AuthRemoteDatasource {
         endpoint: midLogin
             ? WalletEndPoints.resetPasscodeStepCompleteEP
             : WalletEndPoints.resetPasscodeCompleteEP,
-        data: params,
+        data: {"passcode": params["passcode"]},
+        extraHeaders: {"X-Step-Token": params["resetToken"]},
         response: ResponseValue<ResetCompleteResponse>(
           fromJson: (r) => ResetCompleteResponse.fromJson(r),
         ),
@@ -197,7 +198,7 @@ class AuthRemoteDatasource {
         endpoint: KycEndPoints.reverifyVerifyEP,
         data: {
           'challengeId': challengeId,
-          if (sessionId != null && sessionId.isNotEmpty) 'sessionId': sessionId,
+
           'liveFaceImageData': liveFaceImageData,
         },
         response: ResponseValue<ReverifyVerifyResponse>(

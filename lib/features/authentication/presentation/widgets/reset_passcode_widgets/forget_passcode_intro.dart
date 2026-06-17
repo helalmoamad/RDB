@@ -75,6 +75,7 @@ class ForgetPasscodeIntro extends StatelessWidget {
               AppAssets.privacySvg,
               width: 20.w,
               height: 20.h,
+              // ignore: deprecated_member_use
               color: Color(0xff388CFF),
             ),
           ),
@@ -108,40 +109,40 @@ class ForgetPasscodeIntro extends StatelessWidget {
             ResetButtonShimmer(height: 58.h, radius: 20.r)
           else
             InkWell(
-            onTap: onStart,
-            borderRadius: BorderRadius.circular(20.r),
-            child: DottedBorder(
-              strokeCap: StrokeCap.round,
-              strokeWidth: 0.5,
-              borderType: BorderType.RRect,
-              dashPattern: const [3, 3],
-              padding: EdgeInsets.all(1.h),
+              onTap: onStart,
+              borderRadius: BorderRadius.circular(20.r),
+              child: DottedBorder(
+                strokeCap: StrokeCap.round,
+                strokeWidth: 0.5,
+                borderType: BorderType.RRect,
+                dashPattern: const [3, 3],
+                padding: EdgeInsets.all(1.h),
 
-              radius: Radius.circular(20.r),
-              color: const Color(0xff1D1D1D),
-              child: Container(
-                width: 1.sw,
-                height: 58.h,
+                radius: Radius.circular(20.r),
+                color: const Color(0xff1D1D1D),
+                child: Container(
+                  width: 1.sw,
+                  height: 58.h,
 
-                decoration: BoxDecoration(
-                  color: const Color(0xffFCFCFC),
-                  borderRadius: BorderRadius.circular(20.r),
-                ),
-                child: Center(
-                  child: MyTextWidget(
-                    LocaleKeys.reset_start_button.tr(),
-                    style: context.textTheme.displayMedium?.mq.copyWith(
-                      color: const Color(0xff1D1D1D),
-                      letterSpacing: 0.16,
-                      height: 1.25,
-                      fontSize: 16.sp,
+                  decoration: BoxDecoration(
+                    color: const Color(0xffFCFCFC),
+                    borderRadius: BorderRadius.circular(20.r),
+                  ),
+                  child: Center(
+                    child: MyTextWidget(
+                      LocaleKeys.reset_start_button.tr(),
+                      style: context.textTheme.displayMedium?.mq.copyWith(
+                        color: const Color(0xff1D1D1D),
+                        letterSpacing: 0.16,
+                        height: 1.25,
+                        fontSize: 16.sp,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
-                    textAlign: TextAlign.center,
                   ),
                 ),
               ),
             ),
-          ),
           35.verticalSpace,
         ],
       ),

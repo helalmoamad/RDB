@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- أيقونة سبلاش بيضاء صحيحة (drawable حقيقي، ليس لوناً خاماً) — تجعل أيقونة
+     سبلاش Android 12+ غير مرئية (أبيض على أبيض) بطريقة متوافقة مع كل الأجهزة
+     بما فيها HiOS، فلا يرجع النظام للأيقونة الافتراضية ولا يتعطّل تسليم السبلاش. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="#FFFFFFFF" />
+</shape>

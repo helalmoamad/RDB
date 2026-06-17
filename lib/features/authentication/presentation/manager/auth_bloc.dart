@@ -1100,6 +1100,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     ResetCompleteEvent event,
     Emitter<AuthState> emit,
   ) async {
+    if (state.resetCompleteStatus == ResetCompleteStatus.loading) {
+      return;
+    }
     emit(state.copyWith(resetCompleteStatus: ResetCompleteStatus.loading));
     final res = await resetCompleteUseCase(
       ResetCompleteParams(

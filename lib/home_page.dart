@@ -26,6 +26,7 @@ late StreamSubscription walletEvents;
 late StreamSubscription languageChangeEvent;
 late StreamSubscription logoutEvent;
 late StreamSubscription lockEvent;
+late StreamSubscription errorSubscription;
 late StreamSubscription switchEvent;
 
 class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
@@ -106,6 +107,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       // إلغاء الاشتراك مباشرة بعد تسجيل الخروج
 
       await walletEvents.cancel();
+      await errorSubscription.cancel();
       await languageChangeEvent.cancel();
       await logoutEvent.cancel();
       await lockEvent.cancel();
@@ -116,6 +118,14 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       // تنظيف باقي الموارد
 
       GRouter.router.go(GRouter.config.kRootRoute);
+    });
+
+    errorSubscription = errorEvents.listen((event) {
+      // ignore: use_build_context_synchronously
+      showMessage(event.message, context: context, type: MessageType.error);
+      debugPrint(
+        '[App] API error event: ${event.message} (status: ${event.statusCode})',
+      );
     });
     switchEvent = switchEvents.listen((event) async {
       final prefs = GetIt.I<PrefsRepository>();
@@ -171,6 +181,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     languageChangeEvent.cancel();
     logoutEvent.cancel();
     lockEvent.cancel();
+    errorSubscription.cancel();
     switchEvent.cancel();
 
     WidgetsBinding.instance.removeObserver(this);
