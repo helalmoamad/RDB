@@ -208,6 +208,32 @@ class PrefsRepositoryImpl extends PrefsRepository {
   Future<bool> setFcmTokenId(String fcmTokenId) =>
       _preferences.setString(PrefsKey.fcmTokenId, fcmTokenId);
   @override
+  String? get sentFcmToken => _preferences.getString(PrefsKey.sentFcmToken);
+  @override
+  Future<bool> setSentFcmToken(String token) =>
+      _preferences.setString(PrefsKey.sentFcmToken, token);
+
+  @override
+  bool get pendingApprovalRequest =>
+      _preferences.getBool(PrefsKey.pendingApprovalRequest) ?? false;
+  @override
+  String? get pendingApprovalRequestData =>
+      _preferences.getString(PrefsKey.pendingApprovalRequestData);
+  @override
+  Future<bool> setPendingApprovalRequest(bool value) =>
+      _preferences.setBool(PrefsKey.pendingApprovalRequest, value);
+  @override
+  Future<bool> setPendingApprovalRequestData(String data) =>
+      _preferences.setString(PrefsKey.pendingApprovalRequestData, data);
+  @override
+  Future<void> clearPendingApprovalRequest() async {
+    await _preferences.remove(PrefsKey.pendingApprovalRequest);
+    await _preferences.remove(PrefsKey.pendingApprovalRequestData);
+  }
+
+  @override
+  Future<void> reloadPreferences() => _preferences.reload();
+  @override
   Future<bool> setFcmMarketTokenId(String fcmMarketTokenId) =>
       _preferences.setString(PrefsKey.fcmMarketTokenId, fcmMarketTokenId);
 

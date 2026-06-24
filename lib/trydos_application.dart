@@ -12,6 +12,8 @@ import 'package:rdb/generated/locale_keys.g.dart';
 import 'package:rdb/routes/router.dart';
 import 'package:rdb/service/connectivity_service.dart';
 import 'package:rdb/service/ku_fallback_localizations.dart';
+import 'package:rdb/service/analytics_service.dart';
+import 'package:rdb/service/notification_service/notification_service.dart';
 import 'package:rdb/service/app_deep_link_service.dart';
 import 'package:rdb/service/language_service.dart';
 import 'package:rdb/service/localization_service.dart';
@@ -101,6 +103,14 @@ class _TrydosApplicationState extends State<TrydosApplication>
     AppLifecycleManager().handleLifecycleChange(state);
     if (state == AppLifecycleState.resumed) {
       _handleAppResumed();
+      // عند فتح/استئناف التطبيق (سواء من إشعار أو عادي): أفرِغ شريط الإشعارات.
+      AppNotificationService.instance.clearAll();
+    }
+    // عند انتقال التطبيق للخلفية، ادفع أحداث/لقطات PostHog فوراً لتقليل فقدان
+    // آخر اللقطات إذا قتل المستخدم التطبيق بعدها.
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.detached) {
+      AnalyticsService.instance.flush();
     }
   }
 

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
@@ -13,7 +14,9 @@ import 'package:get_it/get_it.dart';
 import 'package:rdb/core/domin/repositories/prefs_repository.dart';
 import 'package:rdb/core/utils/responsive_padding.dart';
 import 'package:rdb/features/authentication/presentation/manager/auth_bloc.dart';
+import 'package:rdb/service/analytics_service.dart';
 import 'package:trydos_wallet/trydos_wallet.dart';
+import 'package:rdb/service/notification_service/notification_service.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -88,6 +91,22 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       ),
     );
 
+    // ربط جلسة PostHog بالمستخدم الحالي ليُنسب التسجيل/الأحداث إليه (يشمل
+    // شاشات المحفظة لأنها ضمن نفس الجلسة).
+    final analyticsUserId =
+        GetIt.I<PrefsRepository>().myPhoneNumber ??
+        GetIt.I<PrefsRepository>().email ??
+        '';
+    AnalyticsService.instance.identify(
+      userId: analyticsUserId,
+      properties: {
+        'is_verified': GetIt.I<PrefsRepository>().isKycVerification ?? false,
+        'is_phone_verified':
+            GetIt.I<PrefsRepository>().isVerifiedPhone ?? false,
+        'language': LanguageService.languageCode,
+      },
+    );
+
     // الاستماع لأحداث تسجيل الخروج
     logoutEvent = logoutEvents.listen((event) async {
       if (kDebugMode) {
@@ -112,6 +131,10 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       await logoutEvent.cancel();
       await lockEvent.cancel();
       TrydosWallet.logout();
+      AnalyticsService.instance.reset(); // فصل جلسة PostHog عن المستخدم
+      // إبطال توكن FCM ومسحه (دون حجب تسجيل الخروج) حتى لا تصل إشعارات للمستخدم
+      // السابق ويبدأ التالي نظيفاً.
+      AppNotificationService.instance.onLogout();
       AppLockController.instance.reset(); // إزالة القفل وتصفير حالته عند الخروج
       authBloc.add(ResetAllData()); // إعادة تعيين كل البيانات في AuthBloc
 
@@ -166,13 +189,49 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         authBloc.add(const RefreshTokenEvent());
       }
     });
+    // طلب إذن الإشعارات مرتبط بحالة القفل: عند فك القفل (إدخال passcode صحيح)
+    // يصبح isPasscodeVerified=true فيُطلق المستمع الطلب. أمّا إن لم يكن هناك
+    // قفل (verified=true أصلاً) فيُطلب مباشرةً في الـ post-frame أدناه.
+    AppLockController.instance.isPasscodeVerified.addListener(
+      _onHomeUnlocked,
+    );
     // مزامنة أولية لحالة القفل/التبديل من التخزين بعد أول إطار. يغطّي حالة
     // الإقلاع البارد وهو مقفول (splash يضبط shouldShowPin=true).
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       AppLockController.instance.syncFromPrefs();
+      // بعد المزامنة: إن لم يكن هناك passcode (verified=true) نفّذ مهام الجهوز.
+      _onHomeUnlocked();
     });
     super.initState();
+  }
+
+  /// مهام تُنفَّذ عند جهوز الـ HomePage وكونها مفكوكة القفل (verified=true):
+  /// طلب إذن الإشعارات + تنفيذ أي طلب موافقة جلسة معلّق وصل خارج foreground.
+  /// تُستدعى بعد إدخال الـ passcode الصحيح أو فوراً إن لم يكن هناك passcode،
+  /// وعند كل استئناف للتطبيق.
+  void _onHomeUnlocked() {
+    if (!AppLockController.instance.isPasscodeVerified.value) return;
+    AppNotificationService.instance.ensureNotificationPermission();
+    _consumePendingApproval();
+  }
+
+  /// تنفيذ طلب موافقة الجلسة المعلّق (المخزّن من خلفية/فتح من إشعار) ثم مسحه.
+  Future<void> _consumePendingApproval() async {
+    final prefs = GetIt.I<PrefsRepository>();
+    // التقط ما كتبه isolate الخلفية (قد تكون النسخة في الذاكرة قديمة).
+    await prefs.reloadPreferences();
+    if (!prefs.pendingApprovalRequest) return;
+    final raw = prefs.pendingApprovalRequestData;
+    // امسح الحقول دائماً (من أجل المرّة القادمة).
+    await prefs.clearPendingApprovalRequest();
+    if (raw == null || raw.isEmpty) return;
+    try {
+      final data = Map<String, dynamic>.from(jsonDecode(raw) as Map);
+      TrydosWallet.handleSessionApprovalRequest(data);
+    } catch (e) {
+      if (kDebugMode) debugPrint('consume approval failed: $e');
+    }
   }
 
   @override
@@ -183,6 +242,9 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     lockEvent.cancel();
     errorSubscription.cancel();
     switchEvent.cancel();
+    AppLockController.instance.isPasscodeVerified.removeListener(
+      _onHomeUnlocked,
+    );
 
     WidgetsBinding.instance.removeObserver(this);
 
@@ -195,6 +257,9 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     if (state == AppLifecycleState.resumed) {
       // تحديث حالة القفل/التبديل عند العودة من الخلفية (يدفع/يُزيل route القفل).
       AppLockController.instance.syncFromPrefs();
+      // عند كل فتح للتطبيق: مهام الجهوز (إذن الإشعارات + طلب موافقة معلّق) إن كان
+      // مفكوك القفل؛ وإلا تنتظر فك القفل عبر المستمع.
+      _onHomeUnlocked();
       // قد ينتهي التوكن أثناء وجود التطبيق في الخلفية — حدّثه استباقيًا
       authBloc.add(const EnsureWalletTokenValidEvent());
     }

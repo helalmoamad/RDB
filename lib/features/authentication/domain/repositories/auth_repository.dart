@@ -49,6 +49,9 @@ abstract class AuthRepository {
     String newPasscode,
   );
 
+  /// إرسال توكن FCM للباك.
+  Future<Either<Failure, bool>> sendFcmToken(String token);
+
   // ── إعادة تعيين رمز المرور ──
   Future<Either<Failure, ResetInitResponse>> resetPasscodeInit({
     required bool midLogin,

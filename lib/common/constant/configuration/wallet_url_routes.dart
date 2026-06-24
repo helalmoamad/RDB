@@ -46,6 +46,9 @@ abstract class WalletEndPoints {
   static String walletBalanceEP(String assetId) =>
       "wallets/my/balances/$assetId";
   static const checkoutEP = "merchant/checkout";
+
+  /// إرسال توكن FCM للباك.
+  static const sendFcmEP = "send/fcm";
 }
 
 abstract class WalletUrls {

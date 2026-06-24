@@ -67,6 +67,18 @@ class AuthRemoteDatasource {
     return sendOtp();
   }
 
+  /// إرسال توكن FCM للباك: POST /send/fcm بجسم {"fcm": token}.
+  Future<bool> sendFcmToken(String fcmToken) {
+    return PostClient<bool>(
+      serverName: ServerName.wallet,
+      requestPrams: RequestConfig<bool>(
+        endpoint: WalletEndPoints.sendFcmEP,
+        data: {"fcm": fcmToken},
+        response: ResponseValue<bool>(returnValueOnSuccess: true),
+      ),
+    )();
+  }
+
   // ───────────── إعادة تعيين رمز المرور ─────────────
   // midLogin=false → idle-lock (access token)؛ midLogin=true → step (stepToken).
 
@@ -162,7 +174,7 @@ class AuthRemoteDatasource {
         endpoint: midLogin
             ? WalletEndPoints.resetPasscodeStepCompleteEP
             : WalletEndPoints.resetPasscodeCompleteEP,
-        data: {"passcode": params["passcode"]},
+        data: params,
         extraHeaders: {"X-Step-Token": params["resetToken"]},
         response: ResponseValue<ResetCompleteResponse>(
           fromJson: (r) => ResetCompleteResponse.fromJson(r),

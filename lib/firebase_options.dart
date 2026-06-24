@@ -26,10 +26,7 @@ class DefaultFirebaseOptions {
       case TargetPlatform.android:
         return android;
       case TargetPlatform.iOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for ios - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return ios;
       case TargetPlatform.macOS:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for macos - '
@@ -53,11 +50,19 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyCHW9v3OeTVyxDG3nEIVuXj3FIvkMR7X7g',
-    appId: '1:817506223106:android:28ea5e0de1f196c382131b',
-    messagingSenderId: '817506223106',
-    authDomain: "trydos-2e2b2.firebaseapp.com",
-    projectId: 'trydos-2e2b2',
-    storageBucket: 'trydos-2e2b2.firebasestorage.app',
+    apiKey: 'AIzaSyD2Rge5OvYbM8IfNTroWur6ITAHki7am_4',
+    appId: '1:169909916458:android:0ad7861c6c6a0457144453',
+    messagingSenderId: '169909916458',
+    projectId: 'radb-f5579',
+    storageBucket: 'radb-f5579.firebasestorage.app',
+  );
+
+  static const FirebaseOptions ios = FirebaseOptions(
+    apiKey: 'AIzaSyBdPmjCt45aF6A6JVbLKrJhoVG-ieTcV9M',
+    appId: '1:169909916458:ios:9f8419912724321d144453',
+    messagingSenderId: '169909916458',
+    projectId: 'radb-f5579',
+    storageBucket: 'radb-f5579.firebasestorage.app',
+    iosBundleId: 'com.rdb.www',
   );
 }

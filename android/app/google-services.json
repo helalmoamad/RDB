@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "169909916458",
+    "project_id": "radb-f5579",
+    "storage_bucket": "radb-f5579.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:169909916458:android:0ad7861c6c6a0457144453",
+        "android_client_info": {
+          "package_name": "com.rdb.www"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD2Rge5OvYbM8IfNTroWur6ITAHki7am_4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

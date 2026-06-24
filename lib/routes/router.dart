@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'dart:io';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
+import 'package:posthog_flutter/posthog_flutter.dart';
 import 'package:rdb/core/domin/repositories/prefs_repository.dart';
 import 'package:rdb/features/authentication/presentation/pages/enter_name_page.dart';
 import 'package:rdb/features/authentication/presentation/pages/first_registeration_page.dart';
@@ -30,7 +31,7 @@ class GRouter {
   static final RouterConfiguration _config = RouterConfiguration.init();
 
   static final GoRouter _router = GoRouter(
-    observers: [BotToastNavigatorObserver()],
+    observers: [BotToastNavigatorObserver(), PosthogObserver()],
     initialLocation: _config.kRootRoute,
     overridePlatformDefaultLocation: true,
     navigatorKey: navigatorKey,

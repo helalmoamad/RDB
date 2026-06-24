@@ -6,6 +6,8 @@
     <uses-feature android:name="android.hardware.camera.front" android:required="false" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <!-- إشعارات Android 13+ (مطلوب لعرض الإشعارات) -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
         android:label="rdb"
@@ -18,7 +20,7 @@
             android:taskAffinity=""
             android:theme="@style/LaunchTheme"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
-            android:hardwareAccelerated="true"
+            android:hardwareAccelerated="false"
             android:windowSoftInputMode="adjustResize">
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
@@ -47,6 +49,17 @@
                     android:host="staging-ramaaz-digital-banking.yazan-adnof.workers.dev" />
             </intent-filter>
         </activity>
+        <!-- PostHog: نهيّئ يدوياً من Dart (Posthog().setup) لذلك نعطّل التهيئة
+             التلقائية الأصلية حتى لا تحدث تهيئة مزدوجة. -->
+        <meta-data
+            android:name="com.posthog.posthog.AUTO_INIT"
+            android:value="false" />
+        <!-- قناة FCM الافتراضية: تضمن أن الإشعارات التي يعرضها النظام والتطبيق
+             مغلق/في الخلفية تستخدم قناة عالية الأهمية (heads-up + صوت) بدل قناة
+             صامتة. القيمة يجب أن تطابق NotificationChannels.high.id في الكود. -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="high_importance_channel" />
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data

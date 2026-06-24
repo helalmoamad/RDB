@@ -1453,6 +1453,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.5.2"
+  posthog_flutter:
+    dependency: "direct main"
+    description:
+      name: posthog_flutter
+      sha256: "39b3fc1d60ed5c63f126cce040f1ab426227864cace385ede95f8a1f13627bd0"
+      url: "https://pub.dev"
+    source: hosted
+    version: "5.24.0"
   pretty_qr_code:
     dependency: transitive
     description:
@@ -1735,7 +1743,7 @@ packages:
     description:
       path: "."
       ref: main
-      resolved-ref: "51d1a41b97de6d6c8893ba39271ae493a1192049"
+      resolved-ref: "2e35ee8a2d2baf7cc9ca1da0b721a67b27709daf"
       url: "https://github.com/helalmoamad/trydos_wallet.git"
     source: git
     version: "0.0.1"

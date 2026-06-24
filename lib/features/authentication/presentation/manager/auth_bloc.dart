@@ -13,6 +13,7 @@ import 'package:rdb/features/authentication/data/models/passkey_model.dart';
 import 'package:rdb/features/authentication/domain/use_cases/get_passkey_list_usecase.dart';
 import 'package:rdb/features/authentication/domain/use_cases/get_user_profile_usecase.dart';
 import 'package:rdb/features/authentication/domain/use_cases/refresh_token_usecase.dart';
+import 'package:rdb/features/authentication/domain/use_cases/send_fcm_usecase.dart';
 import 'package:rdb/features/authentication/domain/use_cases/switch_to_app_usecase.dart';
 import 'package:trydos_wallet/trydos_wallet.dart' show TrydosWallet;
 import 'package:rdb/features/authentication/domain/use_cases/verify_session_passcode_usecase.dart';
@@ -75,6 +76,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     this.resetCompleteUseCase,
     this.reverifyFaceVerifyUseCase,
     this.reverifyFaceStartUseCase,
+    this.sendFcmUseCase,
     // this.verifyOtpSignUpUseCase,
   ) : super(const AuthState()) {
     on<AuthEvent>((event, emit) {});
@@ -107,6 +109,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     );
     on<GetPasskeyListEvent>(_onGetPasskeyListEvent);
     on<RefreshTokenEvent>(_onRefreshTokenEvent);
+    on<SendFcmTokenEvent>(_onSendFcmTokenEvent, transformer: droppable());
     on<EnsureWalletTokenValidEvent>(_onEnsureWalletTokenValidEvent);
     on<SwitchToAppEvent>(_onSwitchToAppEvent);
     on<ResetSwitchToAppEvent>(_onResetSwitchToAppEvent);
@@ -116,7 +119,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<ResetInitEvent>(_onResetInitEvent);
     on<ResetSendOtpEvent>(_onResetSendOtpEvent);
     on<ResetVerifyOtpEvent>(_onResetVerifyOtpEvent);
-    on<ResetQuestionsEvent>(_onResetQuestionsEvent);
+    // droppable: يُسقِط أي طلب أسئلة جديد يصل أثناء وجود طلب جارٍ، فيمنع
+    // تكرار /step/questions مهما تعدّدت مصادر الإطلاق (المستمع/الـ interceptor).
+    on<ResetQuestionsEvent>(
+      _onResetQuestionsEvent,
+      transformer: droppable(),
+    );
     on<ResetAnswersEvent>(_onResetAnswersEvent);
     on<ResetCompleteEvent>(_onResetCompleteEvent);
     on<ReverifyStartEvent>(_onReverifyStartEvent);
@@ -157,6 +165,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final ResetCompleteUseCase resetCompleteUseCase;
   final ReverifyFaceVerifyUseCase reverifyFaceVerifyUseCase;
   final ReverifyFaceStartUseCase reverifyFaceStartUseCase;
+  final SendFcmUseCase sendFcmUseCase;
 
   final SendOtpUseCase sendOtpUseCase;
   final VerifyOtpSignInUseCase verifyOtpSignInUseCase;
@@ -850,6 +859,24 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     );
   }
 
+  /// إرسال توكن FCM للباك. عند النجاح نخزّن التوكن المُرسَل في prefs لمنع تكرار
+  /// الإرسال (إلا عند تغيّره). عند الفشل لا نخزّن شيئاً → يُعاد الإرسال عند الفتح
+  /// التالي (المنطق في AppNotificationService يقارن بـ sentFcmToken).
+  FutureOr<void> _onSendFcmTokenEvent(
+    SendFcmTokenEvent event,
+    Emitter<AuthState> emit,
+  ) async {
+    final res = await sendFcmUseCase(event.token);
+    res.fold(
+      (_) {
+        // فشل → لا نحدّث sentFcmToken (سيُعاد الإرسال لاحقاً).
+      },
+      (ok) {
+        if (ok) _prefsRepository.setSentFcmToken(event.token);
+      },
+    );
+  }
+
   FutureOr<void> _onGetUserCountryEvent(
     GetUserCountryEvent event,
     Emitter<AuthState> emit,
@@ -1046,6 +1073,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     ResetQuestionsEvent event,
     Emitter<AuthState> emit,
   ) async {
+    // حارس إضافي: لا تُطلق طلباً جديداً أثناء وجود طلب جارٍ (يمنع تكرار
+    // /step/questions). لا نحجب حالة success كي يعمل مسار "أعد المحاولة".
+    if (state.resetQuestionsStatus == ResetQuestionsStatus.loading) {
+      return;
+    }
     emit(state.copyWith(resetQuestionsStatus: ResetQuestionsStatus.loading));
     final res = await resetQuestionsUseCase(
       ResetEntryParams(midLogin: event.midLogin),

@@ -1,7 +1,7 @@
 name: rdb
 description: "A new Flutter project."
 publish_to: 'none'
-version: 1.0.0+14
+version: 1.0.0+18
 
 environment:
   sdk: ^3.9.2
@@ -76,6 +76,7 @@ dependencies:
   firebase_core: ^2.32.0
   firebase_database: ^10.5.7
   sync: ^0.3.0
+  posthog_flutter: 5.24.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -12,8 +12,11 @@ import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:rdb/core/di/di_container.dart';
 import 'package:rdb/features/authentication/presentation/manager/auth_bloc.dart';
 import 'package:root_check_flutter/root_check_flutter.dart';
+import 'package:posthog_flutter/posthog_flutter.dart';
 import 'core/domin/repositories/prefs_repository.dart';
 import 'package:rdb/services/security_service.dart';
+import 'package:rdb/service/analytics_service.dart';
+import 'package:rdb/service/notification_service/notification_service.dart';
 
 bool declineCallBecauseOfNotificationButton = false;
 bool isHydratedStorageInitialized = false;
@@ -28,14 +31,23 @@ List<String> apisMustNotToRequest = [];
 ////////////////////////////////////////
 int applicationVersion = 1;
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-  // نرسم صفحة بيضاء فوراً (أول إطار) قبل أي تهيئة ثقيلة، فيُغلق سبلاش النظام
-  // الإجباري (Android 12+) مباشرةً ويُجبَر التطبيق على المرور بها — ثم تتم
-  // التهيئة الثقيلة وننتقل لصفحة السبلاش الرئيسية. هذا يمنع التجمّد على سبلاش
-  // النظام على أي جهاز (بما فيها HiOS/TECNO).
-  runApp(const _AppBootstrap());
+  // ⚠️ مهم جداً لِـ Session Replay: يجب تهيئة PostHog (Posthog().setup) **قبل**
+  // runApp. لأن PostHogWidget.initState يقرأ Posthog().config، فإن كان null (لم
+  // تتم التهيئة بعد) يخرج فوراً ولا يبدأ التقاط اللقطات ولا يسجّل مستمع التفعيل —
+  // فتظهر الجلسات بأحداث ومدة لكن **بلا فيديو** ("missing snapshot data").
+  // لذا نحمّل .env ونهيّئ PostHog هنا أولاً، ثم نلفّ التطبيق بـ PostHogWidget.
+  try {
+    await dotenv.load();
+    await AnalyticsService.instance.init();
+  } catch (e, st) {
+    dev.log('PostHog early init failed: $e', stackTrace: st);
+  }
+  // PostHogWidget يلفّ كامل شجرة الويدجت ليتيح تسجيل الجلسات (Session Replay)
+  // لكل الشاشات — بما فيها شاشات مكتبة trydos_wallet المعروضة داخل نفس الشجرة.
+  runApp(const PostHogWidget(child: _AppBootstrap()));
 }
 
 /// يرسم أول إطار (صفحة بيضاء) فوراً ثم يُنفّذ تهيئة التطبيق الثقيلة، وعند جهوزها
@@ -72,6 +84,12 @@ class _AppBootstrapState extends State<_AppBootstrap> {
       ]);
       isLoadDotenvFile = true;
       isDependencyInitialized = true;
+      // تهيئة PostHog بعد تحميل .env (يقرأ المفاتيح منه). يلتقط Session Replay
+      // كل شاشات التطبيق بما فيها شاشات مكتبة المحفظة لأنها ضمن PostHogWidget.
+      await AnalyticsService.instance.init();
+      // تهيئة الإشعارات (Firebase Messaging + الإشعارات المحلّية) — ملف واحد يدير
+      // كل الحالات، ومنطق كل نوع في handle_with_notification_type.dart.
+      await AppNotificationService.instance.init();
       GetIt.I<PrefsRepository>().setTimerForOtpRunning(false);
       GetIt.I<AuthBloc>().add(GetUserCountryEvent());
       _isDeviceRooted = await _checkDeviceRooted();

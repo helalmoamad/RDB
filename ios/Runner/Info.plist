@@ -49,5 +49,8 @@
 	<string>Use Face ID to securely sign in to your account.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>We need camera access to verify your identity (face check) when resetting your passcode.</string>
+	<!-- PostHog: التهيئة تتم يدوياً من Dart (Posthog().setup) — نعطّل التهيئة التلقائية الأصلية. -->
+	<key>com.posthog.posthog.AUTO_INIT</key>
+	<false/>
 </dict>
 </plist>

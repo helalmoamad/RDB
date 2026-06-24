@@ -75,6 +75,20 @@ abstract class PrefsRepository {
   Future<void> setFcmTokenId(String fcmTokenId);
   Future<void> setFcmMarketTokenId(String fcmMarketTokenId);
 
+  /// آخر توكن FCM أُرسل للباك بنجاح (null إن لم يُرسل بعد).
+  String? get sentFcmToken;
+  Future<bool> setSentFcmToken(String token);
+
+  /// طلب موافقة جلسة معلّق (وصل خارج foreground) — bool + محتواه (JSON).
+  bool get pendingApprovalRequest;
+  String? get pendingApprovalRequestData;
+  Future<bool> setPendingApprovalRequest(bool value);
+  Future<bool> setPendingApprovalRequestData(String data);
+  Future<void> clearPendingApprovalRequest();
+
+  /// إعادة تحميل القيم من القرص — لالتقاط ما كُتب في isolate آخر (الخلفية).
+  Future<void> reloadPreferences();
+
   Future<bool> setUserId(String id);
 
   Future<bool> setUserName(String name);

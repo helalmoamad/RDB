@@ -40,6 +40,15 @@ abstract class PrefsKey {
 
   static const fcmTokenId = r'__$__fcmTokenId__$__';
 
+  /// آخر توكن FCM أُرسل للباك بنجاح (لمنع تكرار الإرسال إلا عند تغيّره).
+  static const sentFcmToken = r'__$__sentFcmToken__$__';
+
+  /// طلب موافقة جلسة معلّق وصل في الخلفية (bool) + محتواه (JSON) — يُنفَّذ بعد
+  /// الوصول للـ HomePage وفك القفل ثم يُمسح.
+  static const pendingApprovalRequest = r'__$__pendingApprovalRequest__$__';
+  static const pendingApprovalRequestData =
+      r'__$__pendingApprovalRequestData__$__';
+
   static const theme = r'__$__theme__$__';
 
   static const fcmToken = r'__$__fcmToken__$__';

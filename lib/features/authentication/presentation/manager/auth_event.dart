@@ -265,3 +265,11 @@ class ResetFlowClearEvent extends AuthEvent {
   @override
   List<Object?> get props => [];
 }
+
+/// إرسال توكن FCM للباك (POST /send/fcm).
+class SendFcmTokenEvent extends AuthEvent {
+  final String token;
+  const SendFcmTokenEvent(this.token);
+  @override
+  List<Object?> get props => [token];
+}

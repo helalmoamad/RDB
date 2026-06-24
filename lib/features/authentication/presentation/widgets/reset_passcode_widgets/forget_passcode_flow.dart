@@ -79,6 +79,14 @@ class _ForgetPasscodeFlowState extends State<ForgetPasscodeFlow> {
       _showErrorAndClose(s.resetError);
       return;
     }
+    // 1.b) جهوز الأسئلة → ننتقل لصفحتها (من المقدّمة mid-login أو من OTP).
+    // يُفحَص قبل فرع init: وإلا يطابق فرع init أولاً ويعمل return فلا يحدث القفز
+    // أبداً (نبقى على page 0)، فيُعاد طلب /step/questions عند كل تغيّر حالة.
+    if (s.resetQuestionsStatus == ResetQuestionsStatus.success &&
+        (_currentPage.value == 0 || _currentPage.value == 3)) {
+      _jumpToPage(_questionsPage);
+      return;
+    }
     // 1) تفرّع init (ونحن على المقدّمة).
     if (s.resetInitStatus == ResetInitStatus.success &&
         _currentPage.value == 0 &&
@@ -90,18 +98,15 @@ class _ForgetPasscodeFlowState extends State<ForgetPasscodeFlow> {
         // فرع الوجه (مستخدم موثّق على idle-lock) — التقاط الوجه لاحقاً.
         _jumpToPage(_facePage);
       } else if (widget.midLogin) {
-        // mid-login: نطلب الأسئلة ونبقى على المقدّمة (زرّ Start يبقى shimmer)
-        // حتى تجهز، ثم ننتقل (الفرع أدناه).
-        _bloc.add(ResetQuestionsEvent(midLogin: widget.midLogin));
+        // mid-login: نطلب الأسئلة مرّة واحدة فقط (عندما لم تُطلب بعد) ونبقى على
+        // المقدّمة (زرّ Start يبقى shimmer) حتى تجهز ثم ننتقل (الفرع أعلاه).
+        // الحارس على status == init يمنع تكرار الطلب عند تغيّرات الحالة اللاحقة.
+        if (s.resetQuestionsStatus == ResetQuestionsStatus.init) {
+          _bloc.add(ResetQuestionsEvent(midLogin: widget.midLogin));
+        }
       } else {
         _goToPage(1); // idle-lock غير موثّق: هاتف → طرق → OTP → أسئلة.
       }
-      return;
-    }
-    // 1.b) جهوز الأسئلة → ننتقل لصفحتها (من المقدّمة mid-login أو من OTP).
-    if (s.resetQuestionsStatus == ResetQuestionsStatus.success &&
-        (_currentPage.value == 0 || _currentPage.value == 3)) {
-      _jumpToPage(_questionsPage);
       return;
     }
     // 2) نتيجة الإجابات (ونحن على صفحة الأسئلة).

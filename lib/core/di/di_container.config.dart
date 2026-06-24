@@ -39,6 +39,8 @@ import '../../features/authentication/domain/use_cases/refresh_token_usecase.dar
     as _i268;
 import '../../features/authentication/domain/use_cases/reset_passcode_usecases.dart'
     as _i919;
+import '../../features/authentication/domain/use_cases/send_fcm_usecase.dart'
+    as _i194;
 import '../../features/authentication/domain/use_cases/send_otp_usecase.dart'
     as _i952;
 import '../../features/authentication/domain/use_cases/set_passcode_usecase.dart'
@@ -144,6 +146,9 @@ Future<_i174.GetIt> $initGetIt(
   gh.factory<_i919.ReverifyFaceVerifyUseCase>(
     () => _i919.ReverifyFaceVerifyUseCase(gh<_i742.AuthRepository>()),
   );
+  gh.factory<_i194.SendFcmUseCase>(
+    () => _i194.SendFcmUseCase(gh<_i742.AuthRepository>()),
+  );
   gh.factory<_i952.SendOtpUseCase>(
     () => _i952.SendOtpUseCase(gh<_i742.AuthRepository>()),
   );
@@ -188,6 +193,7 @@ Future<_i174.GetIt> $initGetIt(
       gh<_i919.ResetCompleteUseCase>(),
       gh<_i919.ReverifyFaceVerifyUseCase>(),
       gh<_i919.ReverifyFaceStartUseCase>(),
+      gh<_i194.SendFcmUseCase>(),
     ),
   );
   return getIt;
