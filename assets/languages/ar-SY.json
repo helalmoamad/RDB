@@ -915,5 +915,10 @@
   "reset_confirm_new_passcode": "أكّد رمز المرور الجديد",
   "reset_passcode_mismatch": "رمزا المرور غير متطابقين، حاول مجدداً",
   "reset_attempts_remaining": "المحاولات المتبقّية: {}",
-  "reset_could_not_verify": "تعذّر التحقّق، يرجى البدء من جديد"
+  "reset_could_not_verify": "تعذّر التحقّق، يرجى البدء من جديد",
+  "third_party_keyboard_title": "تم اكتشاف لوحة مفاتيح من طرف ثالث",
+  "third_party_keyboard_warning_1": "قد ترفع لوحات مفاتيح الطرف الثالث عبارة الاسترداد (Seed Phrase) أو مفتاحك الخاص إلى السحابة دون علمك، مما قد يؤدي إلى فقدان أصولك.",
+  "third_party_keyboard_warning_2": "يرجى التبديل إلى لوحة المفاتيح الافتراضية للمتابعة.",
+  "third_party_keyboard_switch_now": "التبديل الآن",
+  "third_party_keyboard_ignore": "تجاهل"
 }

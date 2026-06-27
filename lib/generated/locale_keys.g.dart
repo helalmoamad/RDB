@@ -919,5 +919,10 @@ abstract class  LocaleKeys {
   static const reset_passcode_mismatch = 'reset_passcode_mismatch';
   static const reset_attempts_remaining = 'reset_attempts_remaining';
   static const reset_could_not_verify = 'reset_could_not_verify';
+  static const third_party_keyboard_title = 'third_party_keyboard_title';
+  static const third_party_keyboard_warning_1 = 'third_party_keyboard_warning_1';
+  static const third_party_keyboard_warning_2 = 'third_party_keyboard_warning_2';
+  static const third_party_keyboard_switch_now = 'third_party_keyboard_switch_now';
+  static const third_party_keyboard_ignore = 'third_party_keyboard_ignore';
 
 }

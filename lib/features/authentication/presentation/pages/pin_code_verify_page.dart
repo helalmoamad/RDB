@@ -15,6 +15,7 @@ import 'package:rdb/features/authentication/presentation/widgets/biometric_auth_
 import 'package:rdb/features/authentication/presentation/widgets/pin_item.dart';
 import 'package:rdb/features/authentication/presentation/widgets/reset_passcode_widgets/forget_passcode_flow.dart';
 import 'package:rdb/theme/typography.dart';
+import 'package:rdb/services/widgets/keyboard_security_guard.dart';
 import 'package:rdb/generated/locale_keys.g.dart';
 import 'dart:async';
 import 'dart:ui' as ui;
@@ -71,6 +72,11 @@ class _PinCodeVerifyPageState extends State<PinCodeVerifyPage>
     _isBiometricEnable();
     _checkStatusAndAutoUnlock();
     _resumeLockoutIfActive();
+
+    // تحذير أمني إن كانت لوحة المفاتيح الافتراضية من طرف ثالث (أندرويد فقط).
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) guardKeyboard(context);
+    });
   }
 
   @override

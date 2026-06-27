@@ -925,5 +925,10 @@
   "reset_confirm_new_passcode": "وشەی نهێنیی نوێ دڵنیا بکەرەوە",
   "reset_passcode_mismatch": "وشەکانی نهێنی یەک ناگرنەوە، دووبارە هەوڵبدە",
   "reset_attempts_remaining": "هەوڵە ماوەکان: {}",
-  "reset_could_not_verify": "نەتوانرا پشتڕاست بکرێتەوە، تکایە لە سەرەتاوە دەستپێبکەرەوە"
+  "reset_could_not_verify": "نەتوانرا پشتڕاست بکرێتەوە، تکایە لە سەرەتاوە دەستپێبکەرەوە",
+  "third_party_keyboard_title": "تەختەکلیلێکی لایەنی سێیەم دۆزرایەوە",
+  "third_party_keyboard_warning_1": "تەختەکلیلەکانی لایەنی سێیەم لەوانەیە دەستەواژەی چاککردنەوە (Seed Phrase) یان کلیلی تایبەتت بۆ هەور بەرز بکەنەوە بەبێ زانینت، کە لەوانەیە ببێتە هۆی لەدەستدانی سامانەکانت.",
+  "third_party_keyboard_warning_2": "تکایە بگۆڕە بۆ تەختەکلیلی بنەڕەتی بۆ بەردەوامبوون.",
+  "third_party_keyboard_switch_now": "ئێستا بگۆڕە",
+  "third_party_keyboard_ignore": "پشتگوێخستن"
 }

@@ -916,5 +916,10 @@
   "reset_confirm_new_passcode": "Confirm new passcode",
   "reset_passcode_mismatch": "Passcodes don't match, try again",
   "reset_attempts_remaining": "Attempts remaining: {}",
-  "reset_could_not_verify": "Could not verify, please start again"
+  "reset_could_not_verify": "Could not verify, please start again",
+  "third_party_keyboard_title": "Third-Party Keyboard Detected",
+  "third_party_keyboard_warning_1": "Third-party keyboards may upload your Seed Phrase or private key to the cloud without your knowledge, potentially leading to asset loss.",
+  "third_party_keyboard_warning_2": "Please switch to the default keyboard to continue.",
+  "third_party_keyboard_switch_now": "Switch Now",
+  "third_party_keyboard_ignore": "Ignore"
 }

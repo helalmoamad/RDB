@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
 import 'package:flutter/services.dart';
@@ -55,6 +57,29 @@ class SecurityService {
       dev.log('SecurityService: تم إلغاء حماية الخصوصية (إظهار المحتوى)');
     } on PlatformException catch (e) {
       dev.log('SecurityService: فشل في إلغاء حماية الخصوصية: ${e.message}');
+    }
+  }
+
+  /// يفحص هل لوحة المفاتيح الافتراضية الحالية من طرف ثالث (أندرويد فقط).
+  /// على iOS تُمنع لوحات الطرف الثالث كلياً من AppDelegate، لذا يعيد دائماً false.
+  Future<bool> isThirdPartyKeyboard() async {
+    if (!Platform.isAndroid) return false;
+    try {
+      final result = await platform.invokeMethod<bool>('isThirdPartyKeyboard');
+      return result ?? false;
+    } on PlatformException catch (e) {
+      dev.log('SecurityService: فشل فحص لوحة المفاتيح: ${e.message}');
+      return false;
+    }
+  }
+
+  /// يفتح نافذة اختيار لوحة المفاتيح ليبدّل المستخدم للوحة آمنة (أندرويد فقط).
+  Future<void> openKeyboardPicker() async {
+    if (!Platform.isAndroid) return;
+    try {
+      await platform.invokeMethod<void>('openKeyboardPicker');
+    } on PlatformException catch (e) {
+      dev.log('SecurityService: فشل فتح مُحدّد لوحة المفاتيح: ${e.message}');
     }
   }
 

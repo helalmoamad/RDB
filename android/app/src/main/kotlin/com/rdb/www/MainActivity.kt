@@ -1,9 +1,13 @@
 package com.rdb.www
 
+import android.content.Context
+import android.content.pm.ApplicationInfo
 import android.os.Bundle
+import android.provider.Settings
 import android.util.Log
 import android.view.ViewGroup
 import android.view.WindowManager
+import android.view.inputmethod.InputMethodManager
 import android.widget.FrameLayout
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import io.flutter.embedding.android.FlutterFragmentActivity
@@ -58,6 +62,13 @@ class MainActivity : FlutterFragmentActivity() {
                         showContent()
                         result.success(null)
                     }
+                    "isThirdPartyKeyboard" -> {
+                        result.success(isThirdPartyKeyboard())
+                    }
+                    "openKeyboardPicker" -> {
+                        openKeyboardPicker()
+                        result.success(null)
+                    }
                     else -> result.notImplemented()
                 }
             }
@@ -109,6 +120,51 @@ class MainActivity : FlutterFragmentActivity() {
             }
         } catch (e: Exception) {
             Log.e(TAG, "خطأ أثناء إظهار المحتوى", e)
+        }
+    }
+
+    /**
+     * يفحص لوحة المفاتيح الافتراضية الحالية: يعيد true إن كانت لوحة طرف ثالث
+     * (ليست تطبيق نظام). لوحات النظام (Samsung/Gboard المثبّتة مسبقاً) تُعتبر آمنة،
+     * أمّا اللوحات المُنزّلة من المتجر فقد ترفع ما يُكتب إلى السحابة → تحذير.
+     */
+    private fun isThirdPartyKeyboard(): Boolean {
+        return try {
+            val imeId = Settings.Secure.getString(
+                contentResolver,
+                Settings.Secure.DEFAULT_INPUT_METHOD,
+            ) ?: return false
+            if (imeId.isEmpty()) return false
+
+            val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            // getInputMethodList يوفّرها النظام ولا تخضع لقيود رؤية الحزم
+            // (Package Visibility) في Android 11+، بخلاف packageManager
+            // .getApplicationInfo الذي يرمي NameNotFoundException على الأجهزة الحديثة.
+            val info = imm.inputMethodList.firstOrNull { it.id == imeId }
+            val appInfo = info?.serviceInfo?.applicationInfo
+            if (appInfo == null) {
+                // تعذّر إيجاد معلومات اللوحة → نعتبرها طرف ثالث احتياطاً (الأكثر أماناً).
+                Log.w(TAG, "تعذّر إيجاد معلومات لوحة المفاتيح: $imeId")
+                return true
+            }
+            val systemFlags =
+                ApplicationInfo.FLAG_SYSTEM or ApplicationInfo.FLAG_UPDATED_SYSTEM_APP
+            val isSystem = (appInfo.flags and systemFlags) != 0
+            Log.d(TAG, "لوحة المفاتيح الحالية: ${info.packageName} (نظام=$isSystem)")
+            !isSystem
+        } catch (e: Exception) {
+            Log.e(TAG, "خطأ أثناء فحص لوحة المفاتيح", e)
+            false
+        }
+    }
+
+    /** يفتح نافذة اختيار لوحة المفاتيح ليتمكّن المستخدم من التبديل للوحة آمنة. */
+    private fun openKeyboardPicker() {
+        try {
+            val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.showInputMethodPicker()
+        } catch (e: Exception) {
+            Log.e(TAG, "خطأ أثناء فتح مُحدّد لوحة المفاتيح", e)
         }
     }
 

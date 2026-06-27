@@ -19,6 +19,7 @@ import 'package:rdb/features/authentication/presentation/widgets/pin_item.dart';
 import '../../../../common/constant/design/assets_provider.dart';
 import '../widgets/verification_methods.dart';
 import 'package:rdb/core/utils/last_pages_tracker.dart';
+import 'package:rdb/services/widgets/keyboard_security_guard.dart';
 
 class RegistrationPage extends StatefulWidget {
   final bool? fromLogOut;
@@ -65,6 +66,11 @@ class _RegistrationPageState extends State<RegistrationPage>
 
     authBloc = BlocProvider.of<AuthBloc>(context);
     super.initState();
+
+    // تحذير أمني إن كانت لوحة المفاتيح الافتراضية من طرف ثالث (أندرويد فقط).
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) guardKeyboard(context);
+    });
   }
 
   @override

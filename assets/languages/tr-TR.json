@@ -898,5 +898,10 @@
   "reset_confirm_new_passcode": "Yeni parolayı onaylayın",
   "reset_passcode_mismatch": "Parolalar eşleşmiyor, tekrar deneyin",
   "reset_attempts_remaining": "Kalan deneme: {}",
-  "reset_could_not_verify": "Doğrulanamadı, lütfen yeniden başlayın"
+  "reset_could_not_verify": "Doğrulanamadı, lütfen yeniden başlayın",
+  "third_party_keyboard_title": "Üçüncü Taraf Klavye Algılandı",
+  "third_party_keyboard_warning_1": "Üçüncü taraf klavyeler, Kurtarma İfadenizi (Seed Phrase) veya özel anahtarınızı siz farkında olmadan buluta yükleyebilir ve bu da varlık kaybına yol açabilir.",
+  "third_party_keyboard_warning_2": "Devam etmek için lütfen varsayılan klavyeye geçin.",
+  "third_party_keyboard_switch_now": "Şimdi Değiştir",
+  "third_party_keyboard_ignore": "Yoksay"
 }
