@@ -170,6 +170,10 @@ class _TrydosApplicationState extends State<TrydosApplication>
                             color: const Color(0xFFFFFFFF),
                             locale: context.locale,
                             theme: AppTheme.light,
+
+                            // 👇 التعديل الأول: حماية ثيم حالة الحماية والأمان
+                            darkTheme: AppTheme.light,
+                            themeMode: ThemeMode.light,
                             supportedLocales: context.supportedLocales,
                             localizationsDelegates: [
                               ...context.localizationDelegates,
@@ -188,6 +192,10 @@ class _TrydosApplicationState extends State<TrydosApplication>
                             locale: context.locale,
                             routerConfig: GRouter.router,
                             theme: AppTheme.light,
+
+                            // 👇 التعديل الأول: حماية ثيم حالة الحماية والأمان
+                            darkTheme: AppTheme.light,
+                            themeMode: ThemeMode.light,
                             supportedLocales: context.supportedLocales,
                             localizationsDelegates: [
                               ...context.localizationDelegates,
