@@ -252,6 +252,30 @@ class HelperFunctions {
     return 'other_os';
   }
 
+  static Future<String?> getDeviceName() async {
+    var deviceInfo = DeviceInfoPlugin();
+    if (Platform.isIOS) {
+      var iosDeviceInfo = await deviceInfo.iosInfo;
+      return iosDeviceInfo.name;
+    } else if (Platform.isAndroid) {
+      AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+      return androidInfo.name;
+    }
+    return 'other_os';
+  }
+
+  static Future<String?> getDeviceVersion() async {
+    var deviceInfo = DeviceInfoPlugin();
+    if (Platform.isIOS) {
+      var iosDeviceInfo = await deviceInfo.iosInfo;
+      return iosDeviceInfo.systemVersion;
+    } else if (Platform.isAndroid) {
+      AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+      return androidInfo.version.release;
+    }
+    return 'other_os';
+  }
+
   static showVersionDialog(context) async {
     await showDialog<String>(
       context: context,

@@ -37,6 +37,8 @@ import '../../features/authentication/domain/use_cases/login_to_wallet_usecase.d
     as _i304;
 import '../../features/authentication/domain/use_cases/refresh_token_usecase.dart'
     as _i268;
+import '../../features/authentication/domain/use_cases/remove_fcm_usecase.dart'
+    as _i587;
 import '../../features/authentication/domain/use_cases/reset_passcode_usecases.dart'
     as _i919;
 import '../../features/authentication/domain/use_cases/send_fcm_usecase.dart'
@@ -122,6 +124,9 @@ Future<_i174.GetIt> $initGetIt(
   gh.factory<_i268.RefreshTokenUsecase>(
     () => _i268.RefreshTokenUsecase(gh<_i742.AuthRepository>()),
   );
+  gh.factory<_i587.RemoveFcmUsecase>(
+    () => _i587.RemoveFcmUsecase(gh<_i742.AuthRepository>()),
+  );
   gh.factory<_i919.ResetInitUseCase>(
     () => _i919.ResetInitUseCase(gh<_i742.AuthRepository>()),
   );
@@ -182,6 +187,7 @@ Future<_i174.GetIt> $initGetIt(
       gh<_i356.GetUserProfileUseCase>(),
       gh<_i892.CompleteSessionUsecase>(),
       gh<_i566.SetPasscodeUseCase>(),
+      gh<_i587.RemoveFcmUsecase>(),
       gh<_i884.ChangePasscodeUseCase>(),
       gh<_i268.RefreshTokenUsecase>(),
       gh<_i814.SwitchToAppUsecase>(),

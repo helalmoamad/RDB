@@ -48,7 +48,8 @@ abstract class WalletEndPoints {
   static const checkoutEP = "merchant/checkout";
 
   /// إرسال توكن FCM للباك.
-  static const sendFcmEP = "send/fcm";
+  static const sendFcmEP = "notifications/devices/register";
+  static const removeFcmEP = "notifications/devices/unregister";
 }
 
 abstract class WalletUrls {

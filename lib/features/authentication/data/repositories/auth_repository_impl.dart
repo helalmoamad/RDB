@@ -25,9 +25,16 @@ class AuthRepositoryImpl extends AuthRepository with HandlingExceptionRequest {
   final AuthRemoteDatasource dataSource;
 
   @override
-  Future<Either<Failure, bool>> sendFcmToken(String token) {
+  Future<Either<Failure, bool>> sendFcmToken(Map<String, dynamic> params) {
     return handlingExceptionRequest(
-      tryCall: () => dataSource.sendFcmToken(token),
+      tryCall: () => dataSource.sendFcmToken(params),
+    );
+  }
+
+  @override
+  Future<Either<Failure, bool>> removeFcmToken(Map<String, dynamic> params) {
+    return handlingExceptionRequest(
+      tryCall: () => dataSource.removeFcmToken(params),
     );
   }
 

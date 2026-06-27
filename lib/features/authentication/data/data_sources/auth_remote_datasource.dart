@@ -68,17 +68,27 @@ class AuthRemoteDatasource {
   }
 
   /// إرسال توكن FCM للباك: POST /send/fcm بجسم {"fcm": token}.
-  Future<bool> sendFcmToken(String fcmToken) {
+  Future<bool> sendFcmToken(Map<String, dynamic> params) {
     return PostClient<bool>(
       serverName: ServerName.wallet,
       requestPrams: RequestConfig<bool>(
         endpoint: WalletEndPoints.sendFcmEP,
-        data: {"fcm": fcmToken},
+        data: params,
         response: ResponseValue<bool>(returnValueOnSuccess: true),
       ),
     )();
   }
 
+  Future<bool> removeFcmToken(Map<String, dynamic> params) {
+    return PostClient<bool>(
+      serverName: ServerName.wallet,
+      requestPrams: RequestConfig<bool>(
+        endpoint: WalletEndPoints.removeFcmEP,
+        data: params,
+        response: ResponseValue<bool>(returnValueOnSuccess: true),
+      ),
+    )();
+  }
   // ───────────── إعادة تعيين رمز المرور ─────────────
   // midLogin=false → idle-lock (access token)؛ midLogin=true → step (stepToken).
 

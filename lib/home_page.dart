@@ -131,6 +131,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       await logoutEvent.cancel();
       await lockEvent.cancel();
       TrydosWallet.logout();
+
       AnalyticsService.instance.reset(); // فصل جلسة PostHog عن المستخدم
       // إبطال توكن FCM ومسحه (دون حجب تسجيل الخروج) حتى لا تصل إشعارات للمستخدم
       // السابق ويبدأ التالي نظيفاً.
@@ -192,9 +193,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     // طلب إذن الإشعارات مرتبط بحالة القفل: عند فك القفل (إدخال passcode صحيح)
     // يصبح isPasscodeVerified=true فيُطلق المستمع الطلب. أمّا إن لم يكن هناك
     // قفل (verified=true أصلاً) فيُطلب مباشرةً في الـ post-frame أدناه.
-    AppLockController.instance.isPasscodeVerified.addListener(
-      _onHomeUnlocked,
-    );
+    AppLockController.instance.isPasscodeVerified.addListener(_onHomeUnlocked);
     // مزامنة أولية لحالة القفل/التبديل من التخزين بعد أول إطار. يغطّي حالة
     // الإقلاع البارد وهو مقفول (splash يضبط shouldShowPin=true).
     WidgetsBinding.instance.addPostFrameCallback((_) {

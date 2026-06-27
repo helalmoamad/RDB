@@ -15,23 +15,12 @@ class AnalyticsService {
   bool _initialized = false;
   bool get isInitialized => _initialized;
 
-  // رموز ANSI لتلوين طباعة الـ console.
-  static const String _green = '\x1B[32m';
-  static const String _red = '\x1B[31m';
-  static const String _yellow = '\x1B[33m';
-  static const String _reset = '\x1B[0m';
-
-  void _logSuccess(String msg) => debugPrint('$_green$msg$_reset');
-  void _logError(String msg) => debugPrint('$_red$msg$_reset');
-  void _logWarn(String msg) => debugPrint('$_yellow$msg$_reset');
-
   /// تهيئة PostHog. تُستدعى بعد تحميل ملف `.env` وقبل عرض التطبيق.
   Future<void> init() async {
     if (_initialized) return;
 
     final apiKey = dotenv.env['POSTHOG_API_KEY'] ?? '';
     if (apiKey.isEmpty) {
-      _logError('🔴 PostHog: POSTHOG_API_KEY مفقود — تم تخطّي التهيئة.');
       return;
     }
 
@@ -74,26 +63,16 @@ class AnalyticsService {
     try {
       await Posthog().setup(config);
       _initialized = true;
-      _logSuccess('🟢 PostHog: تمّت التهيئة بنجاح (host: ${config.host}).');
 
       // طباعة معرّف الجلسة الأولى عند فتحها (قد يتأخّر إنشاؤها لحظات).
       try {
         final sessionId = await Posthog().getSessionId();
         if (sessionId != null && sessionId.isNotEmpty) {
-          _logSuccess('🟢 PostHog: فُتحت أول جلسة — sessionId: $sessionId');
-        } else {
-          _logWarn(
-            '🟡 PostHog: تمّت التهيئة لكن لم تُفتح جلسة بعد '
-            '(ستُفتح عند أول نشاط/شاشة).',
-          );
-        }
-      } catch (e) {
-        _logWarn('🟡 PostHog: تعذّر قراءة معرّف الجلسة: $e');
-      }
-    } catch (e, st) {
-      _logError('🔴 PostHog: فشلت التهيئة — $e');
-      _logError('🔴 PostHog stackTrace: $st');
-    }
+        } else {}
+        // ignore: empty_catches
+      } catch (e) {}
+      // ignore: empty_catches
+    } catch (e) {}
   }
 
   /// ربط الجلسة بالمستخدم الحالي (تُستدعى بعد تسجيل الدخول / تهيئة المحفظة).
@@ -143,9 +122,8 @@ class AnalyticsService {
     if (!_initialized) return;
     try {
       await Posthog().flush();
-    } catch (e) {
-      _logWarn('🟡 PostHog: تعذّر الـ flush: $e');
-    }
+      // ignore: empty_catches
+    } catch (e) {}
   }
 
   /// مسح هوية المستخدم عند تسجيل الخروج.

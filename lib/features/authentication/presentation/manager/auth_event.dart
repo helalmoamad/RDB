@@ -69,6 +69,12 @@ class ResetAllData extends AuthEvent {
   List<Object?> get props => [];
 }
 
+class RemoveFcmTokenEvent extends AuthEvent {
+  const RemoveFcmTokenEvent();
+  @override
+  List<Object?> get props => [];
+}
+
 class SaveErrorSigneInVerify extends AuthEvent {
   final String error;
 

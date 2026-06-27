@@ -14,7 +14,6 @@ abstract class PrefsRepository {
   String? get email;
   String? get photo;
   String? get memberSince;
-  String? get fcmMarketTokenId;
 
   //String? get alaaWebForCall;
   int? get userCountryIsAvailable;
@@ -73,7 +72,6 @@ abstract class PrefsRepository {
   Future<bool> setPhoneNumber(String phoneNumber);
 
   Future<void> setFcmTokenId(String fcmTokenId);
-  Future<void> setFcmMarketTokenId(String fcmMarketTokenId);
 
   /// آخر توكن FCM أُرسل للباك بنجاح (null إن لم يُرسل بعد).
   String? get sentFcmToken;

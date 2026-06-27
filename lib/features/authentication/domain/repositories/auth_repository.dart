@@ -50,8 +50,8 @@ abstract class AuthRepository {
   );
 
   /// إرسال توكن FCM للباك.
-  Future<Either<Failure, bool>> sendFcmToken(String token);
-
+  Future<Either<Failure, bool>> sendFcmToken(Map<String, dynamic> params);
+  Future<Either<Failure, bool>> removeFcmToken(Map<String, dynamic> params);
   // ── إعادة تعيين رمز المرور ──
   Future<Either<Failure, ResetInitResponse>> resetPasscodeInit({
     required bool midLogin,

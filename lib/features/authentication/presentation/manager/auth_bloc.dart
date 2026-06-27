@@ -6,6 +6,7 @@ import 'package:equatable/equatable.dart';
 import 'package:get_it/get_it.dart';
 import 'package:injectable/injectable.dart';
 import 'package:logger/logger.dart';
+import 'package:rdb/common/helper/helper_functions.dart';
 import 'package:rdb/features/authentication/data/models/get_user_country_response_model.dart';
 import 'package:rdb/features/authentication/domain/entities/verify_otp_session_status.dart';
 import 'package:rdb/features/authentication/domain/use_cases/complete_session_usecase.dart';
@@ -13,6 +14,7 @@ import 'package:rdb/features/authentication/data/models/passkey_model.dart';
 import 'package:rdb/features/authentication/domain/use_cases/get_passkey_list_usecase.dart';
 import 'package:rdb/features/authentication/domain/use_cases/get_user_profile_usecase.dart';
 import 'package:rdb/features/authentication/domain/use_cases/refresh_token_usecase.dart';
+import 'package:rdb/features/authentication/domain/use_cases/remove_fcm_usecase.dart';
 import 'package:rdb/features/authentication/domain/use_cases/send_fcm_usecase.dart';
 import 'package:rdb/features/authentication/domain/use_cases/switch_to_app_usecase.dart';
 import 'package:trydos_wallet/trydos_wallet.dart' show TrydosWallet;
@@ -65,6 +67,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     this.getUserProfileUseCase,
     this.completeSessionUsecase,
     this.setPasscodeUseCase,
+    this.removeFcmTokenUsecase,
     this.changePasscodeUseCase,
     this.refreshTokenUsecase,
     this.switchToAppUsecase,
@@ -93,6 +96,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<SaveErrorSigneInVerify>(_onSaveErrorSigneInVerify);
     on<ResetAllData>(_onResetAllData);
     on<VerifyOtpSignInEvent>(_onVerifyOtpSignInEvent);
+    on<RemoveFcmTokenEvent>(_onRemoveFcmTokenEvent);
 
     on<UpdateUserProfileEvent>(_onUpdateUserProfileEvent);
     on<GetUserProfileEvent>(_onGetUserProfileEvent);
@@ -121,10 +125,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<ResetVerifyOtpEvent>(_onResetVerifyOtpEvent);
     // droppable: يُسقِط أي طلب أسئلة جديد يصل أثناء وجود طلب جارٍ، فيمنع
     // تكرار /step/questions مهما تعدّدت مصادر الإطلاق (المستمع/الـ interceptor).
-    on<ResetQuestionsEvent>(
-      _onResetQuestionsEvent,
-      transformer: droppable(),
-    );
+    on<ResetQuestionsEvent>(_onResetQuestionsEvent, transformer: droppable());
     on<ResetAnswersEvent>(_onResetAnswersEvent);
     on<ResetCompleteEvent>(_onResetCompleteEvent);
     on<ReverifyStartEvent>(_onReverifyStartEvent);
@@ -158,6 +159,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   }
 
   final ResetInitUseCase resetInitUseCase;
+  final RemoveFcmUsecase removeFcmTokenUsecase;
   final ResetSendOtpUseCase resetSendOtpUseCase;
   final ResetVerifyOtpUseCase resetVerifyOtpUseCase;
   final ResetQuestionsUseCase resetQuestionsUseCase;
@@ -234,6 +236,23 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
             updateUserProfileError: '',
           ),
         );
+      },
+    );
+  }
+
+  FutureOr<void> _onRemoveFcmTokenEvent(
+    RemoveFcmTokenEvent event,
+    Emitter<AuthState> emit,
+  ) async {
+    final res = await removeFcmTokenUsecase(
+      RemoveFcmParams(fcmToken: _prefsRepository.fcmTokenId),
+    );
+    res.fold(
+      (_) {
+        // فشل → لا نحدّث sentFcmToken (سيُعاد الإرسال لاحقاً).
+      },
+      (ok) {
+        if (ok) _prefsRepository.setSentFcmToken("");
       },
     );
   }
@@ -866,7 +885,18 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     SendFcmTokenEvent event,
     Emitter<AuthState> emit,
   ) async {
-    final res = await sendFcmUseCase(event.token);
+    await TrydosWallet.setFcmToken(event.token);
+    final deviceId = await HelperFunctions.getDeviceId();
+    final deviceVersion = await HelperFunctions.getDeviceVersion();
+    final deviceName = await HelperFunctions.getDeviceName();
+    final res = await sendFcmUseCase(
+      SendFcmParams(
+        deviceId: deviceId,
+        deviceName: deviceName,
+        fcmToken: event.token,
+        osVersion: deviceVersion,
+      ),
+    );
     res.fold(
       (_) {
         // فشل → لا نحدّث sentFcmToken (سيُعاد الإرسال لاحقاً).
