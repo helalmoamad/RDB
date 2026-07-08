@@ -45,6 +45,11 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>remote-notification</string>
+		<string>fetch</string>
+	</array>
 	<key>NSFaceIDUsageDescription</key>
 	<string>Use Face ID to securely sign in to your account.</string>
 	<key>NSCameraUsageDescription</key>

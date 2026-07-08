@@ -47,9 +47,27 @@ class _RegistrationPageState extends State<RegistrationPage>
   int isVisWhatsApp = 0;
   // ignore: non_constant_identifier_names
   int PopScopeValue = 0;
+
+  /// رقم هاتف محفوظ مسبقاً على هذا الجهاز (إن وجد). عند وجوده ننتقل مباشرةً
+  /// لصفحة إدخال الرقم بصيغة تسجيل الدخول ونملأ الحقل به. لاحقاً سيُملأ هذا
+  /// الرقم من الـ API حسب معرِّف الجهاز عند تثبيت التطبيق.
+  String? savedLoginPhone;
+
+  /// يتحقق من وجود رقم هاتف صالح محفوظ في التخزين المحلي.
+  bool get _hasSavedPhone {
+    final saved = savedLoginPhone?.trim();
+    return saved != null && saved.isNotEmpty && saved != 'null';
+  }
+
   @override
   void initState() {
     LastPagesTracker.push('RegistrationPage');
+
+    savedLoginPhone = prefsRepository.myPhoneNumber;
+    // إن كان هناك رقم محفوظ، ابدأ بصيغة تسجيل الدخول مباشرةً.
+    if (_hasSavedPhone) {
+      fromLogin = true;
+    }
     /* if (widget.fromExpiredToken ?? false) {
       Future.delayed(
         Duration(microseconds: 50),
@@ -69,7 +87,17 @@ class _RegistrationPageState extends State<RegistrationPage>
 
     // تحذير أمني إن كانت لوحة المفاتيح الافتراضية من طرف ثالث (أندرويد فقط).
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) guardKeyboard(context);
+      if (!mounted) return;
+      guardKeyboard(context);
+
+      // وجود رقم محفوظ ⇒ انتقل مباشرةً لصفحة إدخال الرقم (صيغة تسجيل الدخول)
+      // بنفس الحركة المستخدمة في زر "تسجيل الدخول" ضمن شاشة الترحيب.
+      if (_hasSavedPhone && pageController.hasClients) {
+        animationDuration = const Duration(seconds: 1);
+        animate.value = true;
+        pageContent.value = 2;
+        pageController.jumpToPage(2);
+      }
     });
   }
 
@@ -326,6 +354,7 @@ class _RegistrationPageState extends State<RegistrationPage>
                             ),
                             InsertPhoneTab(
                               fromLogin: fromLogin,
+                              initialPhoneNumber: savedLoginPhone,
                               focusNode: focusNode,
                               moveToNextStep: (String phoneNumber) {
                                 this.phoneNumber = phoneNumber.replaceAll(

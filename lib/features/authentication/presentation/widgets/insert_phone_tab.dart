@@ -22,11 +22,16 @@ import '../../../app/my_text_widget.dart';
 class InsertPhoneTab extends StatefulWidget {
   const InsertPhoneTab({
     this.fromLogin = false,
+    this.initialPhoneNumber,
     required this.moveToNextStep,
     required this.focusNode,
     super.key,
   });
   final bool fromLogin;
+
+  /// رقم هاتف محفوظ يُملأ به الحقل تلقائياً عند فتح الصفحة (سيناريو تسجيل
+  /// الدخول لمستخدم سبق أن سُجِّل رقمه على هذا الجهاز).
+  final String? initialPhoneNumber;
   final void Function(String phoneNumber) moveToNextStep;
   final FocusNode focusNode;
 
@@ -49,6 +54,82 @@ class _InsertPhoneTabState extends State<InsertPhoneTab> with FormStateMinxin {
   final ValueNotifier<bool> showLoadingSubmit = ValueNotifier(false);
   final ValueNotifier<bool> changeTextInputFieldContent = ValueNotifier(false);
   int maxLength = 25;
+
+  static const Country _emptyCountry = Country(
+    name: '',
+    flag: '',
+    code: '',
+    dialCode: '',
+    minLength: 0,
+    maxLength: 0,
+  );
+
+  @override
+  void initState() {
+    super.initState();
+
+    // ملء الحقل بالرقم المحفوظ (إن وجد). ضبط `controller.text` برمجياً يتجاوز
+    // مسار الإدخال، فلا يعمل الـ inputFormatters (التنسيق بالمسافات) ولا الـ
+    // onChanged (الذي يحسب موضع المؤشر المخصّص). لذا ننسّق الرقم يدوياً بنفس
+    // منطق PhoneNumberFormatter، ونحدّث موضع المؤشر بعد أول إطار.
+    final initial = widget.initialPhoneNumber?.trim();
+    if (initial != null && initial.isNotEmpty) {
+      final digits = initial.replaceAll(RegExp(r'[^0-9]'), '');
+      if (digits.isNotEmpty) {
+        final formatted = PhoneNumberFormatter().getFormattedText('', digits);
+        form.controllers[0].value = TextEditingValue(
+          text: formatted,
+          selection: TextSelection.collapsed(offset: formatted.length),
+        );
+        _evaluatePhone();
+
+        // موضع المؤشر المخصّص (offset في phone_form_fields) يُحسب داخل onChanged
+        // فقط — نكرّر نفس القياس هنا بعد توفّر context حتى يظهر المؤشر بعد الرقم.
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) _syncCustomCursor(formatted);
+        });
+      }
+    }
+  }
+
+  /// يحدّث موضع المؤشر المخصّص ليقع بعد الرقم المملوء تلقائياً — بنفس قياس عرض
+  /// النص المستخدم في [PhoneFormField.onChanged].
+  void _syncCustomCursor(String text) {
+    final tp = TextPainter(
+      text: TextSpan(
+        text: text,
+        style: context.textTheme.headlineSmall?.mq.copyWith(
+          color: const Color(0xff1D1D1D),
+          height: 1.1,
+          decoration: TextDecoration.none,
+          fontSize: 15,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    offset = tp.width;
+  }
+
+  /// يحسب الدولة الحالية من محتوى الحقل ويضبط ظهور زر الإرسال — مستخرَج ليُستدعى
+  /// من [onChange] ومن [initState] عند الملء التلقائي.
+  void _evaluatePhone() {
+    final Country newCountry = countries.firstWhere(
+      (element) => '+${form.controllers[0].text.toLowerCase()}'.startsWith(
+        element.dialCode.toLowerCase(),
+      ),
+      orElse: () => _emptyCountry,
+    );
+    if ((form.controllers[0].text.isNotEmpty) && newCountry.code != "") {
+      displaySubmit.value =
+          (form.controllers[0].text.replaceAll(' ', '').length) >=
+              (newCountry.minLength + newCountry.dialCode.length - 3) &&
+          (form.controllers[0].text.replaceAll(' ', '').length) <=
+              (newCountry.maxLength + newCountry.dialCode.length + 3);
+    } else {
+      displaySubmit.value = false;
+    }
+    countryChanged.value = newCountry;
+  }
 
   @override
   void didChangeDependencies() {
@@ -213,40 +294,7 @@ class _InsertPhoneTabState extends State<InsertPhoneTab> with FormStateMinxin {
                                   );
                                 }
                               }
-                              Country newCountry = countries.firstWhere(
-                                (element) =>
-                                    '+${form.controllers[0].text.toLowerCase()}'
-                                        .startsWith(
-                                          element.dialCode.toLowerCase(),
-                                        ),
-                                orElse: () => const Country(
-                                  name: '',
-                                  flag: '',
-                                  code: '',
-                                  dialCode: '',
-                                  minLength: 0,
-                                  maxLength: 0,
-                                ),
-                              );
-                              if ((form.controllers[0].text.isNotEmpty) &&
-                                  newCountry.code != "") {
-                                displaySubmit.value =
-                                    (form.controllers[0].text
-                                            .replaceAll(' ', '')
-                                            .length) >=
-                                        (newCountry.minLength +
-                                            newCountry.dialCode.length -
-                                            3) &&
-                                    (form.controllers[0].text
-                                            .replaceAll(' ', '')
-                                            .length) <=
-                                        (newCountry.maxLength +
-                                            newCountry.dialCode.length +
-                                            3);
-                              } else {
-                                displaySubmit.value = false;
-                              }
-                              countryChanged.value = newCountry;
+                              _evaluatePhone();
                               debugPrint(
                                 'form.controllers[0].text${form.controllers[0].text}',
                               );

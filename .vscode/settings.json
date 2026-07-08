@@ -1,0 +1,9 @@
+{
+  // توجيه إضافة "Gradle for Java" لاستخدام JDK 17 المرفق مع Android Studio
+  // (البناء يتطلب jvmToolchain(17))، بدل JDK 22 المثبّت على النظام — يمنع خطأ
+  // "Cannot find a Java installation ... languageVersion=17". لا يؤثر على بناء
+  // Flutter نفسه (يستخدم نفس الـ JDK عبر flutter doctor).
+  "java.import.gradle.java.home": "C:\\Program Files\\Android\\Android Studio\\jbr",
+
+
+}
