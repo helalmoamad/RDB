@@ -17,9 +17,6 @@ val keystoreProperties = Properties().apply {
         keystorePropertiesFile.inputStream().use { load(it) }
     }
 }
-val releaseTaskRequested = gradle.startParameter.taskNames.any {
-    it.contains("release", ignoreCase = true) || it.contains("bundle", ignoreCase = true)
-}
 
 android {
     namespace = "com.rdb.www"
@@ -32,8 +29,8 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    kotlin{
-      jvmToolchain(17)
+    kotlin {
+        jvmToolchain(17)
     }
 
     defaultConfig {
@@ -45,25 +42,26 @@ android {
     }
 
     signingConfigs {
-        if (keystorePropertiesFile.exists()) {
-            create("release") {
-                keyAlias = keystoreProperties["keyAlias"] as String
-                keyPassword = keystoreProperties["keyPassword"] as String
+        create("release") {
+            // يقرأ أولاً من متغيرات سيرفر GitHub، وإذا لم يجدها يقرأ من ملف key.properties المحلي
+            keyAlias = System.getenv("ANDROID_KEY_ALIAS") ?: (keystoreProperties["keyAlias"] as? String) ?: ""
+            keyPassword = System.getenv("ANDROID_KEY_PASSWORD") ?: (keystoreProperties["keyPassword"] as? String) ?: ""
+            storePassword = System.getenv("ANDROID_KEYSTORE_PASSWORD") ?: (keystoreProperties["storePassword"] as? String) ?: ""
+            
+            val keystorePath = System.getenv("ANDROID_KEYSTORE_PATH")
+            if (!keystorePath.isNullOrEmpty()) {
+                // إذا كنا على سيرفر GitHub، الملف سيكون في مسار android/app
+                storeFile = file(keystorePath)
+            } else if (keystorePropertiesFile.exists()) {
+                // إذا كنا محلياً على جهازك
                 storeFile = rootProject.file(keystoreProperties["storeFile"] as String)
-                storePassword = keystoreProperties["storePassword"] as String
             }
         }
     }
 
     buildTypes {
         release {
-            if (keystorePropertiesFile.exists()) {
-                signingConfig = signingConfigs.getByName("release")
-            } else if (releaseTaskRequested) {
-                throw GradleException(
-                    "Missing android/key.properties. Create it from android/key.properties.example and keep it out of Git."
-                )
-            }
+            signingConfig = signingConfigs.getByName("release")
         }
     }
 }
@@ -71,6 +69,7 @@ android {
 flutter {
     source = "../.."
 }
+
 dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
 
