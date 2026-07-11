@@ -15,14 +15,13 @@ import '../data_sources/auth_remote_datasource.dart';
 
 @LazySingleton(as: AuthRepository)
 class AuthRepositoryImpl extends AuthRepository with HandlingExceptionRequest {
+  AuthRepositoryImpl(this.dataSource);
+
+  final AuthRemoteDatasource dataSource;
   @override
   Future<Either<Failure, UserProfileModel>> getUserProfile() {
     return handlingExceptionRequest(tryCall: () => dataSource.getUserProfile());
   }
-
-  AuthRepositoryImpl(this.dataSource);
-
-  final AuthRemoteDatasource dataSource;
 
   @override
   Future<Either<Failure, bool>> sendFcmToken(Map<String, dynamic> params) {
