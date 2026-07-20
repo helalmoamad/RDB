@@ -201,19 +201,25 @@ class AuthRepositoryImpl extends AuthRepository with HandlingExceptionRequest {
   Future<Either<Failure, ResetCompleteResponse>> resetPasscodeComplete(
     Map<String, dynamic> params, {
     required bool midLogin,
+    String? faceStepToken,
   }) {
     return handlingExceptionRequest(
-      tryCall: () =>
-          dataSource.resetPasscodeComplete(params, midLogin: midLogin),
+      tryCall: () => dataSource.resetPasscodeComplete(
+        params,
+        midLogin: midLogin,
+        faceStepToken: faceStepToken,
+      ),
     );
   }
 
   @override
   Future<Either<Failure, ReverifyStartResponse>> reverifyFaceStart(
-    String challengeId,
-  ) {
+    String challengeId, {
+    required bool midLogin,
+  }) {
     return handlingExceptionRequest(
-      tryCall: () => dataSource.reverifyFaceStart(challengeId),
+      tryCall: () =>
+          dataSource.reverifyFaceStart(challengeId, midLogin: midLogin),
     );
   }
 
@@ -221,11 +227,13 @@ class AuthRepositoryImpl extends AuthRepository with HandlingExceptionRequest {
   Future<Either<Failure, ReverifyVerifyResponse>> reverifyFaceVerify({
     required String challengeId,
     required String liveFaceImageData,
+    required bool midLogin,
   }) {
     return handlingExceptionRequest(
       tryCall: () => dataSource.reverifyFaceVerify(
         challengeId: challengeId,
         liveFaceImageData: liveFaceImageData,
+        midLogin: midLogin,
       ),
     );
   }

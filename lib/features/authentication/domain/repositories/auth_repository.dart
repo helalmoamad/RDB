@@ -72,13 +72,16 @@ abstract class AuthRepository {
   Future<Either<Failure, ResetCompleteResponse>> resetPasscodeComplete(
     Map<String, dynamic> params, {
     required bool midLogin,
+    String? faceStepToken,
   });
   Future<Either<Failure, ReverifyStartResponse>> reverifyFaceStart(
-    String challengeId,
-  );
+    String challengeId, {
+    required bool midLogin,
+  });
   Future<Either<Failure, ReverifyVerifyResponse>> reverifyFaceVerify({
     required String challengeId,
     required String liveFaceImageData,
+    required bool midLogin,
   });
   /*Future<Either<Failure, VerifyOtpSignUpAndInResponseModel>> verifyOtpSignUp(
     Map<String, dynamic> params,

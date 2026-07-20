@@ -70,8 +70,12 @@ class PostClient<T> extends BaseApi<T> {
             options: options.copyWith(
               receiveTimeout: _receiveTimeout ?? options.receiveTimeout,
               sendTimeout: _sendTimeout ?? options.sendTimeout,
+              // خريطة جديدة لهذا الطلب وحده: `addAll` كانت تكتب داخل خريطة
+              // ترويسات Dio المفرد، فتبقى الترويسة على كل الطلبات اللاحقة —
+              // وهذا يسرّب أسرارًا لجهات لا تحتاجها (برهان الوجه أحادي
+              // الاستخدام، مفتاح التاجر) وقد يُبطلها الخادم.
               headers: _extraHeaders != null
-                  ? (options.headers?..addAll(_extraHeaders))
+                  ? {...?options.headers, ..._extraHeaders}
                   : options.headers,
             ),
             data: _data,

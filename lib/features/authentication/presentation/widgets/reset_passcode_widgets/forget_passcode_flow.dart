@@ -4,8 +4,12 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get_it/get_it.dart';
 import 'package:rdb/common/constant/design/assets_provider.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:rdb/common/helper/show_message.dart';
+import 'package:rdb/core/domin/repositories/prefs_repository.dart';
 import 'package:rdb/features/authentication/presentation/manager/auth_bloc.dart';
+import 'package:rdb/generated/locale_keys.g.dart';
+import 'package:rdb/routes/router.dart';
 import 'face_verification_view.dart';
 import 'forget_passcode_intro.dart';
 import 'reset_phone_tab.dart';
@@ -15,6 +19,27 @@ import 'reset_result_pages.dart';
 import 'reset_setup_passcode_page.dart';
 import 'reset_verification_methods.dart';
 import 'reset_verify_otp.dart';
+
+/// انتهت صلاحية session stepToken (عمره 10 دقائق) — الجلسة الجزئية ماتت، ولا
+/// فائدة من العودة لشاشة الـ passcode لأنها تستخدم التوكن الميت نفسه. نمسح
+/// التوكن ونعيد المستخدم لبداية التطبيق ليدخل من الهاتف/OTP.
+///
+/// دالة عامة (لا method) لأن شاشة تعيين الرمز الجديد تحتاجها أيضًا: الوصول
+/// إليها يتمّ بـ `pushReplacement` فيموت مستمع [ForgetPasscodeFlow]، ويصبح
+/// 401 القادم من `complete` بلا معالج.
+void handleResetStepSessionExpired(BuildContext context) {
+  GetIt.I<PrefsRepository>().setstepToken('');
+  showMessage(
+    LocaleKeys.reset_session_expired_relogin.tr(),
+    hasError: true,
+    showInRelease: true,
+  );
+  // شاشات هذا التدفّق مدفوعة يدويًا (Navigator.push) وليست ضمن شجرة GoRouter،
+  // فلا يزيلها go() وحده وقد تبقى معروضة فوق الوجهة الجديدة. نُفرّغ المكدّس
+  // اليدوي أولًا ثم نوجّه للبداية.
+  Navigator.of(context).popUntil((r) => r.isFirst);
+  GRouter.router.go(GRouter.config.kRootRoute);
+}
 
 /// تدفّق "Forget Passcode" المستقلّ على شكل PageView مع زرّ X في الأعلى للرجوع.
 /// يُفتح من نص "Forget Passcode ?" داخل صفحة التحقق من رمز المرور.
@@ -65,12 +90,51 @@ class _ForgetPasscodeFlowState extends State<ForgetPasscodeFlow> {
 
   /// مستمع نتائج AuthBloc — يقود تنقّل التدفّق حسب ردود الباك.
   void _onResetState(BuildContext context, AuthState s) {
+    // -1) انتهت صلاحية session stepToken (401 على أي نداء step/*). له الأسبقية
+    // على كل الفروع: الرجوع لشاشة الـ passcode بلا فائدة لأنها تستخدم التوكن
+    // الميت نفسه — المخرج الوحيد إعادة الدخول من الهاتف/OTP.
+    if (s.resetSessionExpired) {
+      handleResetStepSessionExpired(context);
+      return;
+    }
     // 0) فشل init أو questions → رسالة ثم الخروج. في mid-login يعني غالباً
     // انتهاء stepToken (401)، فيعود المستخدم لخطوة الدخول لإعادة المحاولة.
     // (حُرّاس الصفحة تتجنّب الخروج بسبب حالة فشل قديمة عالقة في الـ singleton.)
+    //
+    // يشمل صفحة الوجه: "البدء من جديد" يُطلق init، وفشله هناك (شبكة/خادم) كان
+    // يمرّ صامتاً فتبقى الشاشة على تحدٍّ ميت بلا أي رسالة.
     if (s.resetInitStatus == ResetInitStatus.failure &&
-        _currentPage.value == 0) {
+        (_currentPage.value == 0 || _currentPage.value == _facePage)) {
       _showErrorAndClose(s.resetError);
+      return;
+    }
+    // -0.a) لا صورة selfie مسجّلة رغم توجيه init لفرع الوجه. الحساب لا يملك
+    // وسيلة تحقّق صالحة (ولا احتياط أسئلة للموثّقين)، فلا معنى لإبقائه على
+    // شاشة الكاميرا: نعرض السبب ونُغلق ليراجع الدعم.
+    if (s.reverifyFaceStatus == ReverifyFaceStatus.unavailable) {
+      _showErrorAndClose(
+        (s.resetError?.isNotEmpty ?? false)
+            ? s.resetError
+            : LocaleKeys.face_verify_no_enrollment.tr(),
+      );
+      return;
+    }
+    // 0.a) 409 = حساب موثّق: الأسئلة محظورة والوجه إلزامي (بلا احتياط). يعني
+    // أننا وُجّهنا للمسار الخطأ — نحوّل لفرع الوجه بدل الخروج، ما دام init قد
+    // أعطانا challengeId.
+    //
+    // الحارس `!= _facePage` ضروري: `faceRequired` يبقى مضبوطاً حتى طلب أسئلة
+    // جديد، فبلا الحارس يتطابق هذا الفرع عند كل تغيّر حالة ويعمل return —
+    // فيحجب فرع نجاح الوجه (1.c) ولا يصل الداخل عبر 409 لشاشة الرمز الجديد.
+    if (s.resetQuestionsStatus == ResetQuestionsStatus.faceRequired &&
+        _currentPage.value != _facePage) {
+      final challengeId = s.resetInitResult?.stepUp?.challengeId ?? '';
+      if (challengeId.isNotEmpty) {
+        _jumpToPage(_facePage);
+      } else {
+        // لا تحدٍّ بين أيدينا — نعيد init ليصدر واحدًا.
+        _bloc.add(ResetInitEvent(midLogin: widget.midLogin));
+      }
       return;
     }
     // فشل questions يحدث ونحن على المقدّمة (mid-login) أو على OTP (idle-lock).
@@ -87,9 +151,25 @@ class _ForgetPasscodeFlowState extends State<ForgetPasscodeFlow> {
       _jumpToPage(_questionsPage);
       return;
     }
-    // 1) تفرّع init (ونحن على المقدّمة).
+    // 1.c) نجاح التحقّق بالوجه → ننتقل لتعيين الرمز الجديد دون رجوع (مطابق
+    // لنجاح الأسئلة). البرهان محمول في state.faceStepToken.
+    //
+    // **يجب أن يسبق فرع init**: بعد توسيع ذلك الفرع ليشمل صفحة الوجه صار
+    // شرطاه يتحقّقان هنا أيضًا (init ما زال success و needsFace ما زال true)،
+    // فيقفز لصفحة الوجه نفسها ويعمل return — فيبتلع نجاح الوجه ولا يُنتقل أبداً.
+    if (s.reverifyFaceStatus == ReverifyFaceStatus.passed &&
+        _currentPage.value == _facePage) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (_) => ResetSetupPasscodePage(midLogin: widget.midLogin),
+        ),
+      );
+      return;
+    }
+    // 1) تفرّع init — من المقدّمة، أو من صفحة الوجه عند إعادة البدء بتحدٍّ جديد
+    // (بعد locked_out/410). في الحالة الثانية قد يعود القفل فننتقل لصفحته.
     if (s.resetInitStatus == ResetInitStatus.success &&
-        _currentPage.value == 0 &&
+        (_currentPage.value == 0 || _currentPage.value == _facePage) &&
         s.resetInitResult != null) {
       final r = s.resetInitResult!;
       if (r.isLocked) {
@@ -128,25 +208,12 @@ class _ForgetPasscodeFlowState extends State<ForgetPasscodeFlow> {
       }
       return;
     }
-    // 3) نجاح التحقّق بالوجه (ونحن على صفحة الوجه) → ننتقل لتعيين الرمز الجديد
-    // دون رجوع (مطابق لنجاح الأسئلة). stepToken محمول في state.resetToken.
-    if (s.reverifyFaceStatus == ReverifyFaceStatus.passed &&
-        _currentPage.value == _facePage) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (_) => ResetSetupPasscodePage(midLogin: widget.midLogin),
-        ),
-      );
-      return;
-    }
   }
 
   /// يعرض رسالة خطأ ويُغلق التدفّق (يعود لشاشة إدخال الـ passcode).
   void _showErrorAndClose(String? msg) {
     showMessage(
-      (msg == null || msg.isEmpty)
-          ? 'تعذّر إكمال العملية، حاول مجدداً'
-          : msg,
+      (msg == null || msg.isEmpty) ? 'تعذّر إكمال العملية، حاول مجدداً' : msg,
       hasError: true,
       showInRelease: true,
     );
@@ -177,10 +244,7 @@ class _ForgetPasscodeFlowState extends State<ForgetPasscodeFlow> {
       Navigator.of(context).pop();
       return;
     }
-    if (p == 0 ||
-        p == _failurePage ||
-        p == _lockedPage ||
-        p == _facePage) {
+    if (p == 0 || p == _failurePage || p == _lockedPage || p == _facePage) {
       Navigator.of(context).pop();
     } else {
       _goToPage(p - 1);
@@ -223,7 +287,10 @@ class _ForgetPasscodeFlowState extends State<ForgetPasscodeFlow> {
             p.resetInitStatus != c.resetInitStatus ||
             p.resetQuestionsStatus != c.resetQuestionsStatus ||
             p.resetAnswersStatus != c.resetAnswersStatus ||
-            p.reverifyFaceStatus != c.reverifyFaceStatus,
+            p.reverifyFaceStatus != c.reverifyFaceStatus ||
+            // لازم لالتقاط 401/410 القادمَين من `reverify/start`: فشل البدء قد
+            // لا يغيّر أي حالة أخرى، فلولاه لن يُستدعى المستمع أصلًا.
+            p.reverifyStartStatus != c.reverifyStartStatus,
         listener: _onResetState,
         child: _buildScaffold(context),
       ),
@@ -372,13 +439,25 @@ class _ForgetPasscodeFlowState extends State<ForgetPasscodeFlow> {
                             if (page != _facePage) {
                               return const SizedBox.shrink();
                             }
-                            final challengeId = _bloc
-                                .state
-                                .resetInitResult
-                                ?.stepUp
-                                ?.challengeId ?? '';
-                            return FaceVerificationView(
-                              challengeId: challengeId,
+                            // يُعاد البناء عند وصول تحدٍّ جديد (إعادة البدء بعد
+                            // locked_out/410): بلا هذا يبقى challengeId الميت
+                            // لأن رقم الصفحة لم يتغيّر.
+                            return BlocBuilder<AuthBloc, AuthState>(
+                              buildWhen: (p, c) =>
+                                  p.resetInitResult?.stepUp?.challengeId !=
+                                  c.resetInitResult?.stepUp?.challengeId,
+                              builder: (context, s) {
+                                final challengeId =
+                                    s.resetInitResult?.stepUp?.challengeId ??
+                                    '';
+                                return FaceVerificationView(
+                                  // المفتاح على التحدّي: تحدٍّ جديد ⇒ حالة
+                                  // جديدة ⇒ initState يفتح الجلسة عليه.
+                                  key: ValueKey(challengeId),
+                                  challengeId: challengeId,
+                                  midLogin: widget.midLogin,
+                                );
+                              },
                             );
                           },
                         ),

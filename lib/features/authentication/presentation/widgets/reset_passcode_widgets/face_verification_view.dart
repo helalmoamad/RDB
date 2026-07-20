@@ -14,9 +14,16 @@ import 'package:rdb/generated/locale_keys.g.dart';
 /// التقاط. عند الالتقاط نرسل إطاراً واحداً (data URL) عبر [ReverifyFaceEvent].
 /// النجاح يعالجه [ForgetPasscodeFlow] (ينتقل لتعيين الرمز الجديد دون رجوع).
 class FaceVerificationView extends StatefulWidget {
-  const FaceVerificationView({required this.challengeId, super.key});
+  const FaceVerificationView({
+    required this.challengeId,
+    required this.midLogin,
+    super.key,
+  });
 
   final String challengeId;
+
+  /// نقطة الدخول — تحدّد التوكن المرسَل لخادم الـ KYC (mid-login = stepToken).
+  final bool midLogin;
 
   @override
   State<FaceVerificationView> createState() => _FaceVerificationViewState();
@@ -42,16 +49,20 @@ class _FaceVerificationViewState extends State<FaceVerificationView>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _setupCamera();
-    // بدء جلسة التحقّق بالوجه فور دخول الشاشة (قبل الالتقاط).
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _start();
-    });
+    // لا نستدعي `reverify/start`: دليل الـ Worker (§4) يقصره على واجهة البثّ
+    // AWS Amplify FaceLivenessDetector، ونحن على المسار المفرد (§2) — نلتقط
+    // إطاراً واحداً بـ takePicture ونرسله إلى `verify` مباشرة.
+    //
+    // التحدّي (`challengeId`) يأتي من `step/init` لا من `start`، فلا شيء ينقصنا.
+    // وإبقاء الاستدعاء كان يضيف نقطة فشل تحجب الالتقاط: فشله (404/502) يعطّل
+    // زرّاً لا يحتاجه، كما ظهر في اختبار الحقل.
   }
 
-  void _start() {
-    context.read<AuthBloc>().add(
-      ReverifyStartEvent(challengeId: widget.challengeId),
-    );
+  /// الحالات النهائية (`locked_out` / 410): التحدّي الحالي ميت، وإعادة `start`
+  /// عليه تُرجع الخطأ نفسه. نطلب تحدّيًا **جديدًا** من `init` — وعند وصوله
+  /// يُعاد بناء هذه الشاشة بمفتاح التحدّي الجديد فيُستأنف التدفّق.
+  void _restartWithNewChallenge() {
+    context.read<AuthBloc>().add(ResetInitEvent(midLogin: widget.midLogin));
   }
 
   Future<void> _setupCamera() async {
@@ -116,6 +127,7 @@ class _FaceVerificationViewState extends State<FaceVerificationView>
         ReverifyFaceEvent(
           challengeId: widget.challengeId,
           liveFaceImageData: dataUrl,
+          midLogin: widget.midLogin,
         ),
       );
     } catch (_) {
@@ -147,15 +159,15 @@ class _FaceVerificationViewState extends State<FaceVerificationView>
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<AuthBloc, AuthState>(
-      buildWhen: (p, c) =>
-          p.reverifyFaceStatus != c.reverifyFaceStatus ||
-          p.reverifyStartStatus != c.reverifyStartStatus,
+      buildWhen: (p, c) => p.reverifyFaceStatus != c.reverifyFaceStatus,
       builder: (context, s) {
-        final starting = s.reverifyStartStatus == ReverifyStartStatus.loading;
-        final startFailed =
-            s.reverifyStartStatus == ReverifyStartStatus.failure;
-        final started = s.reverifyStartStatus == ReverifyStartStatus.success;
         final verifying = s.reverifyFaceStatus == ReverifyFaceStatus.loading;
+        // نهائي: نفدت المحاولات (locked_out)، أو انتهى التحدّي/صار غير صالح
+        // (410 أو 401). في الحالتين لا فائدة من التقاط آخر على نفس التحدّي —
+        // المخرج تحدٍّ جديد من init.
+        final terminal =
+            s.reverifyFaceStatus == ReverifyFaceStatus.lockedOut ||
+            s.reverifyFaceStatus == ReverifyFaceStatus.expired;
         final verifyFailed =
             s.reverifyFaceStatus == ReverifyFaceStatus.failed ||
             s.reverifyFaceStatus == ReverifyFaceStatus.error;
@@ -182,11 +194,9 @@ class _FaceVerificationViewState extends State<FaceVerificationView>
               SizedBox(height: 50.h),
               _cameraBox(verifying),
               SizedBox(height: 30.h),
-              if (startFailed || verifyFailed) ...[
+              if (verifyFailed || terminal) ...[
                 Text(
-                  s.resetError?.isNotEmpty == true
-                      ? s.resetError!
-                      : LocaleKeys.face_verify_failed.tr(),
+                  _errorText(s),
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: const Color(0xffFF5F61),
@@ -196,17 +206,30 @@ class _FaceVerificationViewState extends State<FaceVerificationView>
                 SizedBox(height: 30.h),
               ],
               _actionButton(
-                started: started,
-                starting: starting,
-                startFailed: startFailed,
                 verifying: verifying,
                 verifyFailed: verifyFailed,
+                terminal: terminal,
               ),
             ],
           ),
         );
       },
     );
+  }
+
+  /// نصّ الخطأ حسب سببه. الحالتان النهائيتان لهما رسالة صريحة تشرح أن إعادة
+  /// الالتقاط لن تفيد، بدل رسالة الفشل العامة.
+  String _errorText(AuthState s) {
+    switch (s.reverifyFaceStatus) {
+      case ReverifyFaceStatus.lockedOut:
+        return LocaleKeys.face_verify_locked_out.tr();
+      case ReverifyFaceStatus.expired:
+        return LocaleKeys.face_verify_expired.tr();
+      default:
+        return s.resetError?.isNotEmpty == true
+            ? s.resetError!
+            : LocaleKeys.face_verify_failed.tr();
+    }
   }
 
   Widget _cameraBox(bool verifying) {
@@ -296,28 +319,29 @@ class _FaceVerificationViewState extends State<FaceVerificationView>
   }
 
   Widget _actionButton({
-    required bool started,
-    required bool starting,
-    required bool startFailed,
     required bool verifying,
     required bool verifyFailed,
+    required bool terminal,
   }) {
     final bool cameraReady = _controller?.value.isInitialized == true;
-    final bool busy = starting || verifying || _capturing;
-    // عند فشل البدء: الزرّ يعيد محاولة start. غير ذلك: يلتقط عند جهوز الكاميرا
-    // ونجاح البدء.
-    final bool enabled = startFailed || (cameraReady && started && !busy);
+    final bool busy = verifying || _capturing;
+    // نهائي (locked_out / تحدٍّ منتهٍ أو غير صالح): الزرّ يطلب تحدّيًا **جديدًا**
+    // عبر init — الالتقاط على التحدّي المستهلَك يُرجع الخطأ نفسه.
+    // غير ذلك: يلتقط بمجرّد جهوز الكاميرا — بلا أي شرط شبكي مسبق.
+    final bool enabled = terminal || (cameraReady && !busy);
     final String label = verifying
         ? LocaleKeys.face_verify_checking.tr()
-        : starting
-        ? LocaleKeys.face_verify_preparing.tr()
-        : (startFailed || verifyFailed)
+        : terminal
+        ? LocaleKeys.face_verify_restart.tr()
+        : verifyFailed
         ? LocaleKeys.face_verify_retry.tr()
         : LocaleKeys.face_verify_capture.tr();
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
-        onPressed: enabled ? (startFailed ? _start : _capture) : null,
+        onPressed: enabled
+            ? (terminal ? _restartWithNewChallenge : _capture)
+            : null,
         style: ElevatedButton.styleFrom(
           backgroundColor: _blue,
           disabledBackgroundColor: const Color(0xffEDEDED),

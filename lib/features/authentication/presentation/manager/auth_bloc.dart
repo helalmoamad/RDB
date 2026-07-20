@@ -25,6 +25,7 @@ import '../../domain/use_cases/change_passcode_usecase.dart';
 // ignore: depend_on_referenced_packages
 import 'package:stream_transform/stream_transform.dart';
 import 'package:rdb/core/error/error_manager.dart';
+import 'package:rdb/core/error/failures.dart';
 import 'package:rdb/enums/status_code_type.dart';
 import 'package:rdb/routes/router.dart';
 import 'package:rdb/core/use_case/use_case.dart';
@@ -150,6 +151,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         reverifySessionId: '',
         resetQuestions: const [],
         resetToken: '',
+        faceStepToken: '',
         resetLockedUntil: '',
         resetLockoutHours: 0,
         resetAttemptsRemaining: 0,
@@ -1013,11 +1015,48 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   // ───────────── معالجات إعادة تعيين رمز المرور ─────────────
 
+  /// انتهاء الجلسة الجزئية في mid-login — مخرجه واحد: إعادة الدخول من
+  /// الهاتف/OTP. حالتان تؤدّيان إليه:
+  ///
+  /// - **401** على أي نداء `step/*`: انتهى session stepToken (عمره 10 دقائق).
+  /// - **409 «Phone verification required first»**: توثيق الهاتف لم يعد
+  ///   ساريًا. يبدو فشلًا عاديًا لكنه ليس كذلك — عميل mid-login لا يملك خطوات
+  ///   OTP أصلًا (لا `step/send-otp` ولا `step/verify-otp`)، فلا سبيل لاستيفاء
+  ///   الشرط داخل التدفّق، وعرض الرسالة وحدها يترك المستخدم بلا مخرج.
+  ///
+  /// لا ينطبق على idle-lock: التوكن هناك walletToken ويتكفّل به مسار الـ
+  /// refresh، وخطوات الهاتف/OTP موجودة داخل التدفّق نفسه.
+  bool _isStepSessionExpired(Failure f, bool midLogin) {
+    if (!midLogin) return false;
+    if (f.statusCode == StatusCode.unauth.code) return true;
+    return f.statusCode == 409 && f.message.toLowerCase().contains('phone');
+  }
+
+  /// رمز 409 على الأسئلة **مُحمَّل بأكثر من معنى**، والرمز وحده لا يكفي:
+  ///
+  /// - `"Face verification is required for this account"` → حساب موثّق، الوجه
+  ///   إلزامي بلا احتياط (الحالة الموثّقة في دليل التكامل §4).
+  /// - `"Phone verification required first"` → شرط سابق مختلف تمامًا؛ توجيه
+  ///   صاحبه لشاشة الكاميرا خطأ صريح.
+  ///
+  /// لذلك نميّز بالرسالة لا بالرمز. وأي 409 آخر يُعامَل كفشل عادي فتظهر رسالة
+  /// الخادم كما هي.
+  bool _isFaceRequiredConflict(Failure f) =>
+      f.statusCode == 409 && f.message.toLowerCase().contains('face');
+
   FutureOr<void> _onResetInitEvent(
     ResetInitEvent event,
     Emitter<AuthState> emit,
   ) async {
-    emit(state.copyWith(resetInitStatus: ResetInitStatus.loading));
+    emit(
+      state.copyWith(
+        resetInitStatus: ResetInitStatus.loading,
+        // إعادة البدء بتحدٍّ جديد: نصفّر حالتَي الوجه وإلا بقيت الحالة النهائية
+        // (locked_out/410) معروضة على التحدّي الجديد فيدور المستخدم في حلقة.
+        reverifyFaceStatus: ReverifyFaceStatus.init,
+        reverifyStartStatus: ReverifyStartStatus.init,
+      ),
+    );
     final res = await resetInitUseCase(
       ResetEntryParams(midLogin: event.midLogin),
     );
@@ -1026,6 +1065,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         state.copyWith(
           resetInitStatus: ResetInitStatus.failure,
           resetError: f.message,
+          resetSessionExpired: _isStepSessionExpired(f, event.midLogin),
         ),
       ),
       (r) => emit(
@@ -1108,15 +1148,32 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     if (state.resetQuestionsStatus == ResetQuestionsStatus.loading) {
       return;
     }
-    emit(state.copyWith(resetQuestionsStatus: ResetQuestionsStatus.loading));
+    emit(
+      state.copyWith(
+        resetQuestionsStatus: ResetQuestionsStatus.loading,
+        // تصفير نتيجة الإجابات السابقة: `success` هنا تعني «نجح الطلب» لا
+        // «صحّت الإجابات»، فتبقى عالقة بعد محاولة خاطئة. وعند العودة لصفحة
+        // الأسئلة يتحقّق شرطا الفرع 2 في المستمع (نتيجة قديمة + الصفحة 4) فيُعاد
+        // المستخدم فورًا لصفحة الفشل — أي أن زرّ "حاول مجدداً" لا يعمل.
+        resetAnswersStatus: ResetAnswersStatus.init,
+        resetToken: '',
+        resetLockedUntil: '',
+      ),
+    );
     final res = await resetQuestionsUseCase(
       ResetEntryParams(midLogin: event.midLogin),
     );
     res.fold(
       (f) => emit(
         state.copyWith(
-          resetQuestionsStatus: ResetQuestionsStatus.failure,
+          // 409 + رسالة تذكر الوجه = حساب موثّق والوجه إلزامي؛ نحوّل لفرعه بدل
+          // الخروج. أمّا 409 لسبب آخر (مثل "Phone verification required first")
+          // فيبقى فشلًا عاديًا لتظهر رسالة الخادم كما هي.
+          resetQuestionsStatus: _isFaceRequiredConflict(f)
+              ? ResetQuestionsStatus.faceRequired
+              : ResetQuestionsStatus.failure,
           resetError: f.message,
+          resetSessionExpired: _isStepSessionExpired(f, event.midLogin),
         ),
       ),
       (r) => emit(
@@ -1141,7 +1198,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       (f) => emit(
         state.copyWith(
           resetAnswersStatus: ResetAnswersStatus.failure,
+          // 409 هنا أيضًا: نميّز بالرسالة لا بالرمز (انظر _isFaceRequiredConflict).
+          resetQuestionsStatus: _isFaceRequiredConflict(f)
+              ? ResetQuestionsStatus.faceRequired
+              : null,
           resetError: f.message,
+          resetSessionExpired: _isStepSessionExpired(f, event.midLogin),
         ),
       ),
       (r) => emit(
@@ -1169,15 +1231,23 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     final res = await resetCompleteUseCase(
       ResetCompleteParams(
         passcode: event.passcode,
+        // برهانان متنافيان: الأسئلة تنتج resetToken (جسم)، والوجه ينتج
+        // faceStepToken (ترويسة). يُمرَّران معًا ويختار ResetCompleteParams.
         resetToken: state.resetToken,
+        faceStepToken: state.faceStepToken,
         midLogin: event.midLogin,
       ),
     );
     res.fold(
       (f) => emit(
         state.copyWith(
-          resetCompleteStatus: ResetCompleteStatus.failure,
+          // 403 = برهان غير صالح / منتهٍ / مُستهلَك (أحادي الاستخدام) → إعادة
+          // البدء من init بتحدٍّ جديد بدل الخروج من التدفّق.
+          resetCompleteStatus: f.statusCode == 403
+              ? ResetCompleteStatus.proofRejected
+              : ResetCompleteStatus.failure,
           resetError: f.message,
+          resetSessionExpired: _isStepSessionExpired(f, event.midLogin),
         ),
       ),
       (r) => emit(
@@ -1199,30 +1269,56 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       ReverifyFaceParams(
         challengeId: event.challengeId,
         liveFaceImageData: event.liveFaceImageData,
-        sessionId: state.reverifySessionId,
+        midLogin: event.midLogin,
       ),
     );
     res.fold(
       (f) => emit(
         state.copyWith(
-          reverifyFaceStatus: ReverifyFaceStatus.error,
+          // **401 هنا لا يعني انتهاء الجلسة**: دليل الـ Worker (§2) يعرّفه بأنه
+          // "Invalid or expired re-verification challenge" — التحدّي خاطئ أو
+          // منتهٍ أو لمستخدم آخر، والعلاج تحدٍّ جديد من init كما في 410.
+          // (لذلك لا نرفع resetSessionExpired هنا؛ فهو يُخرج المستخدم للدخول.)
+          reverifyFaceStatus:
+              (f.statusCode == 410 || f.statusCode == StatusCode.unauth.code)
+              ? ReverifyFaceStatus.expired
+              : ReverifyFaceStatus.error,
+          // 422 = حمولة ناقصة، 502 = الـ Worker لم يصل للخادم الخلفي؛ كلاهما
+          // يُعرض كرسالة خادم عادية ويبقى الالتقاط متاحًا لإعادة المحاولة.
           resetError: f.message,
         ),
       ),
       (r) {
         if (r.isPassed) {
-          // نخزّن stepToken في resetToken ليُحمَل على complete (مثل مسار الأسئلة).
+          // برهان الوجه أحادي الاستخدام — يُحفظ في حقله الخاص ويُرسَل لاحقًا في
+          // ترويسة X-Face-Step-Token (لا في جسم complete مثل resetToken).
           emit(
             state.copyWith(
               reverifyFaceStatus: ReverifyFaceStatus.passed,
-              resetToken: r.stepToken ?? '',
+              faceStepToken: r.stepToken ?? '',
+            ),
+          );
+        } else if (r.isNoEnrolledSelfie) {
+          // لا صورة مسجّلة رغم أن init وجّه لفرع الوجه (تناقض في بيانات
+          // الحساب). لا إعادة محاولة ولا تحدٍّ جديد يفيد — نُنهي التدفّق.
+          emit(
+            state.copyWith(
+              reverifyFaceStatus: ReverifyFaceStatus.unavailable,
+              resetError: r.message,
             ),
           );
         } else {
+          // `locked_out` نهائي لهذا التحدّي (نفدت المحاولات، الافتراضي 3).
+          // أمّا liveness/mismatch (reason) و LIVENESS_FAILED/FACE_NOT_DETECTED
+          // (code، مع status: "error") فكلها **قابلة لإعادة الالتقاط** — الدليل
+          // §2 يوصي فيها بـ "Retake". نعرض رسالة الخادم لتوجيه المستخدم.
+          final lockedOut = (r.reason ?? '').toLowerCase() == 'locked_out';
           emit(
             state.copyWith(
-              reverifyFaceStatus: ReverifyFaceStatus.failed,
-              resetError: r.reason,
+              reverifyFaceStatus: lockedOut
+                  ? ReverifyFaceStatus.lockedOut
+                  : ReverifyFaceStatus.failed,
+              resetError: r.message ?? r.reason,
             ),
           );
         }
@@ -1235,12 +1331,24 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) async {
     emit(state.copyWith(reverifyStartStatus: ReverifyStartStatus.loading));
-    final res = await reverifyFaceStartUseCase(event.challengeId);
+    final res = await reverifyFaceStartUseCase(
+      ReverifyStartParams(
+        challengeId: event.challengeId,
+        midLogin: event.midLogin,
+      ),
+    );
     res.fold(
       (f) => emit(
         state.copyWith(
           reverifyStartStatus: ReverifyStartStatus.failure,
+          // 410 عند فتح الجلسة = التحدّي انتهى قبل الالتقاط. نرفع علَم الوجه
+          // النهائي كي يعرض الزرّ "البدء من جديد" (تحدٍّ جديد) بدل "إعادة
+          // المحاولة" على تحدٍّ ميت.
+          reverifyFaceStatus: f.statusCode == 410
+              ? ReverifyFaceStatus.expired
+              : null,
           resetError: f.message,
+          resetSessionExpired: _isStepSessionExpired(f, event.midLogin),
         ),
       ),
       (r) => emit(

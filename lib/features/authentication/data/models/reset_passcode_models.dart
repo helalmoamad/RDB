@@ -206,6 +206,8 @@ class ReverifyVerifyResponse {
   const ReverifyVerifyResponse({
     required this.status,
     this.reason,
+    this.code,
+    this.message,
     this.stepToken,
     this.faceMatchScore,
     this.livenessConfidence,
@@ -213,17 +215,43 @@ class ReverifyVerifyResponse {
 
   /// "passed" | "failed" | "error".
   final String status;
+
+  /// سبب الفشل القابل لإعادة المحاولة: "liveness" | "mismatch" | "locked_out".
   final String? reason;
+
+  /// رمز خطأ دلالي يرافق `status: "error"` — مثل `NO_ENROLLED_SELFIE`.
+  /// منفصل عن [reason]: هذا يصف خطأ حالة لا نتيجة مطابقة.
+  final String? code;
+
+  /// نصّ الخطأ من الخادم (يُعرض عند غياب ترجمة محلّية للرمز).
+  final String? message;
+
   final String? stepToken;
   final num? faceMatchScore;
   final num? livenessConfidence;
 
   bool get isPassed => status.toLowerCase() == 'passed';
 
+  /// لا صورة selfie مسجّلة للحساب رغم أن `init` وجّه لفرع الوجه — حالة نهائية
+  /// **لا تُعالَج بإعادة المحاولة ولا بتحدٍّ جديد**. يقابل `selfieImageUrl: null`
+  /// في دليل التكامل §2a.
+  ///
+  /// ⚠️ الرسالة قد تكون مضلّلة: لُوحظ ظهورها في **mid-login فقط** لحساب تعمل
+  /// عليه العملية في idle-lock — أي أن الصورة موجودة والـ Worker عجز عن جلبها.
+  /// السبب أن مرحلة verify فيه ما زالت تستخدم `GET /kyc/current` (يرفض session
+  /// stepToken بـ 401) بدل `POST /kyc/reverify/:id/validate` الذي يحمل
+  /// `selfieImageUrl` حسب ADR-013. إصلاحه في الـ Worker لا هنا.
+  ///
+  /// الاستجابة لا تفرّق بين «لا صورة» و«تعذّر جلبها»، فنعامل الحالتين كنهائيتين.
+  bool get isNoEnrolledSelfie =>
+      (code ?? '').toUpperCase() == 'NO_ENROLLED_SELFIE';
+
   factory ReverifyVerifyResponse.fromJson(Map<String, dynamic> json) =>
       ReverifyVerifyResponse(
         status: json['status'] as String? ?? 'error',
         reason: json['reason'] as String?,
+        code: json['code'] as String?,
+        message: json['message'] as String?,
         stepToken: json['stepToken'] as String?,
         faceMatchScore: json['faceMatchScore'] as num?,
         livenessConfidence: json['livenessConfidence'] as num?,

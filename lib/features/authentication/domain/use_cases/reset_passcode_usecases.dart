@@ -51,14 +51,25 @@ class ResetCompleteParams {
     required this.passcode,
     required this.midLogin,
     this.resetToken,
+    this.faceStepToken,
   });
   final String passcode; // 4-6 أرقام
+
+  /// برهان مسار الأسئلة — يُرسَل في **جسم** الطلب.
   final String? resetToken;
+
+  /// برهان مسار الوجه — يُرسَل في **ترويسة** `X-Face-Step-Token`، ولا يدخل
+  /// الجسم إطلاقًا (دليل التكامل: "NO resetToken on the face branch").
+  final String? faceStepToken;
   final bool midLogin;
+
+  /// فرع الوجه يُشخَّص بوجود برهان وجه، وله الأسبقية: عند اكتمال التحقّق بالوجه
+  /// لا يكون هناك resetToken أصلًا.
+  bool get isFaceBranch => (faceStepToken ?? '').isNotEmpty;
 
   Map<String, dynamic> get map => {
     'passcode': passcode,
-    if (resetToken != null) 'resetToken': resetToken,
+    if (!isFaceBranch && (resetToken ?? '').isNotEmpty) 'resetToken': resetToken,
   };
 }
 
@@ -131,31 +142,45 @@ class ResetCompleteUseCase
   @override
   Future<Either<Failure, ResetCompleteResponse>> call(
     ResetCompleteParams params,
-  ) => repository.resetPasscodeComplete(params.map, midLogin: params.midLogin);
+  ) => repository.resetPasscodeComplete(
+    params.map,
+    midLogin: params.midLogin,
+    faceStepToken: params.faceStepToken,
+  );
+}
+
+/// معاملات بدء جلسة التحقّق بالوجه: challengeId من init + نقطة الدخول.
+class ReverifyStartParams {
+  ReverifyStartParams({required this.challengeId, required this.midLogin});
+  final String challengeId;
+  final bool midLogin;
 }
 
 @injectable
 class ReverifyFaceStartUseCase
-    implements UseCase<ReverifyStartResponse, String> {
+    implements UseCase<ReverifyStartResponse, ReverifyStartParams> {
   ReverifyFaceStartUseCase(this.repository);
   final AuthRepository repository;
 
   @override
-  Future<Either<Failure, ReverifyStartResponse>> call(String challengeId) =>
-      repository.reverifyFaceStart(challengeId);
+  Future<Either<Failure, ReverifyStartResponse>> call(
+    ReverifyStartParams params,
+  ) => repository.reverifyFaceStart(
+    params.challengeId,
+    midLogin: params.midLogin,
+  );
 }
 
-/// معاملات التحقّق بالوجه (step-up): challengeId من init + صورة وجه مباشرة +
-/// sessionId العائد من start.
+/// معاملات التحقّق بالوجه (step-up): challengeId من init + صورة وجه مباشرة.
 class ReverifyFaceParams {
   ReverifyFaceParams({
     required this.challengeId,
     required this.liveFaceImageData,
-    this.sessionId,
+    required this.midLogin,
   });
   final String challengeId;
   final String liveFaceImageData; // data:image/jpeg;base64,...
-  final String? sessionId;
+  final bool midLogin;
 }
 
 @injectable
@@ -170,5 +195,6 @@ class ReverifyFaceVerifyUseCase
   ) => repository.reverifyFaceVerify(
     challengeId: params.challengeId,
     liveFaceImageData: params.liveFaceImageData,
+    midLogin: params.midLogin,
   );
 }

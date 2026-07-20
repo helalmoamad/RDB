@@ -245,9 +245,13 @@ class ResetCompleteEvent extends AuthEvent {
 /// بدء جلسة التحقّق بالوجه (start) — يُرسَل عند دخول شاشة الوجه قبل الالتقاط.
 class ReverifyStartEvent extends AuthEvent {
   final String challengeId;
-  const ReverifyStartEvent({required this.challengeId});
+  final bool midLogin;
+  const ReverifyStartEvent({
+    required this.challengeId,
+    required this.midLogin,
+  });
   @override
-  List<Object?> get props => [challengeId];
+  List<Object?> get props => [challengeId, midLogin];
 }
 
 /// التحقّق بالوجه (step-up) في تدفّق إعادة التعيين. [liveFaceImageData] هو
@@ -256,12 +260,14 @@ class ReverifyStartEvent extends AuthEvent {
 class ReverifyFaceEvent extends AuthEvent {
   final String challengeId;
   final String liveFaceImageData;
+  final bool midLogin;
   const ReverifyFaceEvent({
     required this.challengeId,
     required this.liveFaceImageData,
+    required this.midLogin,
   });
   @override
-  List<Object?> get props => [challengeId, liveFaceImageData];
+  List<Object?> get props => [challengeId, liveFaceImageData, midLogin];
 }
 
 /// تصفير كل حالة تدفّق إعادة التعيين عند فتح التدفّق (AuthBloc مفرد، فقد تبقى

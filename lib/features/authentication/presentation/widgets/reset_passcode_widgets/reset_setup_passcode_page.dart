@@ -11,6 +11,7 @@ import 'package:rdb/core/utils/extensions/build_context.dart';
 import 'package:rdb/features/authentication/presentation/manager/auth_bloc.dart';
 import 'package:rdb/generated/locale_keys.g.dart';
 import 'package:rdb/theme/typography.dart';
+import 'forget_passcode_flow.dart';
 import 'reset_pin_item.dart';
 
 enum _SetupState { set, confirm }
@@ -121,17 +122,46 @@ class _ResetSetupPasscodePageState extends State<ResetSetupPasscodePage> {
   }
 
   void _onCompleteResult(BuildContext context, AuthState state) {
+    // 401 على `complete` = انتهت صلاحية session stepToken. يُفحَص أولًا: وصلنا
+    // هنا بـ pushReplacement فمات مستمع ForgetPasscodeFlow، ولولا هذا الفرع
+    // لسقط 401 في `failure` العام فيعود المستخدم لشاشة passcode بتوكن ميت.
+    if (state.resetSessionExpired) {
+      handleResetStepSessionExpired(context);
+      return;
+    }
     if (state.resetCompleteStatus == ResetCompleteStatus.success) {
       GetIt.I<PrefsRepository>().setPasscode("true");
       final navigator = Navigator.of(context);
+      // الدخول لم يكتمل بعد: لا ننتقل للرئيسية. نُعلم المستخدم أن الرمز حُفظ
+      // ونعيده لشاشة إدخال الـ passcode ليكمل الدخول بالرمز الجديد.
+      showMessage(LocaleKeys.reset_passcode_updated.tr(), showInRelease: true);
       Future.delayed(const Duration(milliseconds: 300), () {
         if (!mounted) return;
-        // تمّ تعيين الرمز الجديد؛ نعود لشاشة إدخال الـ passcode لإكمال الدخول
-        // بالرمز الجديد.
         navigator.pop();
       });
+    } else if (state.resetCompleteStatus == ResetCompleteStatus.proofRejected) {
+      // 403: البرهان غير صالح / منتهٍ / مُستهلَك (أحادي الاستخدام). الرمز الجديد
+      // لم يُحفظ، لكن المستخدم ما زال يملك session stepToken صالحًا — فنعيده
+      // لبداية التدفّق ليأخذ تحدّيًا جديدًا بدل إخراجه من العملية كلها.
+      setState(() => codeStatus = 2);
+      final navigator = Navigator.of(context);
+      showMessage(
+        LocaleKeys.reset_proof_expired_restart.tr(),
+        hasError: true,
+        showInRelease: true,
+      );
+      Future.delayed(const Duration(seconds: 1), () {
+        if (!mounted) return;
+        // pushReplacement عند دخول هذه الشاشة أزال التدفّق من المكدّس، فنفتح
+        // تدفّقًا جديدًا (يبدأ بـ ResetFlowClearEvent) بدل pop إلى شاشة الـ passcode.
+        navigator.pushReplacement(
+          MaterialPageRoute(
+            builder: (_) => ForgetPasscodeFlow(midLogin: widget.midLogin),
+          ),
+        );
+      });
     } else if (state.resetCompleteStatus == ResetCompleteStatus.failure) {
-      // برهان غير صالح/مُستهلَك (403) → رسالة عامة وإعادة البدء (إغلاق الشاشة).
+      // فشل آخر (شبكة/خادم) → رسالة عامة وإغلاق الشاشة.
       setState(() => codeStatus = 2);
       final navigator = Navigator.of(context);
       showMessage(
@@ -180,7 +210,9 @@ class _ResetSetupPasscodePageState extends State<ResetSetupPasscodePage> {
         },
         child: BlocListener<AuthBloc, AuthState>(
           bloc: _bloc,
-          listenWhen: (p, c) => p.resetCompleteStatus != c.resetCompleteStatus,
+          listenWhen: (p, c) =>
+              p.resetCompleteStatus != c.resetCompleteStatus ||
+              p.resetSessionExpired != c.resetSessionExpired,
           listener: _onCompleteResult,
           child: SingleChildScrollView(
             physics: const ClampingScrollPhysics(),

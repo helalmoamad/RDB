@@ -857,6 +857,10 @@ abstract class  LocaleKeys {
   static const face_verify_title = 'face_verify_title';
   static const face_verify_subtitle = 'face_verify_subtitle';
   static const face_verify_failed = 'face_verify_failed';
+  static const face_verify_locked_out = 'face_verify_locked_out';
+  static const face_verify_no_enrollment = 'face_verify_no_enrollment';
+  static const face_verify_expired = 'face_verify_expired';
+  static const face_verify_restart = 'face_verify_restart';
   static const face_verify_checking = 'face_verify_checking';
   static const face_verify_preparing = 'face_verify_preparing';
   static const face_verify_retry = 'face_verify_retry';
@@ -919,6 +923,10 @@ abstract class  LocaleKeys {
   static const reset_passcode_mismatch = 'reset_passcode_mismatch';
   static const reset_attempts_remaining = 'reset_attempts_remaining';
   static const reset_could_not_verify = 'reset_could_not_verify';
+  static const reset_proof_expired_restart = 'reset_proof_expired_restart';
+  static const reset_session_expired_relogin =
+      'reset_session_expired_relogin';
+  static const reset_passcode_updated = 'reset_passcode_updated';
   static const third_party_keyboard_title = 'third_party_keyboard_title';
   static const third_party_keyboard_warning_1 = 'third_party_keyboard_warning_1';
   static const third_party_keyboard_warning_2 = 'third_party_keyboard_warning_2';

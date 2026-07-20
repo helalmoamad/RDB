@@ -31,17 +31,39 @@ enum ResetSendOtpStatus { init, loading, success, failure }
 
 enum ResetVerifyOtpStatus { init, loading, success, failure }
 
-enum ResetQuestionsStatus { init, loading, success, failure }
+/// [faceRequired] = 409: الأسئلة محظورة على المستخدم الموثّق (الوجه إلزامي،
+/// بلا احتياط). وصولها يعني أن العميل وجّه المستخدم للمسار الخطأ.
+enum ResetQuestionsStatus { init, loading, success, failure, faceRequired }
 
 enum ResetAnswersStatus { init, loading, success, failure }
 
-enum ResetCompleteStatus { init, loading, success, failure }
+/// [proofRejected] = 403: برهان غير صالح / منتهٍ / مُستهلَك (أحادي الاستخدام).
+/// المخرج إعادة البدء من `init` بتحدٍّ جديد، لا الخروج من التدفّق.
+enum ResetCompleteStatus { init, loading, success, failure, proofRejected }
 
 /// حالة بدء جلسة التحقّق بالوجه (start).
 enum ReverifyStartStatus { init, loading, success, failure }
 
 /// حالة التحقّق بالوجه (step-up) في تدفّق إعادة تعيين رمز المرور.
-enum ReverifyFaceStatus { init, loading, passed, failed, error }
+///
+/// - [failed] فشل قابل لإعادة المحاولة على نفس التحدّي (`liveness` / `mismatch`).
+/// - [lockedOut] نفدت محاولات التحدّي (`locked_out`) — **نهائي لهذا التحدّي**،
+///   وبلا احتياط أسئلة للمستخدم الموثّق. المخرج الوحيد تحدٍّ جديد من `init`.
+/// - [expired] انتهت صلاحية التحدّي (410) — يلزم تحدٍّ جديد من `init`.
+/// - [unavailable] لا يمكن التحقّق بالوجه لهذا الحساب إطلاقًا
+///   (`NO_ENROLLED_SELFIE`) — لا إعادة محاولة ولا تحدٍّ جديد يفيد، والمخرج
+///   الخروج من التدفّق بتوجيه المستخدم لمراجعة الدعم.
+/// - [error] خطأ نقل/خادم غير مصنّف.
+enum ReverifyFaceStatus {
+  init,
+  loading,
+  passed,
+  failed,
+  lockedOut,
+  expired,
+  unavailable,
+  error,
+}
 
 class AuthState {
   const AuthState({
@@ -78,9 +100,11 @@ class AuthState {
     this.resetQuestions = const [],
     this.resetAttemptsRemaining,
     this.resetToken,
+    this.faceStepToken,
     this.resetLockedUntil,
     this.resetLockoutHours,
     this.resetError,
+    this.resetSessionExpired = false,
     this.reverifyFaceStatus = ReverifyFaceStatus.init,
     this.reverifyStartStatus = ReverifyStartStatus.init,
     this.reverifySessionId,
@@ -123,10 +147,31 @@ class AuthState {
   final ResetInitResponse? resetInitResult;
   final List<ResetQuestion> resetQuestions;
   final int? resetAttemptsRemaining;
+
+  /// برهان مسار **الأسئلة**: `resetToken` العائد من `answers`، ويُرسَل في جسم
+  /// `complete`.
   final String? resetToken;
+
+  /// برهان مسار **الوجه**: التوكن أحادي الاستخدام العائد من نجاح التحقّق
+  /// بالوجه، ويُرسَل في ترويسة `X-Face-Step-Token` على `complete`.
+  ///
+  /// مفصول عمدًا عن [resetToken]: الباك يسمّي كليهما `stepToken` في استجابته،
+  /// وهما مختلفان عن session stepToken الخاص بالجلسة — ودليل التكامل يفرد
+  /// جدولًا للتحذير من خلطها. دمجهما في حقل واحد يعني إرسال البرهان في المكان
+  /// الخطأ عند تبديل المسارات.
+  final String? faceStepToken;
   final String? resetLockedUntil;
   final int? resetLockoutHours;
   final String? resetError;
+
+  /// 401 على أي نداء `step/*` = انتهت صلاحية session stepToken (عمره 10 دقائق).
+  ///
+  /// الخروج لشاشة الـ passcode لا يفيد هنا: تلك الشاشة تستخدم التوكن الميت نفسه،
+  /// فيعلق المستخدم. المخرج الوحيد إعادة الدخول من البداية (هاتف → OTP).
+  ///
+  /// يُصفَّر مع [resetError] في كل `copyWith` (لا `??`) كي لا يبقى عالقًا في
+  /// الـ AuthBloc المفرد بعد معالجته.
+  final bool resetSessionExpired;
   final ReverifyFaceStatus reverifyFaceStatus;
   final ReverifyStartStatus reverifyStartStatus;
 
@@ -168,9 +213,11 @@ class AuthState {
     final List<ResetQuestion>? resetQuestions,
     final int? resetAttemptsRemaining,
     final String? resetToken,
+    final String? faceStepToken,
     final String? resetLockedUntil,
     final int? resetLockoutHours,
     final String? resetError,
+    final bool? resetSessionExpired,
     final ReverifyFaceStatus? reverifyFaceStatus,
     final ReverifyStartStatus? reverifyStartStatus,
     final String? reverifySessionId,
@@ -218,9 +265,13 @@ class AuthState {
       resetAttemptsRemaining:
           resetAttemptsRemaining ?? this.resetAttemptsRemaining,
       resetToken: resetToken ?? this.resetToken,
+      faceStepToken: faceStepToken ?? this.faceStepToken,
       resetLockedUntil: resetLockedUntil ?? this.resetLockedUntil,
       resetLockoutHours: resetLockoutHours ?? this.resetLockoutHours,
       resetError: resetError,
+      // كالـ resetError: بلا `??` — علَم لحظي يُستهلَك مرّة ثم يزول، وإلا بقي
+      // عالقًا في الـ singleton فأعاد توجيه المستخدم في تدفّق لاحق.
+      resetSessionExpired: resetSessionExpired ?? false,
       reverifyFaceStatus: reverifyFaceStatus ?? this.reverifyFaceStatus,
       reverifyStartStatus: reverifyStartStatus ?? this.reverifyStartStatus,
       reverifySessionId: reverifySessionId ?? this.reverifySessionId,

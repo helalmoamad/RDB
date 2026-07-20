@@ -9,29 +9,35 @@ import 'handling_exception.dart';
 
 abstract class BaseApi<T> with HandlingExceptionRequest {
   BaseApi(this.serverName) {
-    Map<String, dynamic> headers = client.options.headers;
+    // **نسخة مستقلّة لكل طلب.** الكتابة المباشرة في خريطة ترويسات Dio المفرد
+    // كانت تُبقي `Authorization` الخاصة بطلب سابق على طلبات لا تريدها:
+    //
+    // - خوادم بلا توكن (تحديد الدولة) كانت تستقبل توكن المحفظة.
+    // - وفي mid-login تحديدًا: `walletToken` يساوي "" لا null، فتُكتب
+    //   `Authorization: Bearer ` فارغة ثم تتسرّب إلى نداء KYC الذي يجب أن
+    //   يُصادَق بـ `X-Step-Token` **بلا Bearer إطلاقًا** (دليل الـ Worker §1).
+    //
+    // لذلك نبدأ من نسخة، ونحذف أثر أي مصادقة سابقة، ثم نكتب مصادقة هذا الطلب.
+    final headers = Map<String, dynamic>.of(client.options.headers)
+      ..remove(HttpHeaders.authorizationHeader);
     final String? token = getServerToken(serverName);
 
     if (token != null) {
-      headers = client.options.headers
-        ..[HttpHeaders.authorizationHeader] = 'Bearer $token';
+      headers[HttpHeaders.authorizationHeader] = 'Bearer $token';
     }
     if (serverName != ServerName.cloudinary) {
-      headers = client.options.headers
-        ..['country'] = GetIt.I<PrefsRepository>().userCountryIsAvailable == 1
-            ? GetIt.I<PrefsRepository>().userChoosedCountryIso
-            : GetIt.I<PrefsRepository>().countryIso;
-      headers = client.options.headers
-        ..['lang'] = LanguageService.languageCode == 'ar'
-            ? LanguageService.isKurdish
-                  ? "ku"
-                  : 'ar'
-            : LanguageService.languageCode;
+      headers['country'] =
+          GetIt.I<PrefsRepository>().userCountryIsAvailable == 1
+          ? GetIt.I<PrefsRepository>().userChoosedCountryIso
+          : GetIt.I<PrefsRepository>().countryIso;
+      headers['lang'] = LanguageService.languageCode == 'ar'
+          ? LanguageService.isKurdish
+                ? "ku"
+                : 'ar'
+          : LanguageService.languageCode;
 
-      headers.addAll({
-        'User-Agent':
-            'device OS:${Platform.isAndroid ? 'Android' : 'IOS'} , application version: $applicationVersion',
-      });
+      headers['User-Agent'] =
+          'device OS:${Platform.isAndroid ? 'Android' : 'IOS'} , application version: $applicationVersion';
     }
     options = Options(headers: headers);
   }

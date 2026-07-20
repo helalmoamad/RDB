@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:posthog_flutter/posthog_flutter.dart';
 
@@ -26,7 +25,10 @@ class AnalyticsService {
 
     final config = PostHogConfig(apiKey)
       ..host = dotenv.env['POSTHOG_HOST'] ?? 'https://us.i.posthog.com'
-      ..debug = kDebugMode
+      // مُطفأ عمداً: مع sessionReplay يطبع الوضع المطوّل حمولة كل طلب `$snapshot`
+      // (wireframes لكل إطار) فيغرق الـ console ويخفي سجلّات التطبيق. أعِده إلى
+      // `kDebugMode` مؤقتاً عند تشخيص مشكلة في PostHog نفسه.
+      ..debug = false
       // أحداث دورة حياة التطبيق (فتح/خلفية/استئناف).
       ..captureApplicationLifecycleEvents = true
       // تسجيل الجلسات (Session Replay) — يلتقط كل الشاشات بما فيها شاشات المحفظة.

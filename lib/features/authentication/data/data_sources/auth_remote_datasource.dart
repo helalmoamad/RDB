@@ -1,5 +1,7 @@
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:get_it/get_it.dart';
 import 'package:injectable/injectable.dart';
+import 'package:rdb/core/domin/repositories/prefs_repository.dart';
 import 'package:rdb/common/constant/configuration/kyc_url_routes.dart';
 import 'package:rdb/common/constant/configuration/wallet_url_routes.dart';
 import 'package:rdb/core/api/methods/detect_server.dart';
@@ -174,10 +176,19 @@ class AuthRemoteDatasource {
     )();
   }
 
+  /// [faceStepToken] برهان الوجه أحادي الاستخدام (فرع الوجه فقط). يُرسَل في
+  /// ترويسة `X-Face-Step-Token`؛ وفي هذه الحالة يحمل الجسم `passcode` فقط.
+  /// أمّا فرع الأسئلة فيرسل `resetToken` في الجسم وبلا ترويسة برهان.
+  ///
+  /// ملاحظة: `X-Step-Token` **لا** يُستخدم هنا — على مسارات `step/*` يحمل
+  /// session stepToken الخاص بالجلسة (يُضاف تلقائيًا كـ Bearer عبر
+  /// ServerName.passcode)، وإرسال البرهان فيه يخلط توكنين مختلفين.
   Future<ResetCompleteResponse> resetPasscodeComplete(
     Map<String, dynamic> params, {
     required bool midLogin,
+    String? faceStepToken,
   }) async {
+    final hasFaceProof = (faceStepToken ?? '').isNotEmpty;
     return PostClient<ResetCompleteResponse>(
       serverName: _resetServer(midLogin),
       requestPrams: RequestConfig<ResetCompleteResponse>(
@@ -185,7 +196,9 @@ class AuthRemoteDatasource {
             ? WalletEndPoints.resetPasscodeStepCompleteEP
             : WalletEndPoints.resetPasscodeCompleteEP,
         data: params,
-        extraHeaders: {"X-Step-Token": params["resetToken"]},
+        extraHeaders: hasFaceProof
+            ? {"X-Face-Step-Token": faceStepToken}
+            : null,
         response: ResponseValue<ResetCompleteResponse>(
           fromJson: (r) => ResetCompleteResponse.fromJson(r),
         ),
@@ -193,13 +206,39 @@ class AuthRemoteDatasource {
     )();
   }
 
+  /// خادم الـ KYC لتدفّق إعادة التعيين: نفس المضيف في الحالتين، والفرق في
+  /// **طريقة** المصادقة لا في المسار.
+  ServerName _kycServer(bool midLogin) =>
+      midLogin ? ServerName.kycStep : ServerName.kyc;
+
+  /// مصادقة خادم الـ KYC حسب دليل تكامل الـ Worker (§1):
+  ///
+  /// - **idle-lock** → `Authorization: Bearer <accessToken>` (يضعه BaseApi).
+  /// - **mid-login** → `X-Step-Token: <session stepToken>` حصراً؛ والدليل يمنع
+  ///   صراحةً وضع هذا التوكن في `Authorization: Bearer` («Do NOT send it as
+  ///   Authorization: Bearer»)، ولذلك يُرجع getServerToken قيمة null لـ kycStep.
+  Map<String, dynamic>? _kycAuthHeaders(bool midLogin) => midLogin
+      ? {'X-Step-Token': GetIt.I<PrefsRepository>().stepToken ?? ''}
+      : null;
+
+  /// الخادم الخلفي يتوقّف أحياناً فيرد وسيطه بـ 524 بعد ~100 ثانية، ومهلة Dio
+  /// العامة دقيقتان — أي تجمّد طويل للواجهة. الدليل (§5) يوصي بـ ~30 ثانية،
+  /// ونحصرها في نداءات KYC (رفع صورة) دون المساس بباقي التطبيق.
+  static const _kycTimeout = Duration(seconds: 30);
+
   /// بدء جلسة التحقّق بالوجه (step-up) — تُستدعى عند دخول شاشة الوجه.
-  Future<ReverifyStartResponse> reverifyFaceStart(String challengeId) {
+  Future<ReverifyStartResponse> reverifyFaceStart(
+    String challengeId, {
+    required bool midLogin,
+  }) {
     return PostClient<ReverifyStartResponse>(
-      serverName: ServerName.kyc,
+      serverName: _kycServer(midLogin),
       requestPrams: RequestConfig<ReverifyStartResponse>(
-        endpoint: KycEndPoints.reverifyStartEP,
+        endpoint: KycEndPoints.reverifyStart(midLogin: midLogin),
         data: {'challengeId': challengeId},
+        extraHeaders: _kycAuthHeaders(midLogin),
+        receiveTimeout: _kycTimeout,
+        sendTimeout: _kycTimeout,
         response: ResponseValue<ReverifyStartResponse>(
           fromJson: (r) => ReverifyStartResponse.fromJson(r),
         ),
@@ -209,20 +248,28 @@ class AuthRemoteDatasource {
 
   /// التحقّق بالوجه (step-up) عبر خادم الـ KYC — المسار أحادي الإطار.
   /// [liveFaceImageData] هو data URL لصورة وجه مباشرة (data:image/jpeg;base64,...).
+  // ملاحظة: `sessionId` العائد من start لا يُرسَل في verify — العقد الحالي
+  // يربط الطلب بـ challengeId وحده. أُزيل من التوقيع لأنه كان يُمرَّر عبر ثلاث
+  // طبقات ثم يُهمَل، فيوهم القارئ بأنه جزء من الطلب.
   Future<ReverifyVerifyResponse> reverifyFaceVerify({
     required String challengeId,
     required String liveFaceImageData,
-    String? sessionId,
+    required bool midLogin,
   }) {
     return PostClient<ReverifyVerifyResponse>(
-      serverName: ServerName.kyc,
+      serverName: _kycServer(midLogin),
       requestPrams: RequestConfig<ReverifyVerifyResponse>(
-        endpoint: KycEndPoints.reverifyVerifyEP,
+        endpoint: KycEndPoints.reverifyVerify(midLogin: midLogin),
+        // المسار المفرد: `challengeId` + الإطار فقط. الدليل (§2) يمنع إرسال
+        // `sessionId` ما لم نستخدم بثّ AWS — وإرساله قد يُفشل التحقّق بحالة
+        // جلسة قديمة (`livenessStatus: CREATED/EXPIRED`).
         data: {
           'challengeId': challengeId,
-
           'liveFaceImageData': liveFaceImageData,
         },
+        extraHeaders: _kycAuthHeaders(midLogin),
+        receiveTimeout: _kycTimeout,
+        sendTimeout: _kycTimeout,
         response: ResponseValue<ReverifyVerifyResponse>(
           fromJson: (r) => ReverifyVerifyResponse.fromJson(r),
         ),
