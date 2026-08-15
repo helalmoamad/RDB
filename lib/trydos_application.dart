@@ -3,14 +3,14 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get_it/get_it.dart';
 import 'package:rdb/common/constant/design/constant_design.dart';
-import 'package:rdb/common/helper/show_message.dart';
+import 'package:rdb/core/domin/repositories/prefs_repository.dart';
 import 'package:rdb/core/utils/app_lifecycle_manager.dart';
+import 'package:rdb/core/utils/app_lock_overlay.dart';
 import 'package:rdb/core/utils/extensions/state_ext.dart';
 import 'package:rdb/features/security/presentation/root_security_issue_page.dart';
-import 'package:rdb/generated/locale_keys.g.dart';
 import 'package:rdb/routes/router.dart';
-import 'package:rdb/service/connectivity_service.dart';
 import 'package:rdb/service/ku_fallback_localizations.dart';
 import 'package:rdb/service/analytics_service.dart';
 import 'package:rdb/service/notification_service/notification_service.dart';
@@ -21,6 +21,7 @@ import 'package:rdb/service/screen_service.dart';
 import 'package:rdb/service/service_provider.dart';
 import 'package:rdb/theme/app_theme.dart';
 import 'package:rdb/theme/my_color_scheme.dart';
+import 'package:rdb/widgets/connectivity_gate.dart';
 import 'package:bot_toast/bot_toast.dart';
 
 class TrydosApplication extends StatefulWidget {
@@ -60,12 +61,9 @@ class _TrydosApplicationState extends State<TrydosApplication>
   @override
   void initState() {
     WidgetsBinding.instance.addObserver(this);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-
-      ConnectivityService.instance.initialize().then((_) {});
-      ConnectivityService.instance.isOnline.addListener(_onConnectivityChanged);
-    });
+    // كشف الاتصال ومراقبته يملكهما ConnectivityGate (داخل builder الخاص بـ
+    // MaterialApp) — فهو يستدعي initialize() ويستمع لـ isOnline ويعرض شاشة
+    // NoInternetScreen كطبقة تغطي التطبيق بدل أي رسالة/توست.
     /////////////////////
     // FirebaseAnalyticsService.startAnalyticsSession();
     /////////////////////
@@ -80,9 +78,6 @@ class _TrydosApplicationState extends State<TrydosApplication>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _deepLinkService.dispose();
-    ConnectivityService.instance.isOnline.removeListener(
-      _onConnectivityChanged,
-    );
 
     super.dispose();
   }
@@ -114,12 +109,20 @@ class _TrydosApplicationState extends State<TrydosApplication>
     }
   }
 
-  void _onConnectivityChanged() {
-    final online = ConnectivityService.instance.isOnline.value;
-    if (!mounted) return;
+  /// 🔒 عند عودة الإنترنت: لا نُحدّث أي بيانات — نكتفي بإظهار شاشة إدخال رمز
+  /// المرور إن كان للمستخدم رمز مضبوط وجلسة قائمة (نفس آلية القفل المستخدمة في
+  /// [HomePage]). بدون رمز مضبوط لا يحدث شيء.
+  void _lockWithPasscodeIfSet() {
+    try {
+      final prefs = GetIt.I<PrefsRepository>();
+      final hasPasscode = (prefs.passcode ?? '').isNotEmpty;
+      final hasSession = (prefs.walletToken ?? '').isNotEmpty;
+      if (!hasPasscode || !hasSession) return;
 
-    if (!online) {
-      showMessage(LocaleKeys.no_internet_connected.tr(), hasError: true);
+      prefs.setShouldShowPin(true);
+      AppLockController.instance.showLock();
+    } catch (e) {
+      debugPrint('❌ Error showing passcode lock after reconnect: $e');
     }
   }
 
@@ -182,6 +185,10 @@ class _TrydosApplicationState extends State<TrydosApplication>
                               const KuCupertinoLocalizationsDelegate(),
                             ],
                             home: const RootSecurityIssuePage(),
+                            builder: (context, child) => ConnectivityGate(
+                              languageCode: context.locale.languageCode,
+                              child: child ?? const SizedBox.shrink(),
+                            ),
                           )
                         : MaterialApp.router(
                             debugShowCheckedModeBanner: false,
@@ -208,7 +215,14 @@ class _TrydosApplicationState extends State<TrydosApplication>
                               LanguageService(context);
                               ScreenService(context);
 
-                              return botToastBuilder(context, child);
+                              // ConnectivityGate يغطّي كل شيء (بما فيه الـ
+                              // toasts والحوارات) بشاشة "لا يوجد اتصال" عند
+                              // انقطاع الإنترنت الفعلي.
+                              return ConnectivityGate(
+                                languageCode: context.locale.languageCode,
+                                onReconnected: _lockWithPasscodeIfSet,
+                                child: botToastBuilder(context, child),
+                              );
                             },
                           ),
                     builder: (context, deny, child) {

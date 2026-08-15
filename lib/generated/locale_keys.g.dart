@@ -229,6 +229,9 @@ abstract class  LocaleKeys {
   static const go_to_log_in = 'go_to_log_in';
   static const reset_your_count = 'reset_your_count';
   static const no_internet_connected = 'no_internet_connected';
+  static const no_internet_title = 'no_internet_title';
+  static const no_internet_subtitle = 'no_internet_subtitle';
+  static const no_internet_waiting_reconnect = 'no_internet_waiting_reconnect';
   static const no_products_found = 'no_products_found';
   static const failed_to_get_product_details = 'failed_to_get_product_details';
   static const product_is_not_available_in_your_country = 'product_is_not_available_in_your_country';
@@ -927,6 +930,7 @@ abstract class  LocaleKeys {
   static const reset_session_expired_relogin =
       'reset_session_expired_relogin';
   static const reset_passcode_updated = 'reset_passcode_updated';
+  static const reset_new_passcode_subtitle = 'reset_new_passcode_subtitle';
   static const third_party_keyboard_title = 'third_party_keyboard_title';
   static const third_party_keyboard_warning_1 = 'third_party_keyboard_warning_1';
   static const third_party_keyboard_warning_2 = 'third_party_keyboard_warning_2';

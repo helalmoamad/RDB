@@ -183,13 +183,16 @@ class _ResetSetupPasscodePageState extends State<ResetSetupPasscodePage> {
     final topSpace = isKeyboardOpen ? 230.h : 288.h;
     final pinSectionSpace = isKeyboardOpen ? 75.h : 130.h;
 
-    final String title = LocaleKeys.set_passcode.tr();
-    final String subtitle = LocaleKeys.last_step.tr();
+    // نصوص خاصّة بإعادة التعيين — هذه الشاشة تُستخدم لتدفّق reset فقط، لا
+    // للتعيين الأولي (له PinCodeSetupPage). "الخطوة الأخيرة" لا تناسب سياق
+    // إعادة تعيين رمز منسيّ.
+    final String title = LocaleKeys.reset_set_new_passcode.tr();
+    final String subtitle = LocaleKeys.reset_new_passcode_subtitle.tr();
     final String label = _state == _SetupState.set
-        ? LocaleKeys.set_passcode.tr()
+        ? LocaleKeys.reset_set_new_passcode.tr()
         : codeStatus == 2
-        ? LocaleKeys.passcode_mismatch_restart.tr()
-        : LocaleKeys.reenter_passcode.tr();
+        ? LocaleKeys.reset_passcode_mismatch.tr()
+        : LocaleKeys.reset_confirm_new_passcode.tr();
 
     return Scaffold(
       resizeToAvoidBottomInset: true,
