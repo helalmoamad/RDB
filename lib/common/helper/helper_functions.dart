@@ -365,8 +365,7 @@ class HelperFunctions {
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          // ignore: deprecated_member_use
-                          color: const Color(0xFF007AFF).withOpacity(0.12),
+                          color: const Color(0xFF007AFF).withValues(alpha: 0.12),
                           shape: BoxShape.circle,
                         ),
                         child: const Icon(

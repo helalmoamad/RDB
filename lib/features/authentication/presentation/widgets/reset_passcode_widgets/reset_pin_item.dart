@@ -144,9 +144,7 @@ class _ResetPinItemState extends State<ResetPinItem>
         if (!mounted) return;
         resetShowOtpKeyboard(0);
         Future.delayed(const Duration(milliseconds: 350), () {
-          if (mounted &&
-              !resetOtpInputLocked &&
-              !resetFocusNodes[0].hasFocus) {
+          if (mounted && !resetOtpInputLocked && !resetFocusNodes[0].hasFocus) {
             resetShowOtpKeyboard(0);
           }
         });
@@ -212,8 +210,7 @@ class _ResetPinItemState extends State<ResetPinItem>
     withBorder = widget.controller.text == '​';
     final hasValue = widget.controller.text != '​';
     return BlocConsumer<AuthBloc, AuthState>(
-      buildWhen: (p, c) =>
-          p.resetVerifyOtpStatus != c.resetVerifyOtpStatus,
+      buildWhen: (p, c) => p.resetVerifyOtpStatus != c.resetVerifyOtpStatus,
       listener: (context, state) {
         if (state.resetVerifyOtpStatus == ResetVerifyOtpStatus.loading) {
           fadingController.repeat(reverse: true);
@@ -367,11 +364,15 @@ class _ResetPinItemState extends State<ResetPinItem>
                                 inputFormatters: [
                                   FilteringTextInputFormatter.digitsOnly,
                                 ],
+                                // الرقم المُدخَل يُرسَم في Positioned أدناه، لذا
+                                // نُخفي نص الحقل نفسه. لا تستخدم fontSize: 0 —
+                                // EditableText يشتق StrutStyle.fromTextStyle من
+                                // هذا النمط، و StrutStyle يؤكّد fontSize > 0.
                                 style: context.textTheme.headlineSmall?.mq
                                     .copyWith(
-                                      color: const Color(0xffFFFFFF),
+                                      color: Colors.transparent,
                                       height: 0.6,
-                                      fontSize: 0.sp,
+                                      fontSize: 1,
                                       decoration: TextDecoration.none,
                                     ),
                                 maxLines: 1,

@@ -17,14 +17,12 @@ class LoadingIndicator extends StatelessWidget {
           ? CircularProgressIndicator(
               backgroundColor:
                   color ??
-                  // ignore: deprecated_member_use
-                  context.theme.colorScheme.primary.withOpacity(0.6),
+                  context.theme.colorScheme.primary.withValues(alpha: 0.6),
               strokeWidth: 1.8,
               valueColor: const AlwaysStoppedAnimation<Color>(Colors.white70),
             )
           : CupertinoActivityIndicator(
-              // ignore: deprecated_member_use
-              color: color ?? context.colorScheme.primary.withOpacity(0.6),
+              color: color ?? context.colorScheme.primary.withValues(alpha: 0.6),
             ),
     );
   }

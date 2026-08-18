@@ -19,11 +19,14 @@ pluginManagement {
 
 plugins {
     id("dev.flutter.flutter-plugin-loader") version "1.0.0"
-    id("com.android.application") version "8.10.0" apply false
+    // Flutter 3.47 يرفض البناء تحت AGP 8.11.1 / Kotlin 2.2.20 / Gradle 8.14.0
+    // (DependencyVersionChecker). نبقى على آخر إصدار 8.x من AGP وGradle عمداً —
+    // AGP 9 يكسر Flutter Gradle Plugin ويحذف jcenter المستخدَم في إضافات قديمة.
+    id("com.android.application") version "8.13.2" apply false
     // START: FlutterFire Configuration
     id("com.google.gms.google-services") version("4.3.15") apply false
     // END: FlutterFire Configuration
-    id("org.jetbrains.kotlin.android") version "2.1.20" apply false
+    id("org.jetbrains.kotlin.android") version "2.3.20" apply false
 }
 
 include(":app")

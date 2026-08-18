@@ -31,11 +31,9 @@ class RootSecurityIssuePage extends StatelessWidget {
                   height: 120,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    // ignore: deprecated_member_use
-                    color: Colors.red.withOpacity(0.16),
+                    color: Colors.red.withValues(alpha: 0.16),
                     border: Border.all(
-                      // ignore: deprecated_member_use
-                      color: Colors.redAccent.withOpacity(0.55),
+                      color: Colors.redAccent.withValues(alpha: 0.55),
                       width: 2,
                     ),
                   ),

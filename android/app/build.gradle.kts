@@ -8,7 +8,7 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
-import org.gradle.api.GradleException
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import java.util.Properties
 
 val keystorePropertiesFile = rootProject.file("key.properties")
@@ -27,10 +27,6 @@ android {
         isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
-    }
-
-    kotlin {
-        jvmToolchain(17)
     }
 
     defaultConfig {
@@ -63,6 +59,15 @@ android {
         release {
             signingConfig = signingConfigs.getByName("release")
         }
+    }
+}
+
+// إعدادات Kotlin امتداد على مستوى المشروع، لا داخل android {} — كان الاستدعاء
+// السابق ينجح فقط لأن Kotlin DSL يصل للمستقبل الخارجي، وهذا يُحذف مع AGP 9.
+kotlin {
+    jvmToolchain(17)
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_17)
     }
 }
 

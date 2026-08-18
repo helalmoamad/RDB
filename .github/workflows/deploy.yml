@@ -22,9 +22,13 @@ jobs:
           java-version: '17'
 
       # 3. تثبيت فلاتر
+      # مثبّت على إصدار محدد عمداً: بدون flutter-version يأخذ الرَنَر أحدث stable
+      # في ذلك اليوم، فينكسر البناء في صباح لم تغيّر فيه سطراً واحداً. يجب أن
+      # تبقى هذه القيمة مطابقة لـ Flutter المحلي، وتُغيَّر في نفس التذكرة.
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
+          flutter-version: '3.47.0'
           channel: 'stable'
           cache: true
 

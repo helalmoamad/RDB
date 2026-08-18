@@ -107,7 +107,7 @@ class PostClient<T> extends BaseApi<T> {
           response.statusCode == StatusCode.createdSucceeded.code ||
           response.statusCode == 204) {
         if (_fromJson == null) {
-          return Future.value(_valueOnSuccess);
+          return await Future.value(_valueOnSuccess);
         }
 
         return _fromJson(response.data);

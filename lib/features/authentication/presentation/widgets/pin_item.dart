@@ -409,12 +409,16 @@ class _PinItemState extends State<PinItem> with TickerProviderStateMixin {
                                 inputFormatters: [
                                   FilteringTextInputFormatter.digitsOnly,
                                 ],
+                                // الرقم المُدخَل يُرسَم في Positioned أدناه، لذا
+                                // نُخفي نص الحقل نفسه. لا تستخدم fontSize: 0 —
+                                // EditableText يشتق StrutStyle.fromTextStyle من
+                                // هذا النمط، و StrutStyle يؤكّد fontSize > 0.
                                 style: context.textTheme.headlineSmall?.mq
                                     .copyWith(
-                                      color: const Color(0xffFFFFFF),
+                                      color: Colors.transparent,
 
                                       height: 0.6,
-                                      fontSize: 0.sp,
+                                      fontSize: 1,
                                       decoration: TextDecoration.none,
                                     ),
                                 maxLines: 1,

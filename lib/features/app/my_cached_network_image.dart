@@ -148,8 +148,7 @@ class _MyCachedNetworkImageState extends State<MyCachedNetworkImage> {
         boxShadow: widget.withImageShadow
             ? [
                 BoxShadow(
-                  // ignore: deprecated_member_use
-                  color: context.colorScheme.white.withOpacity(0.1),
+                  color: context.colorScheme.white.withValues(alpha: 0.1),
                   offset: const Offset(0, 3),
                   blurRadius: 6,
                 ),
@@ -224,8 +223,7 @@ class _MyCachedNetworkImageState extends State<MyCachedNetworkImage> {
                                       ),
                                       blurRadius: 24,
 
-                                      // ignore: deprecated_member_use
-                                      color: Colors.black.withOpacity(0.44),
+                                      color: Colors.black.withValues(alpha: 0.44),
                                     ),
                                   ],
                                 )
