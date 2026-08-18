@@ -47,6 +47,10 @@ jobs:
       # 7. بناء التطبيق وتمرير أرقام الإصدارات تلقائياً
       - name: Build App Bundle
         env:
+          # android/gradle.properties مضبوط على جهاز التطوير (7.9 GB). رَنَر
+          # ubuntu-latest يملك 16 GB ويبني bundleRelease، فنمنحه حجمه الخاص هنا
+          # بدل وراثة قياس جهاز آخر. GRADLE_OPTS تتجاوز gradle.properties.
+          GRADLE_OPTS: -Dorg.gradle.jvmargs=-Xmx5g -Dkotlin.daemon.jvmargs=-Xmx2g
           ANDROID_KEYSTORE_PATH: "upload-keystore.jks"
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
