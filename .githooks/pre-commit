@@ -1,0 +1,36 @@
+#!/bin/sh
+# فحص الأسرار قبل كل commit — يمنع دخول السرّ إلى التاريخ بدل اكتشافه بعده.
+#
+# التفعيل مرة واحدة لكل مطوّر (يعمل على ويندوز/ماك/لينكس):
+#   git config core.hooksPath .githooks
+#
+# التعطيل المؤقّت لالتزام واحد: git commit --no-verify
+#
+# gitleaks اختياري: إن لم يكن مثبّتاً يمرّ الالتزام مع تنبيه، حتى لا يتعطّل
+# مطوّر جديد لم يثبّت الأداة بعد. الشبكة الأخيرة هي فحص الـ CI في
+# .github/workflows/deploy.yml الذي لا يمكن تخطّيه.
+
+if ! command -v gitleaks >/dev/null 2>&1; then
+  echo "تنبيه: gitleaks غير مثبّت — تخطّي فحص الأسرار المحلّي."
+  echo "       التثبيت: https://github.com/gitleaks/gitleaks#installing"
+  exit 0
+fi
+
+echo "فحص الأسرار في الملفات المُجهَّزة للالتزام..."
+
+# protect --staged يفحص التغييرات المُجهَّزة فقط (لا التاريخ)، فيبقى سريعاً.
+# --redact يمنع طباعة قيمة أي سرّ على الطرفية.
+if ! gitleaks protect --staged --source . --redact --verbose; then
+  echo ""
+  echo "✖ الالتزام موقوف: عُثر على سرّ محتمل في التغييرات المُجهَّزة."
+  echo ""
+  echo "  إن كان سرّاً حقيقياً: أزِله من التغييرات، وانقله إلى .env أو إلى"
+  echo "  repository secret، ثم **دوّر القيمة** لأنها لم تعد موثوقة."
+  echo ""
+  echo "  إن كان إيجاباً كاذباً: أضِف استثناءً مع تبريره في .gitleaks.toml —"
+  echo "  لا تستخدم --no-verify للالتفاف عليه."
+  echo ""
+  exit 1
+fi
+
+exit 0

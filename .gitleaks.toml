@@ -1,0 +1,51 @@
+# gitleaks configuration for the RDB repository.
+#
+# Run:
+#   gitleaks detect --source . --redact              # full git history
+#   gitleaks protect --staged --source . --redact    # pre-commit, staged only
+#
+# Everything allowlisted below is a PUBLIC identifier that is meant to ship
+# inside the app binary, or generated build output. No real credential is
+# allowlisted here -- if one is ever committed, it must be rotated, not added
+# to this file.
+
+title = "RDB gitleaks config"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Public client identifiers and generated build output"
+
+paths = [
+  # ---- Generated build output -------------------------------------------
+  # Not source. These mirror .env and firebase_options.dart into compiled
+  # assets, so every secret pattern shows up a second and third time.
+  '''^build/''',
+  '''^\.dart_tool/''',
+
+  # ---- Firebase client configuration ------------------------------------
+  # The AIzaSy... value in these files is a Firebase client API key: a public
+  # project identifier that ships in every APK/IPA and can be extracted from
+  # any installed build. Google documents it as public. Access is controlled
+  # by Firebase Security Rules and App Check, not by hiding this string.
+  # https://firebase.google.com/docs/projects/api-keys
+  '''^lib/firebase_options\.dart$''',
+  '''^android/app/google-services\.json$''',
+
+  # ---- WebAuthn debug helper (DELETED, still in history) ----------------
+  # decode_clientdata.py was a leftover debug script holding one base64
+  # clientDataJSON blob from a passkey response. The file has been deleted,
+  # but it stays in git history, so a history scan still reaches it.
+  # Its contents were never a credential: an apk-key-hash (a public APK
+  # signing fingerprint, also published in assetlinks.json) and a single-use
+  # WebAuthn challenge that expired long ago.
+  '''^decode_clientdata\.py$''',
+]
+
+regexes = [
+  # PostHog project API key. The phc_ prefix marks a client-side ingestion
+  # key: it is embedded in every client, can only write events, and cannot
+  # read data. PostHog documents it as public.
+  '''phc_[A-Za-z0-9]{30,}''',
+]

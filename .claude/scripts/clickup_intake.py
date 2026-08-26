@@ -19,6 +19,7 @@ Usage:
 """
 import json
 import os
+import re
 import sys
 import urllib.error
 import urllib.request
@@ -48,12 +49,27 @@ def fetch(task_id: str) -> dict:
     if not token:
         raise SystemExit("CU-1 ERROR: CLICKUP_API_TOKEN is not set")
 
+    # A ClickUp task id is alphanumeric. Validating it keeps the argument from
+    # injecting a query string, a fragment or path traversal into the URL below.
+    if not re.fullmatch(r"[A-Za-z0-9_-]{1,64}", task_id):
+        raise SystemExit(f"CU-2 ERROR: invalid ClickUp task id '{task_id}'")
+
+    url = API.format(task_id=task_id)
+    # The scheme is fixed by the API constant above and the id is validated, so
+    # this can only ever be an https request to api.clickup.com.
+    if not url.startswith("https://api.clickup.com/"):
+        raise SystemExit("CU-2 ERROR: refusing non-ClickUp URL")
+
     request = urllib.request.Request(
-        API.format(task_id=task_id),
+        url,
         headers={"Authorization": token},
         method="GET",  # read-only: GET only, never a write verb
     )
     try:
+        # The URL is built from a fixed https constant plus a validated
+        # alphanumeric id and is re-checked above, so no file:// or attacker
+        # controlled scheme can reach urlopen.
+        # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected
         with urllib.request.urlopen(request, timeout=20) as response:
             data = json.load(response)
     except urllib.error.HTTPError as exc:

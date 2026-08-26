@@ -52,3 +52,7 @@ app.*.map.json
 /android/app/upload-keystore.jks
 
 *.env
+
+# ملفات البيئة: تبقى محلية ولا تُرفَع إطلاقاً — تُوزَّع على الفريق خارج المستودع.
+.env
+.env.*

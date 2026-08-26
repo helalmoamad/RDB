@@ -13,6 +13,7 @@ class PrefsRepositoryImpl extends PrefsRepository {
     _walletRefreshTokenCache = null;
     _sessionTokenCache = null;
     _passcodeCache = null;
+    _stepTokenCache = null;
   }
 
   PrefsRepositoryImpl._(this._preferences, this._secureStorage);
@@ -33,6 +34,7 @@ class PrefsRepositoryImpl extends PrefsRepository {
   String? _walletRefreshTokenCache;
   String? _sessionTokenCache;
   String? _passcodeCache;
+  String? _stepTokenCache;
 
   Future<void> _initializeSensitiveValues() async {
     _walletTokenCache = await _readWithMigration(
@@ -49,6 +51,14 @@ class PrefsRepositoryImpl extends PrefsRepository {
     );
     _passcodeCache = await _readWithMigration(
       PrefsKey.passcode,
+      _preferences.getString,
+    );
+    // stepToken كان يُخزَّن سابقاً في SharedPreferences نصاً صريحاً رغم أنه
+    // بطاقة اعتماد كاملة (تخوّل إعادة تعيين رمز المرور أثناء تسجيل الدخول —
+    // انظر detect_server.dart). _readWithMigration ينقل قيمة المستخدم الحالية
+    // إلى التخزين الآمن مرة واحدة ثم يمسحها من الموقع القديم.
+    _stepTokenCache = await _readWithMigration(
+      PrefsKey.stepToken,
       _preferences.getString,
     );
   }
@@ -74,12 +84,27 @@ class PrefsRepositoryImpl extends PrefsRepository {
   Future<bool> setUserChoosedCountryIso(String? countryIso) =>
       _preferences.setString(PrefsKey.currentCountry, countryIso!);
 
+  /// stepToken بطاقة اعتماد mid-login تخوّل إعادة تعيين رمز المرور، فتُخزَّن في
+  /// Keystore/Keychain لا في SharedPreferences (نفس معاملة walletToken و
+  /// sessionToken و passcode).
   @override
-  Future<bool> setstepToken(String token) =>
-      _preferences.setString(PrefsKey.stepToken, token);
+  Future<bool> setstepToken(String token) async {
+    try {
+      if (token.isEmpty) {
+        await _secureStorage.delete(key: PrefsKey.stepToken);
+      } else {
+        await _secureStorage.write(key: PrefsKey.stepToken, value: token);
+      }
+      await _preferences.remove(PrefsKey.stepToken);
+      _stepTokenCache = token.isEmpty ? null : token;
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
 
   @override
-  String? get stepToken => _preferences.getString(PrefsKey.stepToken);
+  String? get stepToken => _stepTokenCache;
 
   @override
   String? get userChoosedCountryIso =>

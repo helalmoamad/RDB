@@ -77,6 +77,9 @@ class NotificationService {
         android: androidPlatformChannelSpecifics,
       );
       await notificationsPlugin.show(
+        // معرّف إشعار محلّي لتمييز الإشعارات عن بعضها، وليس قيمة أمنية — لا
+        // يُشتق منه سرّ ولا يُرسل للخادم، فلا حاجة لـ Random.secure().
+        // nosemgrep: rdb-dart-insecure-random-for-security
         Random().nextInt(1000000),
         'upload story success',
         '',

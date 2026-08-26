@@ -2,11 +2,34 @@ import 'dart:async';
 
 import 'package:app_links/app_links.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:rdb/routes/router.dart';
 
 class AppDeepLinkService {
-  static const String _allowedHost =
-      'staging-ramaaz-digital-banking.yazan-adnof.workers.dev';
+  /// المضيفات المسموحة تأتي من `DEEPLINK_ALLOWED_HOSTS` في `.env` (قائمة
+  /// مفصولة بفواصل) لتبقى **مصدراً واحداً** متوافقاً مع ما تسجّله المنصّات:
+  /// `android/app/src/main/AndroidManifest.xml` و`ios/Runner/Runner.entitlements`.
+  /// أي مضيف يُضاف في المنصّتين ولا يُضاف هنا تُتجاهَل روابطه بصمت.
+  ///
+  /// الاحتياطي أدناه يطابق ما كان مثبّتاً في الكود سابقاً، ليبقى السلوك معرّفاً
+  /// إن غاب المتغيّر عن البيئة.
+  static const List<String> _fallbackAllowedHosts = <String>[
+    'staging-ramaaz-digital-banking.yazan-adnof.workers.dev',
+  ];
+
+  static Set<String> get allowedHosts {
+    // dotenv.env يرمي NotInitializedError قبل load()، ورابط الإقلاع البارد قد
+    // يصل مبكراً — لذلك نسقط على الاحتياطي بدل أن نُسقط التطبيق.
+    final raw = dotenv.isInitialized
+        ? (dotenv.env['DEEPLINK_ALLOWED_HOSTS'] ?? '')
+        : '';
+    final hosts = raw
+        .split(',')
+        .map((h) => h.trim().toLowerCase())
+        .where((h) => h.isNotEmpty)
+        .toSet();
+    return hosts.isNotEmpty ? hosts : _fallbackAllowedHosts.toSet();
+  }
 
   final AppLinks _appLinks = AppLinks();
   StreamSubscription<Uri>? _subscription;
@@ -42,7 +65,8 @@ class AppDeepLinkService {
       return;
     }
 
-    if (uri.host.toLowerCase() != _allowedHost) {
+    if (!allowedHosts.contains(uri.host.toLowerCase())) {
+      debugPrint('Deep link rejected: host "${uri.host}" is not allowed');
       return;
     }
 

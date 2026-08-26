@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  سياسة أمان الشبكة على مستوى النظام (Android).
+
+  هذه الطبقة الأخيرة تحت الكود: حتى لو أعاد أحدهم تفعيل تجاوز الشهادات في Dart
+  (MyHttpOverrides / allowBadCertificate)، فإن النظام نفسه يرفض الاتصال غير
+  المطابق للسياسة هنا.
+
+  base-config (كل النسخ بما فيها release):
+  - cleartextTrafficPermitted="false" → يُمنع أي اتصال http:// صريح. هذا هو
+    السلوك الافتراضي عند targetSdk >= 28، لكن التصريح به يمنع عودته بصمت إن
+    خُفِّض targetSdk أو أدخلت مكتبة طرف ثالث السماح في manifest خاص بها.
+  - trust-anchors = system فقط → لا تُقبل شهادات الجذر التي يثبّتها المستخدم،
+    فيسقط اعتراض المرور عبر بروكسي (Charles / Burp / mitmproxy) على جهاز غير
+    مروّت.
+
+  debug-overrides: تُطبَّق فقط عندما android:debuggable=true (نسخ التطوير)،
+  فتُعيد شهادات المستخدم ليتمكّن المطوّرون من فحص المرور محلياً. لا أثر لها
+  إطلاقاً في نسخة release المرفوعة للمتجر.
+
+  عند إضافة تثبيت الشهادات (Certificate Pinning) لاحقاً، مكانه هنا عبر
+  <domain-config> + <pin-set> لنطاقات المحفظة والـ KYC.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+
+    <debug-overrides>
+        <trust-anchors>
+            <certificates src="system" />
+            <certificates src="user" />
+        </trust-anchors>
+    </debug-overrides>
+</network-security-config>

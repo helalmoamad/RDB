@@ -87,7 +87,9 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         isVerified: GetIt.I<PrefsRepository>().isKycVerification ?? false,
         disableWalletOverscrollIndicator: true,
         // استخدم اللغة الحالية
-        allowBadCertificate: true, // true للتطوير فقط عند خطأ SSL
+        // تجاوز شهادة TLS في وضع التطوير فقط. في release يجب أن يفشل الاتصال
+        // على شهادة غير صالحة بدل تمرير مرور بنكي عبر قناة قابلة للاعتراض.
+        allowBadCertificate: kDebugMode,
       ),
     );
 

@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:injectable/injectable.dart';
@@ -58,11 +59,22 @@ abstract class AppModule {
 // @singleton
 // SessionManager get sessionManager => SessionManager();
 
+/// تجاوز التحقّق من شهادة TLS — **في وضع التطوير فقط**.
+///
+/// قبول أي شهادة يفتح الباب لهجوم MITM كامل على مرور بنكي (توكن، رمز مرور،
+/// عمليات تحويل)، لذلك يبقى التجاوز محصوراً بـ [kDebugMode]. في نسخ
+/// profile/release يُعاد العميل الافتراضي بتحقّق صارم دون أي استثناء.
+///
+/// لا تُزال شروط [kDebugMode] هنا لتشغيل خادم تطوير بشهادة ذاتية — أضف شهادة
+/// الـ CA الخاصة بالتطوير إلى `SecurityContext` بدلاً من ذلك.
 class MyHttpOverrides extends HttpOverrides {
   @override
   HttpClient createHttpClient(SecurityContext? context) {
-    return super.createHttpClient(context)
-      ..badCertificateCallback =
+    final client = super.createHttpClient(context);
+    if (kDebugMode) {
+      client.badCertificateCallback =
           (X509Certificate cert, String host, int port) => true;
+    }
+    return client;
   }
 }

@@ -669,10 +669,11 @@ class _VerifyOtpState extends State<VerifyOtp> with FormStateMinxin {
                                             checkOtp.value = 0;
                                           },
                                           checkOtp: () async {
-                                            debugPrint('/// checkOtp //////');
-                                            debugPrint(
-                                              prefsRepository.sessionInfo,
-                                            );
+                                            // لا تُطبع sessionInfo — هي
+                                            // verificationId الخاص بالـ OTP،
+                                            // و debugPrint لا يُحذف في نسخة
+                                            // الإصدار فتصل القيمة إلى logcat
+                                            // وتقارير الأعطال.
                                             if (prefsRepository.sessionInfo !=
                                                 null) {
                                               debugPrint(

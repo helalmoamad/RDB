@@ -1,0 +1,190 @@
+# ---------------------------------------------------------------------------
+# Custom Semgrep rules for the RDB Flutter/Dart codebase.
+#
+# Why this file exists:
+#   The Semgrep registry ships NO Dart security pack (there is no p/dart).
+#   Running the stock packs (p/security-audit, p/owasp-top-ten, ...) leaves
+#   everything under lib/ covered only by generic secret-regex rules -- the
+#   actual Dart logic is never analysed. These rules close that gap for the
+#   risks that matter in this app.
+#
+# Run:
+#   semgrep scan --config .semgrep/ --metrics=off
+#
+# NOTE: messages are intentionally ASCII-only. On Windows the Semgrep CLI reads
+# rule files using the system codepage (cp1252), so non-ASCII text here makes
+# the scan crash with UnicodeDecodeError unless PYTHONUTF8=1 is set.
+#
+# Design rule: a security exception is acceptable ONLY when it is confined to
+# `if (kDebugMode)`. The rules below exclude that shape via pattern-not-inside,
+# so whatever they report is what actually reaches a release build.
+# ---------------------------------------------------------------------------
+rules:
+  # --- TLS / certificates --------------------------------------------------
+
+  - id: rdb-dart-bad-certificate-callback
+    languages: [dart]
+    severity: ERROR
+    message: >-
+      badCertificateCallback returns true outside kDebugMode. This accepts ANY
+      TLS certificate and enables full MITM interception of banking traffic:
+      session tokens, passcode, transfers. Confine it to `if (kDebugMode)`, or
+      add the development CA to a SecurityContext instead.
+    metadata:
+      category: security
+      cwe: "CWE-295: Improper Certificate Validation"
+      confidence: HIGH
+    patterns:
+      - pattern: "$CLIENT.badCertificateCallback = ($A, $B, $C) => true;"
+      - pattern-not-inside: "if (kDebugMode) { ... }"
+
+  - id: rdb-dart-allow-bad-certificate-literal
+    languages: [dart]
+    severity: ERROR
+    message: >-
+      allowBadCertificate is hardcoded to true. Pass kDebugMode instead so a
+      release build fails on an invalid certificate rather than shipping data
+      over an interceptable channel.
+    metadata:
+      category: security
+      cwe: "CWE-295: Improper Certificate Validation"
+      confidence: HIGH
+    pattern-regex: >-
+      allowBadCertificate\s*:\s*true
+
+  - id: rdb-dart-http-overrides-global
+    languages: [dart]
+    severity: WARNING
+    message: >-
+      Installing HttpOverrides.global changes the behaviour of EVERY dart:io
+      request in the app. Confirm it is confined to kDebugMode and that the
+      installed class does not weaken certificate validation in release.
+    metadata:
+      category: security
+      cwe: "CWE-295: Improper Certificate Validation"
+      confidence: MEDIUM
+    patterns:
+      - pattern: "HttpOverrides.global = $X"
+      - pattern-not-inside: "if (kDebugMode) { ... }"
+
+  # --- Cleartext transport -------------------------------------------------
+
+  - id: rdb-dart-cleartext-http-url
+    languages: [dart]
+    severity: WARNING
+    message: >-
+      Hardcoded http:// URL. Banking traffic must be https only. Local
+      addresses (localhost / 127.0.0.1 / 10.0.2.2) are excluded.
+    metadata:
+      category: security
+      cwe: "CWE-319: Cleartext Transmission of Sensitive Information"
+      confidence: MEDIUM
+    pattern-regex: >-
+      ['"]http://(?!localhost|127\.0\.0\.1|10\.0\.2\.2)[^'"\s]+['"]
+
+  # --- Sensitive data in logs ----------------------------------------------
+
+  # Two rules instead of one: matching any argument whose TEXT contains a
+  # sensitive word fires on harmless debug markers such as
+  # `debugPrint('/// checkOtp //////')`. Splitting by argument shape keeps the
+  # high-confidence case clean.
+
+  - id: rdb-dart-print-sensitive-expression
+    languages: [dart]
+    severity: ERROR
+    message: >-
+      A sensitive VALUE is printed via print/debugPrint (the argument is an
+      expression, not a message literal). debugPrint is NOT stripped from
+      release builds, so this reaches device logs readable with logcat and gets
+      swept into crash reports. Remove the line, or mask the value and confine
+      it to kDebugMode.
+    metadata:
+      category: security
+      cwe: "CWE-532: Insertion of Sensitive Information into Log File"
+      confidence: HIGH
+    patterns:
+      - pattern-either:
+          - pattern: "print($MSG)"
+          - pattern: "debugPrint($MSG)"
+      # The leading (?!['"]) restricts this to expressions -- an argument that
+      # starts with a quote is a message literal and is handled by the rule
+      # below, at a lower severity.
+      - metavariable-regex:
+          metavariable: $MSG
+          regex: (?i)^(?!['"]).*(token|passcode|password|secret|otp|session|apikey|api_key|credential).*
+      - pattern-not-inside: "if (kDebugMode) { ... }"
+
+  - id: rdb-dart-print-sensitive-interpolation
+    languages: [dart]
+    severity: WARNING
+    message: >-
+      A log message interpolates a value into a string that names something
+      sensitive (token / passcode / OTP / session). Confirm the interpolated
+      value is not the secret itself; if it is, mask it or drop the line.
+    metadata:
+      category: security
+      cwe: "CWE-532: Insertion of Sensitive Information into Log File"
+      confidence: LOW
+    patterns:
+      - pattern-either:
+          - pattern: "print($MSG)"
+          - pattern: "debugPrint($MSG)"
+      # A quoted literal that names a secret AND interpolates something ($).
+      - metavariable-regex:
+          metavariable: $MSG
+          regex: (?i)^['"].*(token|passcode|password|secret|otp|session|apikey|api_key|credential).*\$.*
+      - pattern-not-inside: "if (kDebugMode) { ... }"
+
+  # --- Insecure storage ----------------------------------------------------
+
+  - id: rdb-dart-sensitive-value-in-shared-prefs
+    languages: [dart]
+    severity: WARNING
+    message: >-
+      A sensitive value is written to SharedPreferences, which stores plaintext
+      in an XML/plist file readable on a rooted device or via backup. Use
+      FlutterSecureStorage (Keystore / Keychain) for tokens and passcodes.
+    metadata:
+      category: security
+      cwe: "CWE-312: Cleartext Storage of Sensitive Information"
+      confidence: MEDIUM
+    patterns:
+      - pattern: "$P.setString($KEY, $VALUE)"
+      # Excluded by the negative lookahead, because the key names a
+      # non-credential even though it contains "token":
+      #   *ExpiresAt  -> a timestamp, not the token itself
+      #   *fcm*       -> a push routing address, not an authentication secret
+      - metavariable-regex:
+          metavariable: $KEY
+          regex: (?i)^(?!.*(expires|fcm)).*(token|passcode|password|secret|pin|credential).*
+
+  # --- Hardcoded secrets ---------------------------------------------------
+
+  - id: rdb-dart-hardcoded-jwt
+    languages: [dart]
+    severity: ERROR
+    message: >-
+      Hardcoded JWT. Any secret shipped inside the bundle can be recovered by
+      unpacking the APK/IPA. Move it to .env (untracked) or a CI secret, and
+      rotate the exposed value.
+    metadata:
+      category: security
+      cwe: "CWE-798: Use of Hard-coded Credentials"
+      confidence: HIGH
+    pattern-regex: >-
+      ['"]eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]+['"]
+
+  # --- Randomness ----------------------------------------------------------
+
+  - id: rdb-dart-insecure-random-for-security
+    languages: [dart]
+    severity: WARNING
+    message: >-
+      Random() is not cryptographically secure and its output is predictable.
+      Use Random.secure() for any security value (nonce, idempotencyKey,
+      challenge, session id). Ignore this finding for UI or animation use.
+    metadata:
+      category: security
+      cwe: "CWE-338: Use of Cryptographically Weak PRNG"
+      confidence: LOW
+    pattern: "Random()"

@@ -1,5 +1,6 @@
 import 'package:cupertino_back_gesture/cupertino_back_gesture.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -122,7 +123,10 @@ class _TrydosApplicationState extends State<TrydosApplication>
       prefs.setShouldShowPin(true);
       AppLockController.instance.showLock();
     } catch (e) {
-      debugPrint('❌ Error showing passcode lock after reconnect: $e');
+      // سجلّ تشخيصي للتطوير فقط: debugPrint لا يُحذف في نسخة الإصدار.
+      if (kDebugMode) {
+        debugPrint('❌ Error showing passcode lock after reconnect: $e');
+      }
     }
   }
 
