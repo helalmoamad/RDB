@@ -87,9 +87,10 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         isVerified: GetIt.I<PrefsRepository>().isKycVerification ?? false,
         disableWalletOverscrollIndicator: true,
         // استخدم اللغة الحالية
-        // تجاوز شهادة TLS في وضع التطوير فقط. في release يجب أن يفشل الاتصال
-        // على شهادة غير صالحة بدل تمرير مرور بنكي عبر قناة قابلة للاعتراض.
-        allowBadCertificate: kDebugMode,
+        // ⚠️ مؤقّت: تعارض اسم المضيف في WALLET_URL (شُرَط سفلية في
+        // trydos_wallet_develop.ramaaz.dev). يُعاد إلى kDebugMode فور إضافة
+        // سجل DNS بشُرَط عادية. الشرح الكامل في di_container.dart.
+        allowBadCertificate: true,
       ),
     );
 

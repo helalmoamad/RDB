@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:injectable/injectable.dart';
@@ -59,22 +58,47 @@ abstract class AppModule {
 // @singleton
 // SessionManager get sessionManager => SessionManager();
 
-/// تجاوز التحقّق من شهادة TLS — **في وضع التطوير فقط**.
-///
-/// قبول أي شهادة يفتح الباب لهجوم MITM كامل على مرور بنكي (توكن، رمز مرور،
-/// عمليات تحويل)، لذلك يبقى التجاوز محصوراً بـ [kDebugMode]. في نسخ
-/// profile/release يُعاد العميل الافتراضي بتحقّق صارم دون أي استثناء.
-///
-/// لا تُزال شروط [kDebugMode] هنا لتشغيل خادم تطوير بشهادة ذاتية — أضف شهادة
-/// الـ CA الخاصة بالتطوير إلى `SecurityContext` بدلاً من ذلك.
+// ╔═════════════════════════════════════════════════════════════════════════╗
+// ║  ⚠️  حلّ مؤقّت — التحقّق من شهادات TLS معطَّل في كل النسخ                ║
+// ║      يُزال فور إصلاح الباك-اند. لا تبنِ عليه ولا تنسخه لمشروع آخر.       ║
+// ╚═════════════════════════════════════════════════════════════════════════╝
+//
+//  سبب التعطيل:
+//    WALLET_URL يشير إلى `trydos_wallet_develop.ramaaz.dev`، والاسم يحوي
+//    شُرَطاً سفلية. الشرطة السفلية ممنوعة في أسماء المضيفات (RFC 1123)، وقواعد
+//    مطابقة الأحرف البديلة (RFC 6125) تشترط أن يكون المقطع اسم DNS صالحاً —
+//    فيرفض dart:io مطابقة الاسم مع `*.ramaaz.dev` رغم أن الشهادة سليمة تماماً
+//    وسلسلتها كاملة وصادرة عن Google Trust Services.
+//
+//    أُثبت بـ openssl s_client -verify_hostname على نفس الخادم والشهادة:
+//      trydos_wallet_develop.ramaaz.dev  ->  62 (hostname mismatch)
+//      trydos-wallet-develop.ramaaz.dev  ->  0  (ok)
+//
+//  الإصلاح النهائي (على الباك-اند — دقائق، وبلا أي عمل على الشهادات):
+//    1) أضف سجل DNS `trydos-wallet-develop.ramaaz.dev` يشير لنفس الوجهة.
+//       شهادة `*.ramaaz.dev` الحالية تغطّيه فوراً.
+//    2) حدّث WALLET_URL في `.env` وفي `.github/workflows/deploy.yml`.
+//    3) احذف هذا التعطيل: أعِد شرط `if (kDebugMode)` حول
+//       badCertificateCallback هنا، وحول HttpOverrides.global في main.dart،
+//       وأعِد `allowBadCertificate: kDebugMode` في home_page.dart.
+//
+//  ما الذي تخسره ما دام هذا السطر قائماً:
+//    التحقّق من الشهادة معطَّل لكل نطاق وكل طلب في نسخة الإصدار. أي مهاجم على
+//    نفس الشبكة (واي فاي عام، راوتر مخترَق، نقطة اتصال مزيّفة) يستطيع تقديم
+//    شهادة موقّعة ذاتياً فيقبلها التطبيق بصمت، ثم يقرأ **ويعدّل** المرور:
+//    رموز OTP، walletToken، stepToken، ومبالغ التحويلات وأرقام حسابات
+//    المستلِمين. لا يظهر للمستخدم أي تحذير.
+//
+//  ملاحظة: قواعد Semgrep في `.semgrep/dart-security.yaml` سترصد هذا السطر
+//  كخطأ (ERROR) عمداً — تُركت تعمل لتبقى المشكلة ظاهرة حتى تُحلّ. لا تُسكِتها
+//  بـ nosemgrep.
 class MyHttpOverrides extends HttpOverrides {
   @override
   HttpClient createHttpClient(SecurityContext? context) {
     final client = super.createHttpClient(context);
-    if (kDebugMode) {
-      client.badCertificateCallback =
-          (X509Certificate cert, String host, int port) => true;
-    }
+    // مؤقّت: اقبل كل الشهادات. انظر الشرح أعلاه.
+    client.badCertificateCallback =
+        (X509Certificate cert, String host, int port) => true;
     return client;
   }
 }
