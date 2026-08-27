@@ -72,9 +72,9 @@ jobs:
       - name: Create .env file dynamically
         run: |
           cat <<'EOF' > .env
-          WALLET_URL="https://trydos_wallet_develop.ramaaz.dev"
+          WALLET_URL="https://rdb_develop.ramaaz.dev"
           KYC_URL="https://rdb-kyc-worker.yazan-adnof.workers.dev"
-          PASSKEY_URL="https://dev.ramaaz-digital-bank.online"
+          PASSKEY_URL="https://dev-rdb-ms.yazan-adnof.workers.dev"
           CLOUDINARY_URL="https://api.cloudinary.com"
           CLOUDINARY_NAME="djooohujg"
           CLOUDINARY_VERSION="v1_1"
