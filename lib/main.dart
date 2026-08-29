@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 import 'package:flutter/services.dart';
 import 'dart:developer' as dev;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -76,11 +75,9 @@ class _AppBootstrapState extends State<_AppBootstrap> {
         storageDirectory: await getApplicationDocumentsDirectory(),
       );
       isHydratedStorageInitialized = true;
-      // ⚠️ مؤقّت: يُركَّب في كل النسخ لأن MyHttpOverrides يقبل حالياً كل
-      // الشهادات — حلّ مؤقّت لتعارض اسم المضيف في WALLET_URL (شُرَط سفلية).
-      // الشرح الكامل وخطوات الإزالة في di_container.dart.
-      // بعد إصلاح DNS: أعِد شرط `if (kDebugMode)` حول هذا السطر.
-      HttpOverrides.global = MyHttpOverrides();
+      // لا يُركَّب أي HttpOverrides: عميل dart:io الافتراضي يتحقّق من سلسلة
+      // الثقة ومن اسم المضيف ويرفض أي شهادة مزيّفة. انظر سياسة TLS في
+      // core/di/di_container.dart.
       await Future.wait([
         tran.EasyLocalization.ensureInitialized(),
         dotenv.load(),
