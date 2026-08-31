@@ -72,7 +72,7 @@ class _TrydosApplicationState extends State<TrydosApplication>
     super.initState();
     if (!widget.isSecurityIssueFound) {
       _deepLinkService.init();
-      // ⏱️ قفل تلقائي بعد دقيقة من عدم التفاعل مع الشاشة (جلسة قائمة + رمز
+      // ⏱️ قفل تلقائي بعد 6 دقائق من عدم التفاعل مع الشاشة (جلسة قائمة + رمز
       // مرور مضبوط فقط). التفاعل يصل عبر الـ Listener في build.
       IdleLockTimer.instance.start();
     }

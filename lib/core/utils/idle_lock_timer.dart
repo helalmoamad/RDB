@@ -23,7 +23,7 @@ import 'package:rdb/core/utils/app_lock_overlay.dart';
 /// يتوقّف المؤقّت تلقائياً بينما القفل/شاشة التبديل معروضة، وأثناء وجود
 /// التطبيق في الخلفية (القفل عند العودة يتكفّل به [AppLifecycleManager])،
 /// ويُستأنف عند فكّ القفل أو العودة للمقدّمة.
-const Duration kIdleLockTimeout = Duration(minutes: 1);
+const Duration kIdleLockTimeout = Duration(minutes: 6);
 
 class IdleLockTimer {
   IdleLockTimer._();
