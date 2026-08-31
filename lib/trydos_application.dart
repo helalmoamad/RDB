@@ -10,6 +10,7 @@ import 'package:rdb/core/domin/repositories/prefs_repository.dart';
 import 'package:rdb/core/utils/app_lifecycle_manager.dart';
 import 'package:rdb/core/utils/app_lock_overlay.dart';
 import 'package:rdb/core/utils/extensions/state_ext.dart';
+import 'package:rdb/core/utils/idle_lock_timer.dart';
 import 'package:rdb/features/security/presentation/root_security_issue_page.dart';
 import 'package:rdb/routes/router.dart';
 import 'package:rdb/service/ku_fallback_localizations.dart';
@@ -71,6 +72,9 @@ class _TrydosApplicationState extends State<TrydosApplication>
     super.initState();
     if (!widget.isSecurityIssueFound) {
       _deepLinkService.init();
+      // ⏱️ قفل تلقائي بعد دقيقة من عدم التفاعل مع الشاشة (جلسة قائمة + رمز
+      // مرور مضبوط فقط). التفاعل يصل عبر الـ Listener في build.
+      IdleLockTimer.instance.start();
     }
     // FirebasePresence.sendUserStatus("online");
   }
@@ -79,6 +83,7 @@ class _TrydosApplicationState extends State<TrydosApplication>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _deepLinkService.dispose();
+    IdleLockTimer.instance.stop();
 
     super.dispose();
   }
@@ -97,6 +102,9 @@ class _TrydosApplicationState extends State<TrydosApplication>
     super.didChangeAppLifecycleState(state);
     // لا تنفذ أي منطق حماية أو إخفاء محتوى عند الحالة inactive (يتم ذلك فقط في SecurityService)
     AppLifecycleManager().handleLifecycleChange(state);
+    // أوقِف عدّاد الخمول في الخلفية واستأنفه عند العودة — القفل عند العودة من
+    // الخلفية يتكفّل به AppLifecycleManager أصلاً.
+    IdleLockTimer.instance.handleLifecycleChange(state);
     if (state == AppLifecycleState.resumed) {
       _handleAppResumed();
       // عند فتح/استئناف التطبيق (سواء من إشعار أو عادي): أفرِغ شريط الإشعارات.
@@ -222,10 +230,22 @@ class _TrydosApplicationState extends State<TrydosApplication>
                               // ConnectivityGate يغطّي كل شيء (بما فيه الـ
                               // toasts والحوارات) بشاشة "لا يوجد اتصال" عند
                               // انقطاع الإنترنت الفعلي.
-                              return ConnectivityGate(
-                                languageCode: context.locale.languageCode,
-                                onReconnected: _lockWithPasscodeIfSet,
-                                child: botToastBuilder(context, child),
+                              //
+                              // ⏱️ الـ Listener هنا يلفّ الـ Navigator كاملاً
+                              // فيرى كل لمسة/سحب في التطبيق (بما فيها شاشات
+                              // مكتبة المحفظة). لا يستهلك الأحداث ولا يمنع
+                              // وصولها للودجت أسفله — يسجّل وقت آخر تفاعل فقط.
+                              return Listener(
+                                behavior: HitTestBehavior.translucent,
+                                onPointerDown: (_) =>
+                                    IdleLockTimer.instance.reportActivity(),
+                                onPointerMove: (_) =>
+                                    IdleLockTimer.instance.reportActivity(),
+                                child: ConnectivityGate(
+                                  languageCode: context.locale.languageCode,
+                                  onReconnected: _lockWithPasscodeIfSet,
+                                  child: botToastBuilder(context, child),
+                                ),
                               );
                             },
                           ),
