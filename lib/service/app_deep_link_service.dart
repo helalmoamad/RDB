@@ -14,7 +14,7 @@ class AppDeepLinkService {
   /// الاحتياطي أدناه يطابق ما كان مثبّتاً في الكود سابقاً، ليبقى السلوك معرّفاً
   /// إن غاب المتغيّر عن البيئة.
   static const List<String> _fallbackAllowedHosts = <String>[
-    'staging-ramaaz-digital-banking.yazan-adnof.workers.dev',
+    'rdb-ms.yazan-adnof.workers.dev',
   ];
 
   static Set<String> get allowedHosts {

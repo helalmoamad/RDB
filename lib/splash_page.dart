@@ -22,6 +22,7 @@ class _SplashPageState extends State<SplashPage> {
   void initState() {
     GetIt.I<PrefsRepository>().setShouldShowPin(true);
     GetIt.I<AuthBloc>().add(GetUserProfileEvent());
+    GetIt.I<AuthBloc>().add(GetPasskeyListEvent());
     // تحديث استباقي للتوكن مبكرًا لكسب الوقت قبل الوصول للصفحة الرئيسية
     GetIt.I<AuthBloc>().add(const EnsureWalletTokenValidEvent());
     // فحص التحديث يبدأ مع السبلاش بالتوازي مع مدته. لا نغادر إلا بعد اكتمال

@@ -875,6 +875,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
         // إرسال التوكن الجديد للمكتبة لمتابعة العمل به
         TrydosWallet.updateToken(newAccessToken);
+        Future.delayed(Duration(seconds: 1), () {
+          add(GetUserProfileEvent());
+          add(GetPasskeyListEvent());
+        });
         return true;
       },
     );
