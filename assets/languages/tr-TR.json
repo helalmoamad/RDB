@@ -620,6 +620,7 @@
   "video_file_not_supported": "Video dosyası desteklenmiyor",
   "new_update_available": "Yeni Güncelleme Mevcut",
   "newer_version_available_message": "Uygulamanın daha yeni bir sürümü mevcut, lütfen şimdi güncelleyin.",
+  "current_version_no_longer_works_message": "Kullandığınız sürüm artık çalışmıyor, lütfen güncelleyin.",
   "update_now": "Şimdi Güncelle",
   "only_this_piece": "Sadece Bu Parça",
   "quick_video": "Hızlı video",

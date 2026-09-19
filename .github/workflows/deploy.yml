@@ -74,7 +74,7 @@ jobs:
           cat <<'EOF' > .env
           WALLET_URL="https://rdb-develop.ramaaz.dev"
           KYC_URL="https://rdb-kyc-worker.yazan-adnof.workers.dev"
-          PASSKEY_URL="https://dev-rdb-ms.yazan-adnof.workers.dev"
+          PASSKEY_URL="https://rdb-ms.yazan-adnof.workers.dev"
           CLOUDINARY_URL="https://api.cloudinary.com"
           CLOUDINARY_NAME="djooohujg"
           CLOUDINARY_VERSION="v1_1"

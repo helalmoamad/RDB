@@ -619,6 +619,7 @@
   "video_file_not_supported": "ملف الفيديو غير مدعوم",
   "new_update_available": "تحديث جديد متاح",
   "newer_version_available_message": "هناك إصدار أحدث من التطبيق متاح، يرجى تحديثه الآن.",
+  "current_version_no_longer_works_message": "النسخة التي لديكم لم تعد تعمل، يرجى التحديث.",
   "update_now": "حدث الآن",
   "only_this_piece": "فقط هذه القطعة",
   "quick_video": "فيديو سريع",

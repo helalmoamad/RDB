@@ -50,6 +50,19 @@
 		<string>remote-notification</string>
 		<string>fetch</string>
 	</array>
+	<!-- روابط الدفع (trydos_wallet): المخطّط المخصّص rdb://. الروابط الشاملة
+	     (applinks) تُضاف في Runner.entitlements بعد حسم نطاق صفحة الرابط. -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>com.rdb.www</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>rdb</string>
+			</array>
+		</dict>
+	</array>
 	<key>NSFaceIDUsageDescription</key>
 	<string>Use Face ID to securely sign in to your account.</string>
 	<key>NSCameraUsageDescription</key>

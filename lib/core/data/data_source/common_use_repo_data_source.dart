@@ -1,8 +1,10 @@
 import 'package:injectable/injectable.dart';
 
 import '../../../common/constant/configuration/cloudinary_url_routes.dart';
+import '../../../common/constant/configuration/wallet_url_routes.dart';
 import '../../api/client_config.dart';
 import '../../api/methods/detect_server.dart';
+import '../../api/methods/get.dart';
 import '../../api/methods/post.dart';
 import '../model/upload_file_cloudinary_response.dart';
 
@@ -33,5 +35,18 @@ class CommonUseRemoteDataSource {
         );
     // uploadStory.call();
     return uploadCloudinaryFile();
+  }
+
+  /// يُرجع جسم `startingSettings` خاماً؛ لا نبني نموذجاً كاملاً لأن ميزة
+  /// التحديث تقرأ حقلين فقط (انظر VersionUpdate.readMinVersion).
+  Future<Object?> getStartingSettings() {
+    GetClient<Object?> getStartingSettings = GetClient<Object?>(
+      serverName: ServerName.wallet,
+      requestPrams: RequestConfig<Object?>(
+        endpoint: WalletEndPoints.startingSettingsEP,
+        response: ResponseValue<Object?>(fromJson: (response) => response),
+      ),
+    );
+    return getStartingSettings();
   }
 }

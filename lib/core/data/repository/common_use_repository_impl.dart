@@ -21,4 +21,11 @@ class CommonUseRepositoryImpl extends CommonUseRepository
       tryCall: () => commonUseRemoteDataSource.uploadCloudinaryFile(params),
     );
   }
+
+  @override
+  Future<Either<Failure, Object?>> getStartingSettings() {
+    return handlingExceptionRequest(
+      tryCall: () => commonUseRemoteDataSource.getStartingSettings(),
+    );
+  }
 }

@@ -63,6 +63,7 @@ import '../data/data_source/common_use_repo_data_source.dart' as _i672;
 import '../data/repository/common_use_repository_impl.dart' as _i77;
 import '../domin/repositories/common_use_repository.dart' as _i702;
 import '../domin/repositories/prefs_repository.dart' as _i658;
+import '../domin/usecases/get_starting_settings_usecase.dart' as _i713;
 import '../domin/usecases/upload_file_cloudinary_usecase.dart' as _i1043;
 import 'di_container.dart' as _i198;
 
@@ -96,6 +97,9 @@ Future<_i174.GetIt> $initGetIt(
   );
   gh.lazySingleton<_i742.AuthRepository>(
     () => _i317.AuthRepositoryImpl(gh<_i539.AuthRemoteDatasource>()),
+  );
+  gh.factory<_i713.GetStartingSettingsUseCase>(
+    () => _i713.GetStartingSettingsUseCase(gh<_i702.CommonUseRepository>()),
   );
   gh.factory<_i1043.UploadFileCloudinaryUseCase>(
     () => _i1043.UploadFileCloudinaryUseCase(gh<_i702.CommonUseRepository>()),

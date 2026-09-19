@@ -40,7 +40,7 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="https" android:host="dev.ramaaz-digital-bank.online" />
+                <data android:scheme="https" android:host="rdb-ms.yazan-adnof.workers.dev" />
             </intent-filter>
             <!-- Specifies an Android theme to apply to this Activity as soon as
                  the Android process has started. This theme is visible to the user
@@ -60,7 +60,19 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data
                     android:scheme="https"
-                    android:host="staging-ramaaz-digital-banking.yazan-adnof.workers.dev" />
+                    android:host="rdb-ms.yazan-adnof.workers.dev" />
+            </intent-filter>
+            <!--
+                روابط الدفع (trydos_wallet): المخطّط المخصّص يعمل بلا أي إعداد على
+                الخادم. النصف الآخر (https مع autoVerify + assetlinks.json) مؤجّل
+                حتى يُحسم نطاق صفحة الرابط. launchMode=singleTop أعلاه ضروري ليصل
+                الرابط إلى uriLinkStream بدل فتح Activity ثانية.
+            -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="rdb" />
             </intent-filter>
         </activity>
         <!-- PostHog: نهيّئ يدوياً من Dart (Posthog().setup) لذلك نعطّل التهيئة
@@ -89,6 +101,15 @@
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
+        </intent>
+        <!-- حوار تحديث الإصدار: فتح Google Play (market://) أو صفحته على الويب. -->
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="https" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="market" />
         </intent>
     </queries>
 </manifest>

@@ -50,6 +50,9 @@ abstract class WalletEndPoints {
   /// إرسال توكن FCM للباك.
   static const sendFcmEP = "notifications/devices/register";
   static const removeFcmEP = "notifications/devices/unregister";
+
+  /// إعدادات البدء — يُقرأ منها أدنى إصدار مقبول (android/ios_min_version).
+  static const startingSettingsEP = "api/v1/mobile/home/startingSettings";
 }
 
 abstract class WalletUrls {

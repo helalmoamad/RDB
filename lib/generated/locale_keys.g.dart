@@ -18,13 +18,13 @@ abstract class  LocaleKeys {
   static const typing = 'typing';
   static const recording = 'recording';
   static const sending_file = 'sending_file';
+  static const out_for_return = 'out_for_return';
   static const sending_picture = 'sending_picture';
   static const sending_video = 'sending_video';
-  static const work_days = 'work_days';
   static const succesfully_added_story = 'succesfully_added_story';
   static const failed_to_add_story = 'failed_to_add_story';
-  static const out_for_return = 'out_for_return';
   static const gallery = 'gallery';
+  static const work_days = 'work_days';
   static const camera = 'camera';
   static const camera_permission_required_message = 'camera_permission_required_message';
   static const account_import_success_message = 'account_import_success_message';
@@ -44,6 +44,7 @@ abstract class  LocaleKeys {
   static const search_image_preview_instructions = 'search_image_preview_instructions';
   static const crop_image = 'crop_image';
   static const select_image_part = 'select_image_part';
+  static const send = 'send';
   static const cancel_preview = 'cancel_preview';
   static const welcome_page_description = 'welcome_page_description';
   static const why_we_know_you_label = 'why_we_know_you_label';
@@ -67,6 +68,9 @@ abstract class  LocaleKeys {
   static const save_to_gallery = 'save_to_gallery';
   static const contacts_list = 'contacts_list';
   static const search_chat_contact_startNewChat = 'search_chat_contact_startNewChat';
+  static const product_shared_successfully = 'product_shared_successfully';
+  static const report_story = 'report_story';
+  static const confirm_report_story = 'confirm_report_story';
   static const agree_continue = 'agree_continue';
   static const trems_of_services = 'trems_of_services';
   static const to = 'to';
@@ -74,7 +78,7 @@ abstract class  LocaleKeys {
   static const tap = 'tap';
   static const to_accept_rdb = 'to_accept_rdb';
   static const phone_number = 'phone_number';
-  static const county_code = 'county_code';
+  static const country_code = 'country_code';
   static const enter_your_phonenumber_registered_with_us = 'enter_your_phonenumber_registered_with_us';
   static const your_Privacy = 'your_Privacy';
   static const whatsApp = 'whatsApp';
@@ -164,6 +168,8 @@ abstract class  LocaleKeys {
   static const un_mute = 'un_mute';
   static const read = 'read';
   static const pin = 'pin';
+  static const translate = 'translate';
+  static const show_original_version = 'show_original_version';
   static const un_pin = 'un_pin';
   static const you_can_have_at_most_3_pinned = 'you_can_have_at_most_3_pinned';
   static const video_call = 'video_call';
@@ -179,12 +185,12 @@ abstract class  LocaleKeys {
   static const answer = 'answer';
   static const calling = 'calling';
   static const my_stories = 'my_stories';
+  static const read_more = 'read_more';
+  static const read_less = 'read_less';
   static const click_to_add_story = 'click_to_add_story';
   static const insert_name_to_continue = 'insert_name_to_continue';
   static const name_must_be_at_least_6_characters = 'name_must_be_at_least_6_characters';
   static const must_be_at_least_8_characters = 'must_be_at_least_8_characters';
-  static const read_more = 'read_more';
-  static const read_less = 'read_less';
   static const color = 'color';
   static const size = 'size';
   static const composed_of = 'composed_of';
@@ -196,8 +202,6 @@ abstract class  LocaleKeys {
   static const time_running_out = 'time_running_out';
   static const add_again = 'add_again';
   static const item = 'item';
-  static const translate = 'translate';
-  static const show_original_version = 'show_original_version';
   static const hide_all = 'hide_all';
   static const old_cart = 'old_cart';
   static const hurry_up = 'hurry_up';
@@ -270,7 +274,6 @@ abstract class  LocaleKeys {
   static const notify_me_when_quantity_is_available = 'notify_me_when_quantity_is_available';
   static const we_will_inform_you_when_a = 'we_will_inform_you_when_a';
   static const quantity_is_available = 'quantity_is_available';
-  static const send = 'send';
   static const add = 'add';
   static const bag = 'bag';
   static const comment_about_this_product = 'comment_about_this_product';
@@ -397,7 +400,6 @@ abstract class  LocaleKeys {
   static const applied_your_coupon = 'applied_your_coupon';
   static const shipping_payment = 'shipping_payment';
   static const the_time_will_end = 'the_time_will_end';
-  static const country_code = 'country_code';
   static const this_product_is_not_available_in_store = 'this_product_is_not_available_in_store';
   static const notify_me_when_available = 'notify_me_when_available';
   static const product_is_available = 'product_is_available';
@@ -427,8 +429,10 @@ abstract class  LocaleKeys {
   static const profile_personal_info = 'profile_personal_info';
   static const full_name = 'full_name';
   static const enter_full_name = 'enter_full_name';
+  static const phone = 'phone';
   static const enter_phone = 'enter_phone';
   static const enter_alternative_phone = 'enter_alternative_phone';
+  static const email = 'email';
   static const enter_email_address = 'enter_email_address';
   static const gender = 'gender';
   static const man = 'man';
@@ -542,7 +546,6 @@ abstract class  LocaleKeys {
   static const return_policy_get_full_refund = 'return_policy_get_full_refund';
   static const to_your_account = 'to_your_account';
   static const why_was_product_return = 'why_was_product_return';
-  static const product_shared_successfully = 'product_shared_successfully';
   static const i_didnt_like = 'i_didnt_like';
   static const bad_quality = 'bad_quality';
   static const it_arrived_damaged = 'it_arrived_damaged';
@@ -622,6 +625,7 @@ abstract class  LocaleKeys {
   static const video_file_not_supported = 'video_file_not_supported';
   static const new_update_available = 'new_update_available';
   static const newer_version_available_message = 'newer_version_available_message';
+  static const current_version_no_longer_works_message = 'current_version_no_longer_works_message';
   static const update_now = 'update_now';
   static const only_this_piece = 'only_this_piece';
   static const quick_video = 'quick_video';
@@ -699,9 +703,9 @@ abstract class  LocaleKeys {
   static const pack = 'pack';
   static const dear = 'dear';
   static const product = 'product';
-  static const delete_chat = 'delete_chat';
   static const block = 'block';
   static const un_block = 'un_block';
+  static const delete_chat = 'delete_chat';
   static const You_cannot_send_messages_or_calls_to_this_user = 'You_cannot_send_messages_or_calls_to_this_user';
   static const seller_dashboard = 'seller_dashboard';
   static const seller_id = 'seller_id';
@@ -748,9 +752,7 @@ abstract class  LocaleKeys {
   static const personal_details = 'personal_details';
   static const first_name = 'first_name';
   static const last_name = 'last_name';
-  static const email = 'email';
   static const invalid_email = 'invalid_email';
-  static const phone = 'phone';
   static const password = 'password';
   static const password_must_be_at_least_6_characters = 'password_must_be_at_least_6_characters';
   static const password_must_be_at_least_8_characters = 'password_must_be_at_least_8_characters';
@@ -927,8 +929,7 @@ abstract class  LocaleKeys {
   static const reset_attempts_remaining = 'reset_attempts_remaining';
   static const reset_could_not_verify = 'reset_could_not_verify';
   static const reset_proof_expired_restart = 'reset_proof_expired_restart';
-  static const reset_session_expired_relogin =
-      'reset_session_expired_relogin';
+  static const reset_session_expired_relogin = 'reset_session_expired_relogin';
   static const reset_passcode_updated = 'reset_passcode_updated';
   static const reset_new_passcode_subtitle = 'reset_new_passcode_subtitle';
   static const third_party_keyboard_title = 'third_party_keyboard_title';

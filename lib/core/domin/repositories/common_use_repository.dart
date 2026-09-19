@@ -6,4 +6,6 @@ import '../../error/failures.dart';
 abstract class CommonUseRepository {
   Future<Either<Failure, UploadFileCloudinaryResponseModel>>
       uploadFileCloudinary(Map<String, dynamic> params);
+
+  Future<Either<Failure, Object?>> getStartingSettings();
 }

@@ -617,6 +617,7 @@
   "video_file_not_supported": "پەڕگەی ڤیدیۆ پاڵپشتی ناکرێت",
   "new_update_available": "نوێکردنەوەی نوێ بەردەستە",
   "newer_version_available_message": "وەشانێکی نوێتری بەرنامە بەردەستە، تکایە ئێستا نوێی بکەوە.",
+  "current_version_no_longer_works_message": "ئەو وەشانەی لەلای ئێوەیە چیتر کار ناکات، تکایە نوێی بکەنەوە.",
   "update_now": "ئێستا نوێ بکەوە",
   "only_this_piece": "تەنیا ئەم پارچەیە",
   "quick_video": "ڤیدیۆی خێرا",

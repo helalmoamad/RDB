@@ -929,10 +929,10 @@ packages:
     dependency: transitive
     description:
       name: image_picker_android
-      sha256: f71f4f3a9c5dbbe39800b31839cb3b305aac403a7cfbddf8331cf179d813b72a
+      sha256: "0a55d645a670d6ae11efa948f955ae904afa472f1344fc15a7ddacc20c1e7219"
       url: "https://pub.dev"
     source: hosted
-    version: "0.8.13+21"
+    version: "0.8.13+23"
   image_picker_for_web:
     dependency: transitive
     description:
@@ -1177,10 +1177,10 @@ packages:
     dependency: transitive
     description:
       name: mobile_scanner
-      sha256: ce3f059ebd6dbfab7292bba0e893e354b46730636820d3c9ef69005ce2d55bce
+      sha256: "5a51ea79f0cf8293f616a5d08baae185b59b5e6bb24df01f2a63037ade0bade0"
       url: "https://pub.dev"
     source: hosted
-    version: "7.4.0"
+    version: "7.4.2"
   nested:
     dependency: transitive
     description:
@@ -1743,7 +1743,7 @@ packages:
     description:
       path: "."
       ref: main
-      resolved-ref: "46a7f84a9627082df04effd0421e934d4e6a1273"
+      resolved-ref: "7cd5533b1f69f00b676be0f143ce15d2e8be1c0d"
       url: "https://github.com/helalmoamad/trydos_wallet.git"
     source: git
     version: "0.0.1"

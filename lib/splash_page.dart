@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rdb/core/utils/extensions/build_context.dart';
+import 'package:rdb/core/version_update/version_update.dart';
 import 'package:rdb/features/authentication/presentation/manager/auth_bloc.dart';
 import 'package:rdb/routes/router.dart';
 import 'package:rdb/splash_widget.dart';
@@ -23,13 +24,19 @@ class _SplashPageState extends State<SplashPage> {
     GetIt.I<AuthBloc>().add(GetUserProfileEvent());
     // تحديث استباقي للتوكن مبكرًا لكسب الوقت قبل الوصول للصفحة الرئيسية
     GetIt.I<AuthBloc>().add(const EnsureWalletTokenValidEvent());
-    Future.delayed(const Duration(milliseconds: 6300), () {
+    // فحص التحديث يبدأ مع السبلاش بالتوازي مع مدته. لا نغادر إلا بعد اكتمال
+    // الاثنين: الاختياري بعد إغلاق الحوار، والإلزامي لا يكتمل أبداً فيبقى
+    // التطبيق خلف الحوار (المغادرة أثناء فتحه كانت ستستبدل route الحوار).
+    Future.wait([
+      Future<void>.delayed(const Duration(milliseconds: 6300)),
+      VersionUpdate.checkOnSplash(),
+    ]).then((_) {
+      if (!mounted) return;
       final hasToken = prefsRepository.walletToken != null;
 
       final isNameEntered = (prefsRepository.userName?.length ?? 0) > 2;
       final isPinSet = (prefsRepository.passcode?.length ?? 0) > 3;
 
-      // ignore: use_build_context_synchronously
       context.go(
         !hasToken
             ? GRouter.config.applicationRoutes.kRegistrationPage

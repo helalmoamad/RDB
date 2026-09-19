@@ -622,6 +622,7 @@
   "video_file_not_supported": "The video file is not supported",
   "new_update_available": "New Update Available",
   "newer_version_available_message": "There is a newer version of app available please update it now.",
+  "current_version_no_longer_works_message": "The version you have no longer works. Please update.",
   "update_now": "Update Now",
   "only_this_piece": "Only This Piece",
   "quick_video": "Quick video",
