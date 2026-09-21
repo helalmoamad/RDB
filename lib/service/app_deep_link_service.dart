@@ -4,6 +4,7 @@ import 'package:app_links/app_links.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:rdb/routes/router.dart';
+import 'package:trydos_wallet/trydos_wallet.dart';
 
 class AppDeepLinkService {
   /// المضيفات المسموحة تأتي من `DEEPLINK_ALLOWED_HOSTS` في `.env` (قائمة
@@ -62,6 +63,17 @@ class AppDeepLinkService {
 
   void _handleUri(Uri? uri) {
     if (uri == null) {
+      return;
+    }
+
+    // روابط الدفع تُسلَّم لمكتبة المحفظة **قبل أي فلترة** وبأي مضيف كان: هي
+    // تتحقّق من شكل الكود محلياً قبل أي نداء شبكة، فتمرير رابط لا يخصّها بلا
+    // كلفة. وفلترتنا المسبقة كانت ستستهلك حدّ المحاولات (10/15 دقيقة) أو تُسقط
+    // روابط صحيحة إن تغيّر شكلها. ترجع true إن كان رابط دفع وتكفّلت به، فتفتح
+    // شاشة الدفع بنفسها — وإن لم تكن واجهة المحفظة جاهزة بعد (إقلاع بارد أو
+    // المستخدم لم يسجّل دخوله) تحتفظ بالكود وتعيده فور جهوزها.
+    if (TrydosWallet.handleIncomingLink(uri)) {
+      debugPrint('Deep link taken by wallet: ${uri.host}${uri.path}');
       return;
     }
 

@@ -54,19 +54,11 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
-            <intent-filter android:autoVerify="true">
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data
-                    android:scheme="https"
-                    android:host="rdb-ms.yazan-adnof.workers.dev" />
-            </intent-filter>
             <!--
-                روابط الدفع (trydos_wallet): المخطّط المخصّص يعمل بلا أي إعداد على
-                الخادم. النصف الآخر (https مع autoVerify + assetlinks.json) مؤجّل
-                حتى يُحسم نطاق صفحة الرابط. launchMode=singleTop أعلاه ضروري ليصل
-                الرابط إلى uriLinkStream بدل فتح Activity ثانية.
+                روابط الدفع (trydos_wallet): مرشّح https للمضيف أعلاه يغطّي الرابط
+                الحيّ، وهذا المخطّط المخصّص هو الاحتياطي الذي يعمل بلا أي إعداد على
+                الخادم. launchMode=singleTop أعلاه ضروري ليصل الرابط إلى
+                uriLinkStream بدل فتح Activity ثانية.
             -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />

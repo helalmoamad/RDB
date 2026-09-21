@@ -7,6 +7,9 @@
 	<key>com.apple.developer.associated-domains</key>
 	<array>
 		<string>applinks:staging-ramaaz-digital-banking.yazan-adnof.workers.dev</string>
+		<!-- روابط الدفع من Trydos. تحتاج أيضاً نشر
+		     /.well-known/apple-app-site-association على هذا المضيف. -->
+		<string>applinks:rdb-ms.yazan-adnof.workers.dev</string>
 		<string>webcredentials:staging-ramaaz-digital-banking.yazan-adnof.workers.dev</string>
 	</array>
 </dict>
