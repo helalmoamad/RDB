@@ -55,13 +55,21 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       GetIt.I<PrefsRepository>().memberSince ?? '',
     );
 
+    // LanguageService.languageCode يطوي 'ku' إلى 'ar' عمداً (توافق RTL تاريخي —
+    // انظر _languageCodeNormalized في language_service.dart). نعيد اشتقاق الرمز
+    // الحقيقي قبل تمريره للمحفظة، وإلا فُتحت المحفظة بالعربية عند اختيار
+    // الكردية. نفس العكس مُطبَّق في base_api.dart و biometric_auth_services.dart.
+    final walletLanguageCode = LanguageService.isKurdish
+        ? 'ku'
+        : LanguageService.languageCode;
+
     // تهيئة المحفظة
     TrydosWallet.init(
       TrydosWalletConfig(
         baseUrl: dotenv.env['WALLET_URL'] ?? '', // رابط الـ API
         kycBaseUrl: dotenv.env['KYC_URL'] ?? '', // رابط KYC
         token: GetIt.I<PrefsRepository>().walletToken, // استخدم القيمة الفعلية
-        languageCode: LanguageService.languageCode,
+        languageCode: walletLanguageCode,
         refreshToken: GetIt.I<PrefsRepository>().walletRefreshToken,
         clientIp: authBloc.state.getUserCountryResponseModel?.ip ?? '',
 
@@ -79,7 +87,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         isPhoneVerified: GetIt.I<PrefsRepository>().isVerifiedPhone ?? false,
         memberSince: memberSince,
         phoneNumber: GetIt.I<PrefsRepository>().myPhoneNumber,
-        isKurdish: LanguageService.languageCode == "ku",
+        isKurdish: LanguageService.isKurdish,
         isTwoFactorEnabled:
             GetIt.I<PrefsRepository>().isKycVerification ?? false,
         applicationVersion: "1.0.0",
@@ -101,7 +109,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         'is_verified': GetIt.I<PrefsRepository>().isKycVerification ?? false,
         'is_phone_verified':
             GetIt.I<PrefsRepository>().isVerifiedPhone ?? false,
-        'language': LanguageService.languageCode,
+        'language': walletLanguageCode,
       },
     );
 
@@ -166,6 +174,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     // الاستماع لأحداث تغيير اللغة
     languageChangeEvent = languageChangeEvents.listen((event) async {
       final languageCode = event.languageCode.trim().toLowerCase();
+      print("*************-------------${languageCode}");
       final locale = mpaLanguageCodeToLocale[languageCode];
       if (locale == null || !mounted) {
         return;
