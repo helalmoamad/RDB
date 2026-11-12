@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -47,9 +46,13 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   void initState() {
     WidgetsBinding.instance.addObserver(this);
     if (kDebugMode) {
-      print("walletToken: ${GetIt.I<PrefsRepository>().walletToken}###");
+      // logcat يقصّ أي سطر يتجاوز ~1024 بايت، والتوكن أطول من ذلك فيظهر ناقصاً.
+      // نطبعه على نصفين؛ يُلصق النصفان يدوياً بلا فاصل للحصول على التوكن كاملاً.
+      final walletToken = GetIt.I<PrefsRepository>().walletToken ?? '';
+      final half = (walletToken.length / 2).ceil();
+      print("walletToken[1/2]: ${walletToken.substring(0, half)}");
+      print("walletToken[2/2]: ${walletToken.substring(half)}###");
     }
-
     authBloc = BlocProvider.of<AuthBloc>(context);
     final memberSince = DateTime.tryParse(
       GetIt.I<PrefsRepository>().memberSince ?? '',
@@ -174,7 +177,6 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     // الاستماع لأحداث تغيير اللغة
     languageChangeEvent = languageChangeEvents.listen((event) async {
       final languageCode = event.languageCode.trim().toLowerCase();
-      print("*************-------------${languageCode}");
       final locale = mpaLanguageCodeToLocale[languageCode];
       if (locale == null || !mounted) {
         return;
