@@ -28,7 +28,7 @@ bool notificationClicked = false;
 List<String> isFailedTheFirstTime = [];
 List<String> apisMustNotToRequest = [];
 ////////////////////////////////////////
-int applicationVersion = 30;
+int applicationVersion = 50;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
