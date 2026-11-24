@@ -929,10 +929,10 @@ packages:
     dependency: transitive
     description:
       name: image_picker_ios
-      sha256: f4e5650a81b268af3886bc789216ff6d56bdfa79934f93f1a5a8a303b8f60f77
+      sha256: a4aeafbe049ad99882059f186862de6fd5296c708c5805277f6f684165268af1
       url: "https://pub.dev"
     source: hosted
-    version: "0.8.13+15"
+    version: "0.8.13+16"
   image_picker_linux:
     dependency: transitive
     description:
@@ -1711,7 +1711,7 @@ packages:
     description:
       path: "."
       ref: main
-      resolved-ref: bf493b3afd340308bec245fa01ae029dcbdd8d7e
+      resolved-ref: "406b7de9001b497ea18d41cec0b292caddbf1be5"
       url: "https://github.com/helalmoamad/trydos_wallet.git"
     source: git
     version: "0.0.1"
